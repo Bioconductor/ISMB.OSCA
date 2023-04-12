@@ -1,0 +1,20 @@
+---
+title: Accessing data from the Human Cell Atlas (HCA)
+vignette: >
+  % \VignetteIndexEntry{Accessing data from the Human Cell Atlas}
+  % \VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output:
+  html_document:
+    mathjax: null   
+---
+
+# Setup
+
+```{r setup, message = FALSE}
+library(cellxgenedp)
+```
+
+# Data retrieval
+
+There is a lot to say here.

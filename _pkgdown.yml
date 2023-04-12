@@ -1,6 +1,6 @@
 title: "ISMB.OSCA"
 
-url: https://Bioconductor.github.io/ISMB.OSCA
+url: https://bioconductor.github.io/ISMB.OSCA
 
 template:
   params:
@@ -18,6 +18,13 @@ navbar:
         href: articles/eda_qc.html
       - text: Cell type annotation
         href: articles/cell_type_annotation.html
+      - text: Multi-sample analyses
+        href: articles/multi_sample.html
+      - text: Working with large data
+        href: articles/large_data.html  
+      - text: Accessing data from the Human Cell Atlas
+        href: articles/hca.html
+
 
   right:
    - icon: fa-github

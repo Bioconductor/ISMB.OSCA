@@ -20,6 +20,8 @@ Depends:
     R (>= 4.2.0)
 Imports:
     SingleR,
+    TENxBrainData,
+    cellxgenedp,
     scater,
     scran
 Suggests: 

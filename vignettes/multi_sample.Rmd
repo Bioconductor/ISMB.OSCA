@@ -1,0 +1,20 @@
+---
+title: Multi-sample analyses
+vignette: >
+  % \VignetteIndexEntry{Multi-sample analysis}
+  % \VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output:
+  html_document:
+    mathjax: null   
+---
+
+# Setup
+
+```{r setup, message = FALSE}
+library(scran)
+```
+
+# Data retrieval
+
+There is a lot to say here.

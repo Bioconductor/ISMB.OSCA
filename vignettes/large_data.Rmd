@@ -1,0 +1,20 @@
+---
+title: Working with large data
+vignette: >
+  % \VignetteIndexEntry{Working with large data}
+  % \VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output:
+  html_document:
+    mathjax: null   
+---
+
+# Setup
+
+```{r setup, message = FALSE}
+library(TENxBrainData)
+```
+
+# Data retrieval
+
+There is a lot to say here.
