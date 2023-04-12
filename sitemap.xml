@@ -1,33 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://Bioconductor.github.io/ISMB.OSCA/404.html</loc>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/404.html</loc>
   </url>
   <url>
-    <loc>https://Bioconductor.github.io/ISMB.OSCA/LICENSE-text.html</loc>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>https://Bioconductor.github.io/ISMB.OSCA/LICENSE.html</loc>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://Bioconductor.github.io/ISMB.OSCA/articles/cell_type_annotation.html</loc>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/articles/cell_type_annotation.html</loc>
   </url>
   <url>
-    <loc>https://Bioconductor.github.io/ISMB.OSCA/articles/eda_qc.html</loc>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/articles/eda_qc.html</loc>
   </url>
   <url>
-    <loc>https://Bioconductor.github.io/ISMB.OSCA/articles/index.html</loc>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/articles/hca.html</loc>
   </url>
   <url>
-    <loc>https://Bioconductor.github.io/ISMB.OSCA/articles/intro_bioc_sce.html</loc>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://Bioconductor.github.io/ISMB.OSCA/authors.html</loc>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/articles/intro_bioc_sce.html</loc>
   </url>
   <url>
-    <loc>https://Bioconductor.github.io/ISMB.OSCA/index.html</loc>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/articles/large_data.html</loc>
   </url>
   <url>
-    <loc>https://Bioconductor.github.io/ISMB.OSCA/reference/index.html</loc>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/articles/multi_sample.html</loc>
+  </url>
+  <url>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/authors.html</loc>
+  </url>
+  <url>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/index.html</loc>
+  </url>
+  <url>
+    <loc>https://bioconductor.github.io/ISMB.OSCA/reference/index.html</loc>
   </url>
 </urlset>
