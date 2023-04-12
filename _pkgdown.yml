@@ -1,18 +1,26 @@
-url: https://seandavi.github.io/BuildABiocWorkshop
+title: "ISMB.OSCA"
+
+url: https://Bioconductor.github.io/ISMB.OSCA
 
 template:
   params:
     bootswatch: flatly
-    #ganalytics: UA-99999999-9
-
-home:
-  title: "BuildABiocWorkshop"
-  type: inverse
-
 
 navbar:
+  title: ~
+  type: default
+  left:
+    - text: Vignettes
+      menu:
+      - text: Introduction to Bioconductor
+        href: articles/intro_bioc_sce.html
+      - text: Exploratory data analysis  
+        href: articles/eda_qc.html
+      - text: Cell type annotation
+        href: articles/cell_type_annotation.html
+
   right:
    - icon: fa-github
-     href: https://github.com/seandavi/BuildABiocWorkshop
+     href: https://github.com/Bioconductor/ISMB.OSCA
      
 

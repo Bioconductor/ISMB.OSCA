@@ -1,28 +1,32 @@
-Package: BuildABiocWorkshop
-Title: Bioconductor or R Workshop Template and Github Actions
-Version: 2.0.0
+Package: ISMB.OSCA
+Title: Orchestrating Large-Scale Single-Cell Analysis with Bioconductor
+Version: 0.99.0
 Authors@R: 
-    person(given = "Sean",
-           family = "Davis",
-           role = c("aut", "cre"),
-           email = "seandavi@gmail.com",
-           comment = c(ORCID = "0000-0002-8991-6458"))
-Description: This package serves as a template for using github actions to 
-    prepare a Bioconductor Workshop package for use. In particular,
-    a pkgdown website and docker image are generated based on workflow 
-    settings. 
-License: MIT + file LICENSE
+    c(person("Davide", "Risso", role = "aut", email = "davide.risso@unipd.it"),
+    person("Ludwig", "Geistlinger", role = c("aut", "cre"),
+           email = "ludwig_geistlinger@hms.harvard.edu"),
+    person("Marcel", "Ramos", role = "ctb",
+           email = "marcel.ramos@roswellpark.org"),
+    person("Dario", "Righelli", role = "ctb", email = "drighelli@gmail.com")) 
+Description: This tutorial aims to provide a solid foundation in using
+    Bioconductor tools for single-cell RNA-seq analysis by walking through
+    various steps of typical workflows using example datasets. 
+License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 Depends: 
-    Biobase
+    R (>= 4.2.0)
+Imports:
+    SingleR,
+    scater,
+    scran
 Suggests: 
     knitr,
     rmarkdown,
     pkgdown
-URL: https://seandavi.github.io/BuildABiocWorkshop/
-BugReports: https://github.com/seandavi/BuildABiocWorkshop/issues/new/choose
+URL: https://bioconductor.github.io/ISMB.OSCA/
+BugReports: https://github.com/Bioconductor/ISMB.OSCA/issues/new/choose
 VignetteBuilder: knitr
 DockerImage: ghcr.io/seandavi/buildabiocworkshop:latest
