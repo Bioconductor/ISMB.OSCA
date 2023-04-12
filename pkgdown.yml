@@ -2,10 +2,11 @@ pandoc: 2.19.2
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  HOWTO_BUILD_WORKSHOP: HOWTO_BUILD_WORKSHOP.html
-  workshop_example: workshop_example.html
-last_built: 2023-03-30T14:11Z
+  cell_type_annotation: cell_type_annotation.html
+  eda_qc: eda_qc.html
+  intro_bioc_sce: intro_bioc_sce.html
+last_built: 2023-04-12T21:00Z
 urls:
-  reference: https://seandavi.github.io/BuildABiocWorkshop/reference
-  article: https://seandavi.github.io/BuildABiocWorkshop/articles
+  reference: https://Bioconductor.github.io/ISMB.OSCA/reference
+  article: https://Bioconductor.github.io/ISMB.OSCA/articles
 
