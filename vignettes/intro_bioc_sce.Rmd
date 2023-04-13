@@ -1,0 +1,19 @@
+---
+title: Introduction to Bioconductor and the SingleCellExperiment class
+vignette: >
+  % \VignetteIndexEntry{Introduction}
+  % \VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output:
+  html_document:
+    mathjax: null   
+---
+
+# Setup
+
+```{r setup, message = FALSE}
+library(SingleCellExperiment)
+```
+
+# The `SingleCellExperiment` class
+

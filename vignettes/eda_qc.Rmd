@@ -1,0 +1,26 @@
+---
+title: Exploratory data analysis and quality control
+vignette: >
+  % \VignetteIndexEntry{Quality control}
+  % \VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output:
+  html_document:
+    mathjax: null   
+---
+
+# Setup
+
+```{r setup, message = FALSE}
+library(scater)
+```
+
+# Exploratory data analysis
+
+There is a lot to say here.
+
+# Quality control
+
+Also an interesting topic. 
+
+

@@ -1,0 +1,20 @@
+---
+title: Cell type annotation
+vignette: >
+  % \VignetteIndexEntry{Quality control}
+  % \VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output:
+  html_document:
+    mathjax: null   
+---
+
+# Setup
+
+```{r setup, message = FALSE}
+library(SingleR)
+```
+
+# Data retrieval
+
+There is a lot to say here.
