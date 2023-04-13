@@ -42,3 +42,21 @@ In particular, participants will learn:
 * How to correct for batch effects and integrate multiple samples.
 * How to perform differential expression and differential abundance analysis between conditions.
 * How to work with large out-of-memory datasets.
+
+## Time outline
+
+| Activity                     | Time |
+|------------------------------|------|
+| Introduction and Setup                                          | 9:00-9:30    |
+| Introduction to Bioconductor and the SingleCellExperiment class | 9:30-10:00   |
+| Contributing to Bioconductor                                    | 10:00-10:45  |
+| Exploratory Data Analysis and Quality Control (EDA/QC)          | 10:45-11:00  |
+| Clustering and cell type annotation                             | 11:00-12:00  |
+| Multi-sample analyses                                           | 12:00-13:00  |
+| Lunch break                                                     | 13:00-14:00  |
+| Working with large data                                         | 14:00-15:00  |
+| Accessing the Human Cell Atlas (HCA) Data from R/Bioconductor   | 15:00-16:00  |
+| Coffee break                                                    | 16:00-16:15  |
+| Case study: from data import to DE and DA                       | 16:15-17:00  |
+| Case study: discussion                                          | 17:00-18:00  |
+
