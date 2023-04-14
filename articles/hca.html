@@ -99,15 +99,295 @@
     
     
 <div class="section level2">
-<h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
+<h2 id="hca-project">HCA Project<a class="anchor" aria-label="anchor" href="#hca-project"></a>
 </h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">cellxgenedp</span><span class="op">)</span></span></code></pre></div>
+<p>The Human Cell Atlas (HCA) is a large project that aims to learn from
+and map every cell type in the human body. The project extracts spatial
+and molecular characteristics in order to understand cellular function
+and networks. It is an international collaborative that charts healthy
+cells in the human body at all ages. There are about 37.2 trillion cells
+in the human body. To read more about the project, head over to their
+website at <a href="https://www.humancellatlas.org" class="external-link uri">https://www.humancellatlas.org</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="data-retrieval">Data retrieval<a class="anchor" aria-label="anchor" href="#data-retrieval"></a>
+<h2 id="from-the-authors">From the authors<a class="anchor" aria-label="anchor" href="#from-the-authors"></a>
 </h2>
-<p>There is a lot to say here.</p>
+<blockquote>
+<p>To systematically characterise the immune system across tissues,
+demographics and multiple studies, we harmonised single cell
+transcriptomics data from the CELLxGENE database. We collected
+28,975,366 cells, spanning 156 tissues (excluding cell cultures), 12,981
+samples and 324 studies (Figure 1A). We standardised metadata, including
+sample identifiers, tissue labels (grouping them to 45 based on anatomy;
+Figure 1A) and age. Also, we harmonised the gene-transcript abundance of
+all samples, putting values on the positive natural scale
+(i.e. non-logarithmic).</p>
+</blockquote>
+<blockquote>
+<p>The resulting database constitutes a comprehensive resource that
+facilitates large-scale studies of human biology at the single-cell
+level across human developmental stages and demographic groups.</p>
+</blockquote>
+<blockquote>
+<p>To model the immune system across studies, we adopted a consistent
+immune cell-type ontology appropriate for lymphoid and non-lymphoid
+tissues. We applied a consensus cell labelling strategy to minimise
+biases in immune cell classification from study-specific standards.</p>
+</blockquote>
+<blockquote>
+<p>To support data access and programmatic exploration of the harmonised
+atlas, we developed CuratedAtlasQuery (Figure 2J). This interface allows
+the programmatic exploration of our harmonised database. Cells of
+interest can be selected based on their ontology, tissue of origin,
+demographics and disease. For example, the user can select CD4 T helper
+cells across lymphoid tissues in health and diseases, including
+COVID-19. The data for the selected cells can be downloaded locally into
+popular single-cell data containers. Pseudobulk counts are also
+available to facilitate large-scale, summary analyses of transcriptional
+profiles. This platform offers a standardised workflow for accessing
+atlas-level datasets programmatically and reproducibly.</p>
+</blockquote>
+<p><img src="figures/HCA_sccomp_SUPPLEMENTARY_technical_cartoon_curatedAtlasQuery.png" width="1110"></p>
+</div>
+<div class="section level2">
+<h2 id="data-sources-in-r-bioconductor">Data Sources in R / Bioconductor<a class="anchor" aria-label="anchor" href="#data-sources-in-r-bioconductor"></a>
+</h2>
+<p>There are a few options to access single cell data from within
+Bioconductor.</p>
+<table class="table">
+<colgroup>
+<col width="29%">
+<col width="41%">
+<col width="29%">
+</colgroup>
+<thead><tr class="header">
+<th>Package</th>
+<th>Target</th>
+<th>Data Level</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>hca</td>
+<td><a href="https://www.humancellatlas.org/data-portal/" class="external-link">HCA Data
+Portal API</a></td>
+<td>Project, Sample, Files</td>
+</tr>
+<tr class="even">
+<td>cellxgenedp</td>
+<td><a href="https://cellxgene.cziscience.com/" class="external-link">CellxGene</a></td>
+<td>Human and mouse SC</td>
+</tr>
+<tr class="odd">
+<td>CuratedAtlasQueryR</td>
+<td><a href="https://stemangiola.github.io/CuratedAtlasQueryR/" class="external-link">Website</a></td>
+<td>fine-grained HCA</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"CuratedAtlasQueryR"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 'getOption("repos")' replaces Bioconductor standard repositories, see</span></span>
+<span><span class="co">## 'help("repositories", package = "BiocManager")' for details.</span></span>
+<span><span class="co">## Replacement repositories:</span></span>
+<span><span class="co">##     CRAN: https://cloud.r-project.org</span></span></code></pre>
+<pre><code><span><span class="co">## Bioconductor version 3.17 (BiocManager 1.30.20), R 4.3.0 beta (2023-04-12</span></span>
+<span><span class="co">##   r84240)</span></span></code></pre>
+<pre><code><span><span class="co">## Warning: package(s) not installed when version(s) same as or greater than current; use</span></span>
+<span><span class="co">##   `force = TRUE` to re-install: 'CuratedAtlasQueryR'</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="load">Load<a class="anchor" aria-label="anchor" href="#load"></a>
+</h2>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/stemangiola/CuratedAtlasQueryR" class="external-link">CuratedAtlasQueryR</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="hca-metadata">HCA Metadata<a class="anchor" aria-label="anchor" href="#hca-metadata"></a>
+</h2>
+<p>The metadata allows the user to get a lay of the land of what is
+available via the package.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_metadata.html" class="external-link">get_metadata</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 1 file, totalling 0.48 GB</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="summarizing-the-metadata">Summarizing the metadata<a class="anchor" aria-label="anchor" href="#summarizing-the-metadata"></a>
+</h2>
+<p>For each distinct tissue and dataset combination, count the number of
+datasets by tissue type.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">tissue</span>, <span class="va">dataset_id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">tissue</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># Source:   SQL [?? x 2]</span></span></span>
+<span><span class="co">## <span style="color: #949494;"># Database: DuckDB 0.7.1 [unknown@Linux 5.15.0-1035-azure:R 4.3.0/:memory:]</span></span></span>
+<span><span class="co">##    tissue                          n</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> peripheral zone of prostate    10</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> transition zone of prostate    10</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> blood                          47</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> intestine                      18</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> middle temporal gyrus          24</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> heart left ventricle           46</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> apex of heart                  16</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> heart right ventricle          16</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> left cardiac atrium             7</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> interventricular septum        16</span></span>
+<span><span class="co">## <span style="color: #949494;"># ℹ more rows</span></span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="columns-available-in-the-metadata">Columns available in the metadata<a class="anchor" aria-label="anchor" href="#columns-available-in-the-metadata"></a>
+</h2>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">metadata</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##  [1] "cell_"                             "sample_"                          </span></span>
+<span><span class="co">##  [3] "cell_type"                         "cell_type_harmonised"             </span></span>
+<span><span class="co">##  [5] "confidence_class"                  "cell_annotation_azimuth_l2"       </span></span>
+<span><span class="co">##  [7] "cell_annotation_blueprint_singler" "cell_annotation_monaco_singler"   </span></span>
+<span><span class="co">##  [9] "sample_id_db"                      "_sample_name"</span></span></code></pre>
+<div class="section level3">
+<h3 id="download-single-cell-rna-sequencing-counts">Download single-cell RNA sequencing counts<a class="anchor" aria-label="anchor" href="#download-single-cell-rna-sequencing-counts"></a>
+</h3>
+<div class="section level4">
+<h4 id="query-raw-counts">Query raw counts<a class="anchor" aria-label="anchor" href="#query-raw-counts"></a>
+</h4>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span> </span>
+<span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span>        <span class="va">ethnicity</span> <span class="op">==</span> <span class="st">"African"</span> <span class="op">&amp;</span></span>
+<span>        <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">assay</span>, <span class="st">"%10x%"</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>        <span class="va">tissue</span> <span class="op">==</span> <span class="st">"lung parenchyma"</span> <span class="op">&amp;</span></span>
+<span>        <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">cell_type</span>, <span class="st">"%CD4%"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Realising metadata.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Synchronising files</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading files.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Compiling Single Cell Experiment.</span></span></code></pre>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">single_cell_counts</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 36229 1571 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): counts</span></span>
+<span><span class="co">## rownames(36229): A1BG A1BG-AS1 ... ZZEF1 ZZZ3</span></span>
+<span><span class="co">## rowData names(0):</span></span>
+<span><span class="co">## colnames(1571): ACAGCCGGTCCGTTAA_F02526_1 GGGAATGAGCCCAGCT_F02526_1 ...</span></span>
+<span><span class="co">##   TACAACGTCAGCATTG_SC84_1 CATTCGCTCAATACCG_F02526_1</span></span>
+<span><span class="co">## colData names(56): sample_ cell_type ... updated_at_y original_cell_id</span></span>
+<span><span class="co">## reducedDimNames(0):</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
+</div>
+<div class="section level4">
+<h4 id="query-counts-scaled-per-million">Query counts scaled per million<a class="anchor" aria-label="anchor" href="#query-counts-scaled-per-million"></a>
+</h4>
+<p>This is helpful if just few genes are of interest, as they can be
+compared across samples.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span>      <span class="va">ethnicity</span> <span class="op">==</span> <span class="st">"African"</span> <span class="op">&amp;</span></span>
+<span>      <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">assay</span>, <span class="st">"%10x%"</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>      <span class="va">tissue</span> <span class="op">==</span> <span class="st">"lung parenchyma"</span> <span class="op">&amp;</span></span>
+<span>      <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">cell_type</span>, <span class="st">"%CD4%"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="st">"cpm"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Realising metadata.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Synchronising files</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading files.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Compiling Single Cell Experiment.</span></span></code></pre>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 36229 1571 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): cpm</span></span>
+<span><span class="co">## rownames(36229): A1BG A1BG-AS1 ... ZZEF1 ZZZ3</span></span>
+<span><span class="co">## rowData names(0):</span></span>
+<span><span class="co">## colnames(1571): ACAGCCGGTCCGTTAA_F02526_1 GGGAATGAGCCCAGCT_F02526_1 ...</span></span>
+<span><span class="co">##   TACAACGTCAGCATTG_SC84_1 CATTCGCTCAATACCG_F02526_1</span></span>
+<span><span class="co">## colData names(56): sample_ cell_type ... updated_at_y original_cell_id</span></span>
+<span><span class="co">## reducedDimNames(0):</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
+</div>
+<div class="section level4">
+<h4 id="extract-only-a-subset-of-genes">Extract only a subset of genes<a class="anchor" aria-label="anchor" href="#extract-only-a-subset-of-genes"></a>
+</h4>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span></span>
+<span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span>        <span class="va">ethnicity</span> <span class="op">==</span> <span class="st">"African"</span> <span class="op">&amp;</span></span>
+<span>        <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">assay</span>, <span class="st">"%10x%"</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>        <span class="va">tissue</span> <span class="op">==</span> <span class="st">"lung parenchyma"</span> <span class="op">&amp;</span></span>
+<span>        <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">cell_type</span>, <span class="st">"%CD4%"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="st">"cpm"</span>, features <span class="op">=</span> <span class="st">"PUM1"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Realising metadata.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Synchronising files</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading files.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Compiling Single Cell Experiment.</span></span></code></pre>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">single_cell_counts</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 1 1571 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): cpm</span></span>
+<span><span class="co">## rownames(1): PUM1</span></span>
+<span><span class="co">## rowData names(0):</span></span>
+<span><span class="co">## colnames(1571): ACAGCCGGTCCGTTAA_F02526_1 GGGAATGAGCCCAGCT_F02526_1 ...</span></span>
+<span><span class="co">##   TACAACGTCAGCATTG_SC84_1 CATTCGCTCAATACCG_F02526_1</span></span>
+<span><span class="co">## colData names(56): sample_ cell_type ... updated_at_y original_cell_id</span></span>
+<span><span class="co">## reducedDimNames(0):</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
+</div>
+<div class="section level4">
+<h4 id="extracting-counts-as-a-seurat-object">Extracting counts as a Seurat object<a class="anchor" aria-label="anchor" href="#extracting-counts-as-a-seurat-object"></a>
+</h4>
+<p>If needed, the H5 <code>SingleCellExperiment</code> can be converted
+into a Seurat object. Note that it may take a long time and use a lot of
+memory depending on how many cells you are requesting.</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span></span>
+<span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span>        <span class="va">ethnicity</span> <span class="op">==</span> <span class="st">"African"</span> <span class="op">&amp;</span></span>
+<span>        <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">assay</span>, <span class="st">"%10x%"</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>        <span class="va">tissue</span> <span class="op">==</span> <span class="st">"lung parenchyma"</span> <span class="op">&amp;</span></span>
+<span>        <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">cell_type</span>, <span class="st">"%CD4%"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_seurat.html" class="external-link">get_seurat</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">single_cell_counts</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level3">
+<h3 id="save-your-singlecellexperiment">Save your <code>SingleCellExperiment</code><a class="anchor" aria-label="anchor" href="#save-your-singlecellexperiment"></a>
+</h3>
+<div class="section level4">
+<h4 id="saving-as-hdf5">Saving as HDF5<a class="anchor" aria-label="anchor" href="#saving-as-hdf5"></a>
+</h4>
+<p>The recommended way of saving these <code>SingleCellExperiment</code>
+objects, if necessary, is to use
+<code>saveHDF5SummarizedExperiment</code> from the
+<code>HDF5Array</code> package.</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">|&gt;</span> <span class="fu">saveHDF5SummarizedExperiment</span><span class="op">(</span><span class="st">"single_cell_counts"</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
 </div>
   </div>
 
