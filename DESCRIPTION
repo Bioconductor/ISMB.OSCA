@@ -29,6 +29,7 @@ Suggests:
     knitr,
     rmarkdown,
     pkgdown
+Remotes: stemangiola/CuratedAtlasQueryR
 URL: https://bioconductor.github.io/ISMB.OSCA/
 BugReports: https://github.com/Bioconductor/ISMB.OSCA/issues/new/choose
 VignetteBuilder: knitr
