@@ -19,6 +19,7 @@ RoxygenNote: 7.1.0
 Depends: 
     R (>= 4.2.0)
 Imports:
+    CuratedAtlasQueryR,
     SingleR,
     TENxBrainData,
     cellxgenedp,
