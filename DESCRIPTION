@@ -22,7 +22,6 @@ Imports:
     CuratedAtlasQueryR,
     SingleR,
     TENxBrainData,
-    cellxgenedp,
     scater,
     scran
 Suggests: 
@@ -33,4 +32,4 @@ Remotes: stemangiola/CuratedAtlasQueryR
 URL: https://bioconductor.github.io/ISMB.OSCA/
 BugReports: https://github.com/Bioconductor/ISMB.OSCA/issues/new/choose
 VignetteBuilder: knitr
-DockerImage: ghcr.io/seandavi/buildabiocworkshop:latest
+DockerImage: ghcr.io/bioconductor/ismb.osca:latest

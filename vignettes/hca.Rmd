@@ -55,22 +55,14 @@ knitr::include_graphics("figures/HCA_sccomp_SUPPLEMENTARY_technical_cartoon_cura
 
 # Data Sources in R / Bioconductor
 
-There are a few options to access single cell data from within Bioconductor.
+There are a few options to access single-cell data from the Human Cell Atlas
+from within Bioconductor.
 
 | Package | Target | Data Level |
 |---------|-------------|---------|
 | hca     | [HCA Data Portal API](https://www.humancellatlas.org/data-portal/) | Project, Sample, Files |
 | cellxgenedp | [CellxGene](https://cellxgene.cziscience.com/) | Human and mouse SC |
 | CuratedAtlasQueryR | [Website](https://stemangiola.github.io/CuratedAtlasQueryR/) | fine-grained HCA |
-
-# Installation
-
-```{r}
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-
-BiocManager::install("CuratedAtlasQueryR")
-```
 
 # Load 
 
