@@ -98,8 +98,6 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>echo <span class="op">=</span> <span class="cn">TRUE</span>, eval <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="hca-project">HCA Project<a class="anchor" aria-label="anchor" href="#hca-project"></a>
 </h2>
@@ -147,6 +145,7 @@ counts are also available to facilitate large-scale, summary analyses of
 transcriptional profiles. This platform offers a standardized workflow
 for accessing atlas-level datasets programmatically and
 reproducibly.</p>
+<p><img src="figures/HCA_sccomp_SUPPLEMENTARY_technical_cartoon_curatedAtlasQuery.png" width="1110"></p>
 </div>
 <div class="section level2">
 <h2 id="data-sources-in-r-bioconductor">Data Sources in R / Bioconductor<a class="anchor" aria-label="anchor" href="#data-sources-in-r-bioconductor"></a>
@@ -187,16 +186,24 @@ Portal API</a></td>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"CuratedAtlasQueryR"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 'getOption("repos")' replaces Bioconductor standard repositories, see</span></span>
+<span><span class="co">## 'help("repositories", package = "BiocManager")' for details.</span></span>
+<span><span class="co">## Replacement repositories:</span></span>
+<span><span class="co">##     CRAN: https://cloud.r-project.org</span></span></code></pre>
+<pre><code><span><span class="co">## Bioconductor version 3.17 (BiocManager 1.30.20), R 4.3.0 Patched (2023-04-21</span></span>
+<span><span class="co">##   r84297)</span></span></code></pre>
+<pre><code><span><span class="co">## Warning: package(s) not installed when version(s) same as or greater than current; use</span></span>
+<span><span class="co">##   `force = TRUE` to re-install: 'CuratedAtlasQueryR'</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="package-load">Package load<a class="anchor" aria-label="anchor" href="#package-load"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/stemangiola/CuratedAtlasQueryR" class="external-link">CuratedAtlasQueryR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -205,7 +212,7 @@ Portal API</a></td>
 </h2>
 <p>The metadata allows the user to get a lay of the land of what is
 available via the package.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_metadata.html" class="external-link">get_metadata</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -213,23 +220,43 @@ available via the package.</p>
 </h2>
 <p>For each distinct tissue and dataset combination, count the number of
 datasets by tissue type.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">tissue</span>, <span class="va">dataset_id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">tissue</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># Source:   SQL [?? x 2]</span></span></span>
+<span><span class="co">## <span style="color: #949494;"># Database: DuckDB 0.7.1 [unknown@Linux 5.15.0-1035-azure:R 4.3.0/:memory:]</span></span></span>
+<span><span class="co">##    tissue                          n</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> peripheral zone of prostate    10</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> transition zone of prostate    10</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> blood                          47</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> intestine                      18</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> middle temporal gyrus          24</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> heart left ventricle           46</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> apex of heart                  16</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> heart right ventricle          16</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> left cardiac atrium             7</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> interventricular septum        16</span></span>
+<span><span class="co">## <span style="color: #949494;"># ℹ more rows</span></span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="columns-available-in-the-metadata">Columns available in the metadata<a class="anchor" aria-label="anchor" href="#columns-available-in-the-metadata"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">metadata</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##  [1] "cell_"                             "sample_"                          </span></span>
+<span><span class="co">##  [3] "cell_type"                         "cell_type_harmonised"             </span></span>
+<span><span class="co">##  [5] "confidence_class"                  "cell_annotation_azimuth_l2"       </span></span>
+<span><span class="co">##  [7] "cell_annotation_blueprint_singler" "cell_annotation_monaco_singler"   </span></span>
+<span><span class="co">##  [9] "sample_id_db"                      "_sample_name"</span></span></code></pre>
 <div class="section level3">
 <h3 id="download-single-cell-rna-sequencing-counts">Download single-cell RNA sequencing counts<a class="anchor" aria-label="anchor" href="#download-single-cell-rna-sequencing-counts"></a>
 </h3>
 <div class="section level4">
 <h4 id="query-raw-counts">Query raw counts<a class="anchor" aria-label="anchor" href="#query-raw-counts"></a>
 </h4>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span> </span>
 <span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
@@ -238,16 +265,34 @@ datasets by tissue type.</p>
 <span>        <span class="va">tissue</span> <span class="op">==</span> <span class="st">"lung parenchyma"</span> <span class="op">&amp;</span></span>
 <span>        <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">cell_type</span>, <span class="st">"%CD4%"</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">single_cell_counts</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> This function name is deprecated. Please use `get_single_cell_experiment()` instead</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Realising metadata.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Synchronising files</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading files.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Compiling Single Cell Experiment.</span></span></code></pre>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">single_cell_counts</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 36229 1571 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): counts</span></span>
+<span><span class="co">## rownames(36229): A1BG A1BG-AS1 ... ZZEF1 ZZZ3</span></span>
+<span><span class="co">## rowData names(0):</span></span>
+<span><span class="co">## colnames(1571): ACAGCCGGTCCGTTAA_F02526_1 GGGAATGAGCCCAGCT_F02526_1 ...</span></span>
+<span><span class="co">##   TACAACGTCAGCATTG_SC84_1 CATTCGCTCAATACCG_F02526_1</span></span>
+<span><span class="co">## colData names(56): sample_ cell_type ... updated_at_y original_cell_id</span></span>
+<span><span class="co">## reducedDimNames(0):</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="query-counts-scaled-per-million">Query counts scaled per million<a class="anchor" aria-label="anchor" href="#query-counts-scaled-per-million"></a>
 </h4>
 <p>This is helpful if just few genes are of interest, as they can be
 compared across samples.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
 <span>      <span class="va">ethnicity</span> <span class="op">==</span> <span class="st">"African"</span> <span class="op">&amp;</span></span>
@@ -256,11 +301,29 @@ compared across samples.</p>
 <span>      <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">cell_type</span>, <span class="st">"%CD4%"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="st">"cpm"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> This function name is deprecated. Please use `get_single_cell_experiment()` instead</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Realising metadata.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Synchronising files</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading files.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Compiling Single Cell Experiment.</span></span></code></pre>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 36229 1571 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): cpm</span></span>
+<span><span class="co">## rownames(36229): A1BG A1BG-AS1 ... ZZEF1 ZZZ3</span></span>
+<span><span class="co">## rowData names(0):</span></span>
+<span><span class="co">## colnames(1571): ACAGCCGGTCCGTTAA_F02526_1 GGGAATGAGCCCAGCT_F02526_1 ...</span></span>
+<span><span class="co">##   TACAACGTCAGCATTG_SC84_1 CATTCGCTCAATACCG_F02526_1</span></span>
+<span><span class="co">## colData names(56): sample_ cell_type ... updated_at_y original_cell_id</span></span>
+<span><span class="co">## reducedDimNames(0):</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="extract-only-a-subset-of-genes">Extract only a subset of genes<a class="anchor" aria-label="anchor" href="#extract-only-a-subset-of-genes"></a>
 </h4>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span></span>
 <span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
@@ -269,9 +332,27 @@ compared across samples.</p>
 <span>        <span class="va">tissue</span> <span class="op">==</span> <span class="st">"lung parenchyma"</span> <span class="op">&amp;</span></span>
 <span>        <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">cell_type</span>, <span class="st">"%CD4%"</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="st">"cpm"</span>, features <span class="op">=</span> <span class="st">"PUM1"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">single_cell_counts</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="st">"cpm"</span>, features <span class="op">=</span> <span class="st">"PUM1"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> This function name is deprecated. Please use `get_single_cell_experiment()` instead</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Realising metadata.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Synchronising files</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading files.</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Compiling Single Cell Experiment.</span></span></code></pre>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">single_cell_counts</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 1 1571 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): cpm</span></span>
+<span><span class="co">## rownames(1): PUM1</span></span>
+<span><span class="co">## rowData names(0):</span></span>
+<span><span class="co">## colnames(1571): ACAGCCGGTCCGTTAA_F02526_1 GGGAATGAGCCCAGCT_F02526_1 ...</span></span>
+<span><span class="co">##   TACAACGTCAGCATTG_SC84_1 CATTCGCTCAATACCG_F02526_1</span></span>
+<span><span class="co">## colData names(56): sample_ cell_type ... updated_at_y original_cell_id</span></span>
+<span><span class="co">## reducedDimNames(0):</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="extracting-counts-as-a-seurat-object">Extracting counts as a Seurat object<a class="anchor" aria-label="anchor" href="#extracting-counts-as-a-seurat-object"></a>
@@ -279,7 +360,7 @@ compared across samples.</p>
 <p>If needed, the H5 <code>SingleCellExperiment</code> can be converted
 into a Seurat object. Note that it may take a long time and use a lot of
 memory depending on how many cells you are requesting.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span></span>
 <span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
@@ -303,7 +384,7 @@ memory depending on how many cells you are requesting.</p>
 objects, if necessary, is to use
 <code>saveHDF5SummarizedExperiment</code> from the
 <code>HDF5Array</code> package.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">|&gt;</span> <span class="fu">saveHDF5SummarizedExperiment</span><span class="op">(</span><span class="st">"single_cell_counts"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
