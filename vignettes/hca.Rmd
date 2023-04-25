@@ -10,10 +10,6 @@ output:
 bibliography: references.bib
 ---
 
-```{r setup}
-knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
-```
-
 # HCA Project
 
 The Human Cell Atlas (HCA) is a large project that aims to learn from and map
