@@ -190,4 +190,10 @@ package.
 single_cell_counts |> saveHDF5SummarizedExperiment("single_cell_counts")
 ```
 
+# Session Info
+
+```{r}
+sessionInfo()
+```
+
 # References

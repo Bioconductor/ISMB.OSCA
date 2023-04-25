@@ -25,6 +25,7 @@ Imports:
     scater,
     scran
 Suggests: 
+    BiocStyle,
     knitr,
     rmarkdown,
     pkgdown
