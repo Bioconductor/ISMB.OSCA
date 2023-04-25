@@ -6,8 +6,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 output:
   html_document:
-    mathjax: null   
+    mathjax: null
+bibliography: references.bib
 ---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
 
 # HCA Project
 
@@ -22,8 +27,9 @@ the project, head over to their website at https://www.humancellatlas.org.
 
 CELLxGENE is a database and a suite of tools that help scientists to find,
 download, explore, analyze, annotate, and publish single cell data. It includes
-several analytic and visualiation tools to help you to discover single cell data
-patterns. To see the list of tools, browse to https://cellxgene.cziscience.com/.
+several analytic and visualization tools to help you to discover single cell
+data patterns. To see the list of tools, browse to
+https://cellxgene.cziscience.com/.
 
 # The CuratedAtlasQueryR Project
 
@@ -35,18 +41,19 @@ standardized, including sample identifiers, tissue labels (based on anatomy) and
 age. Also, the gene-transcript abundance of all samples was harmonized by
 putting values on the positive natural scale (i.e. non-logarithmic).
 
-> To model the immune system across studies, we adopted a consistent immune
+To model the immune system across studies, we adopted a consistent immune
 cell-type ontology appropriate for lymphoid and non-lymphoid tissues. We applied
-a consensus cell labelling strategy to minimise biases in immune cell
-classification from study-specific standards.
+a consensus cell labeling strategy between the Seurat blueprint and Monaco
+[-@Monaco2019] to minimize biases in immune cell classification from
+study-specific standards.
 
-CuratedAtlasQueryR supports data access and programmatic exploration of the
+`CuratedAtlasQueryR` supports data access and programmatic exploration of the
 harmonized atlas. Cells of interest can be selected based on ontology, tissue of
 origin, demographics, and disease. For example, the user can select CD4 T helper
 cells across healthy and diseased lymphoid tissue. The data for the selected
 cells can be downloaded locally into popular single-cell data containers. Pseudo
 bulk counts are also available to facilitate large-scale, summary analyses of
-transcriptional profiles. This platform offers a standardised workflow for
+transcriptional profiles. This platform offers a standardized workflow for
 accessing atlas-level datasets programmatically and reproducibly.
 
 ```{r,echo=FALSE}
@@ -186,3 +193,5 @@ package.
 ```{r, eval=FALSE}
 single_cell_counts |> saveHDF5SummarizedExperiment("single_cell_counts")
 ```
+
+# References
