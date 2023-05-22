@@ -49,8 +49,8 @@ In particular, participants will learn:
 |------------------------------|------|
 | Introduction and Setup                                          | 9:00-9:30    |
 | Introduction to Bioconductor and the SingleCellExperiment class | 9:30-10:00   |
-| Contributing to Bioconductor                                    | 10:00-10:45  |
-| Exploratory Data Analysis and Quality Control (EDA/QC)          | 10:45-11:00  |
+| Exploratory Data Analysis and Quality Control (EDA/QC)          | 10:00-10:45  |
+| Coffee break                                                    | 10:45-11:00  |
 | Clustering and cell type annotation                             | 11:00-12:00  |
 | Multi-sample analyses                                           | 12:00-13:00  |
 | Lunch break                                                     | 13:00-14:00  |
