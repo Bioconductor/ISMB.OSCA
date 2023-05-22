@@ -23,7 +23,9 @@ Imports:
     SingleR,
     TENxBrainData,
     scater,
-    scran
+    scran,
+    MouseGastrulationData,
+    SingleCellExperiment
 Suggests: 
     BiocStyle,
     knitr,
