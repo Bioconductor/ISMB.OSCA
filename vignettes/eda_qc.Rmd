@@ -13,14 +13,37 @@ output:
 
 ```{r setup, message = FALSE}
 library(scater)
+library(MouseGastrulationData)
 ```
 
-# Exploratory data analysis
+Let's start with an example dataset.
 
-There is a lot to say here.
+```{r}
+sce <- WTChimeraData(samples=5, type="raw")
+sce <- sce[[1]]
+```
+
+# Droplet processing
+
+Sections 7.2.1 and 7.2.2 of OSCA advanced.
 
 # Quality control
 
-Also an interesting topic. 
+Sections 1.2, 1.3.2, 1.4, 1.5 of OSCA basics.
 
+# Normalization
+
+Sections 2.1, 2.2, 2.3, 2.5, of OSCA basics.
+
+# Feature Selection
+
+Sections 3.1, 3.2, 3.5 of OSCA basics.
+
+# Dimensionality Reduction
+
+All sections of Chapter 4 of OSCA basics.
+
+# Doublet identification
+
+Sections 8.1, 8.3 of OSCA advanced.
 
