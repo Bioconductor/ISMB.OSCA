@@ -13,7 +13,14 @@ output:
 
 ```{r setup, message = FALSE}
 library(SingleCellExperiment)
+library(MouseGastrulationData)
 ```
 
 # The `SingleCellExperiment` class
 
+Let's start with an example dataset.
+
+```{r, message = FALSE}
+sce_processed <- WTChimeraData(samples=5:10)
+sce_processed
+```
