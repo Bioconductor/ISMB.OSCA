@@ -22,7 +22,7 @@ Imports:
     CuratedAtlasQueryR,
     MouseGastrulationData,
     SingleR,
-    SingleCellExperiment
+    SingleCellExperiment,
     TENxBrainData,
     scater,
     scran
