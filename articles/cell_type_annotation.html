@@ -101,12 +101,383 @@
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/LTLA/SingleR" class="external-link">SingleR</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://scenic.aertslab.org" class="external-link">AUCell</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/LTLA/SingleR" class="external-link">SingleR</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">bluster</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="data-retrieval">Data retrieval<a class="anchor" aria-label="anchor" href="#data-retrieval"></a>
 </h2>
-<p>There is a lot to say here.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples <span class="op">=</span> <span class="fl">5</span>, type <span class="op">=</span> <span class="st">"processed"</span><span class="op">)</span></span>
+<span><span class="va">sce</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 29453 2411 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): counts</span></span>
+<span><span class="co">## rownames(29453): ENSMUSG00000051951 ENSMUSG00000089699 ...</span></span>
+<span><span class="co">##   ENSMUSG00000095742 tomato-td</span></span>
+<span><span class="co">## rowData names(2): ENSEMBL SYMBOL</span></span>
+<span><span class="co">## colnames(2411): cell_9769 cell_9770 ... cell_12178 cell_12179</span></span>
+<span><span class="co">## colData names(11): cell barcode ... doub.density sizeFactor</span></span>
+<span><span class="co">## reducedDimNames(2): pca.corrected.E7.5 pca.corrected.E8.5</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="preprocessing">Preprocessing<a class="anchor" aria-label="anchor" href="#preprocessing"></a>
+</h2>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/runPCA.html" class="external-link">runPCA</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="clustering">Clustering<a class="anchor" aria-label="anchor" href="#clustering"></a>
+</h2>
+<p>Clustering is an unsupervised learning procedure that is used to
+empirically define groups of cells with similar expression profiles. Its
+primary purpose is to summarize complex scRNA-seq data into a digestible
+format for human interpretation. This allows us to describe population
+heterogeneity in terms of discrete labels that are easily understood,
+rather than attempting to comprehend the high-dimensional manifold on
+which the cells truly reside. After annotation based on marker genes,
+the clusters can be treated as proxies for more abstract biological
+concepts such as cell types or states.</p>
+<p>Popularized by its use in<br><a href="https://cran.r-project.org/web/packages/Seurat/index.html" class="external-link">Seurat</a>,
+graph-based clustering is a flexible and scalable technique for
+clustering large scRNA-seq datasets. We first build a graph where each
+node is a cell that is connected to its nearest neighbors in<br>
+the high-dimensional space. Edges are weighted based on the similarity
+between the cells involved, with higher weight given to cells that are
+more closely related. We then apply algorithms to identify “communities”
+of cells that are more connected to cells in the same community than
+they are to cells of<br>
+different communities. Each community represents a cluster that we can
+use for downstream interpretation.</p>
+<p>Here, we use the <code><a href="https://rdrr.io/pkg/scran/man/clusterCells.html" class="external-link">clusterCells()</a></code> function from the <a href="https://bioconductor.org/packages/scran" class="external-link">scran</a> package to
+perform graph-based clustering using the <a href="https://doi.org/10.1088/1742-5468/2008/10/P10008" class="external-link">Louvain
+algorithm</a> for community detection. All calculations are performed
+using the top PCs to take advantage of data compression and denoising.
+This function returns a vector containing cluster assignments for each
+cell in our <code>SingleCellExperiment</code> object.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html" class="external-link">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/clusterCells.html" class="external-link">clusterCells</a></span><span class="op">(</span><span class="va">sce</span>, use.dimred <span class="op">=</span> <span class="st">"PCA"</span>,</span>
+<span>                               BLUSPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/bluster/man/NNGraphParam-class.html" class="external-link">NNGraphParam</a></span><span class="op">(</span>cluster.fun <span class="op">=</span> <span class="st">"louvain"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html" class="external-link">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">##   1   2   3   4   5   6   7   8   9  10  11  12  13  14 </span></span>
+<span><span class="co">##  91 144  75 397 397 209 246  95 108 114 154 215 146  20</span></span></code></pre>
+<p>We assign the cluster assignments back into our
+<code>SingleCellExperiment</code> object as a <code>factor</code> in the
+column metadata. This allows us to conveniently visualize the
+distribution of clusters in eg. a <em>t</em>-SNE or a UMAP.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runUMAP.html" class="external-link">runUMAP</a></span><span class="op">(</span><span class="va">sce</span>, dimred <span class="op">=</span> <span class="st">"PCA"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html" class="external-link">plotReducedDim</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"UMAP"</span>, color_by <span class="op">=</span> <span class="st">"label"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="cell_type_annotation_files/figure-html/cluster-viz-1.png" width="700"></p>
+<p>Exercise: The <a href="https://www.nature.com/articles/s41598-019-41695-z" class="external-link">Leiden
+algorithm</a> is similar to the Louvain algorithm, but it is faster and
+has been shown to result in better connected communities. Modify the
+above call to <code>clusterCells</code> to carry out the community
+detection with the Leiden algorithm instead. Visualize the results in a
+UMAP plot.</p>
+<p>Hint: The <code>NNGraphParam</code> constructor has an argument
+<code>cluster.args</code>. This allows to specify arguments passed on to
+the <code>cluster_leiden</code> function from the <a href="https://cran.r-project.org/web/packages/igraph/index.html" class="external-link">igraph</a>
+package. Use the <code>cluster.args</code> argument to parameterize the
+clustering to use modularity as the objective function and a resolution
+parameter of 0.5.</p>
+<div class="section level3">
+<h3 id="marker-gene-detection">Marker gene detection<a class="anchor" aria-label="anchor" href="#marker-gene-detection"></a>
+</h3>
+<p>To interpret clustering results as obtained in the previous section,
+we identify the genes that drive separation between clusters. These
+marker genes allow us to assign biological meaning to each cluster based
+on their functional annotation. In the simplest case, we have <em>a
+priori</em> knowledge of the marker genes associated with particular
+cell types, allowing us to treat the clustering as a proxy for cell type
+identity.</p>
+<p>The most straightforward approach to marker gene detection involves
+testing for differential expression between clusters. If a gene is
+strongly DE between clusters, it is likely to have driven the separation
+of cells in the clustering algorithm.</p>
+<p>Here, we perform a Wilcoxon rank sum test against a log2 fold change
+threshold of 1, focusing on up-regulated (positive) markers in one
+cluster when compared to another cluster.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/findMarkers.html" class="external-link">findMarkers</a></span><span class="op">(</span><span class="va">sce</span>, test.type <span class="op">=</span> <span class="st">"wilcox"</span>, direction <span class="op">=</span> <span class="st">"up"</span>, lfc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">markers</span></span></code></pre></div>
+<pre><code><span><span class="co">## List of length 14</span></span>
+<span><span class="co">## names(14): 1 2 3 4 5 6 7 8 9 10 11 12 13 14</span></span></code></pre>
+<p>The resulting object contains a sorted marker gene list for each
+cluster, in which the top genes are those that contribute the most to
+the separation of that cluster from mall other clusters.</p>
+<p>Here, we inspect the ranked marker gene list for the first
+cluster.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">markers</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 29453 rows and 17 columns</span></span>
+<span><span class="co">##                          Top     p.value         FDR summary.AUC     AUC.2</span></span>
+<span><span class="co">##                    &lt;integer&gt;   &lt;numeric&gt;   &lt;numeric&gt;   &lt;numeric&gt; &lt;numeric&gt;</span></span>
+<span><span class="co">## ENSMUSG00000049866         1 3.92896e-90 3.85732e-86    0.998644  0.908349</span></span>
+<span><span class="co">## ENSMUSG00000028023         1 1.40465e-80 4.59680e-77    0.952612  0.942308</span></span>
+<span><span class="co">## ENSMUSG00000003153         1 7.27172e-43 1.89535e-40    0.961359  0.890797</span></span>
+<span><span class="co">## ENSMUSG00000032060         1 1.76158e-73 3.45892e-70    0.958563  0.942537</span></span>
+<span><span class="co">## ENSMUSG00000042757         1 2.00077e-94 5.89286e-90    0.997979  0.944902</span></span>
+<span><span class="co">## ...                      ...         ...         ...         ...       ...</span></span>
+<span><span class="co">## ENSMUSG00000079794     29448           1           1           0         0</span></span>
+<span><span class="co">## ENSMUSG00000094799     29449           1           1           0         0</span></span>
+<span><span class="co">## ENSMUSG00000095019     29450           1           1           0         0</span></span>
+<span><span class="co">## ENSMUSG00000094915     29451           1           1           0         0</span></span>
+<span><span class="co">## ENSMUSG00000096730     29453           1           1           0         0</span></span>
+<span><span class="co">##                        AUC.3     AUC.4     AUC.5     AUC.6     AUC.7     AUC.8</span></span>
+<span><span class="co">##                    &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
+<span><span class="co">## ENSMUSG00000049866  0.991502  0.998644  0.669499  0.911562  0.864514  0.942279</span></span>
+<span><span class="co">## ENSMUSG00000028023  0.774359  0.952612  0.810696  0.952101  0.948718  0.759630</span></span>
+<span><span class="co">## ENSMUSG00000003153  0.937729  0.961359  0.879481  0.696041  0.705843  0.886293</span></span>
+<span><span class="co">## ENSMUSG00000032060  0.909890  0.958563  0.953691  0.962721  0.963191  0.262348</span></span>
+<span><span class="co">## ENSMUSG00000042757  0.912674  0.997979  0.934564  0.962091  0.934691  0.665703</span></span>
+<span><span class="co">## ...                      ...       ...       ...       ...       ...       ...</span></span>
+<span><span class="co">## ENSMUSG00000079794         0         0         0         0         0         0</span></span>
+<span><span class="co">## ENSMUSG00000094799         0         0         0         0         0         0</span></span>
+<span><span class="co">## ENSMUSG00000095019         0         0         0         0         0         0</span></span>
+<span><span class="co">## ENSMUSG00000094915         0         0         0         0         0         0</span></span>
+<span><span class="co">## ENSMUSG00000096730         0         0         0         0         0         0</span></span>
+<span><span class="co">##                        AUC.9    AUC.10    AUC.11    AUC.12    AUC.13</span></span>
+<span><span class="co">##                    &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
+<span><span class="co">## ENSMUSG00000049866  0.870065  0.979853  0.942914  0.924406  0.735059</span></span>
+<span><span class="co">## ENSMUSG00000028023  0.421245  0.935512  0.952547  0.878456  0.853229</span></span>
+<span><span class="co">## ENSMUSG00000003153  0.894587  0.944573  0.386685  0.962075  0.299187</span></span>
+<span><span class="co">## ENSMUSG00000032060  0.349105  0.957297  0.959612  0.957271  0.917883</span></span>
+<span><span class="co">## ENSMUSG00000042757  0.395910  0.983420  0.956615  0.963046  0.959506</span></span>
+<span><span class="co">## ...                      ...       ...       ...       ...       ...</span></span>
+<span><span class="co">## ENSMUSG00000079794         0         0         0         0         0</span></span>
+<span><span class="co">## ENSMUSG00000094799         0         0         0         0         0</span></span>
+<span><span class="co">## ENSMUSG00000095019         0         0         0         0         0</span></span>
+<span><span class="co">## ENSMUSG00000094915         0         0         0         0         0</span></span>
+<span><span class="co">## ENSMUSG00000096730         0         0         0         0         0</span></span>
+<span><span class="co">##                         AUC.14</span></span>
+<span><span class="co">##                      &lt;numeric&gt;</span></span>
+<span><span class="co">## ENSMUSG00000049866 0.095604396</span></span>
+<span><span class="co">## ENSMUSG00000028023 0.938461538</span></span>
+<span><span class="co">## ENSMUSG00000003153 0.000549451</span></span>
+<span><span class="co">## ENSMUSG00000032060 0.459890110</span></span>
+<span><span class="co">## ENSMUSG00000042757 0.567582418</span></span>
+<span><span class="co">## ...                        ...</span></span>
+<span><span class="co">## ENSMUSG00000079794           0</span></span>
+<span><span class="co">## ENSMUSG00000094799           0</span></span>
+<span><span class="co">## ENSMUSG00000095019           0</span></span>
+<span><span class="co">## ENSMUSG00000094915           0</span></span>
+<span><span class="co">## ENSMUSG00000096730           0</span></span></code></pre>
+<p>The <code>Top</code> field provides the the minimum rank across all
+pairwise comparisons. The <code>p.value</code> field provides the
+combined <em>p</em>-value across all comparisons, and the
+<code>FDR</code> field the BH-adjusted <em>p</em>-value for each gene.
+The <code>summary.AUC</code> provides area under the curve (here the
+concordance probability) from the comparison with the lowest
+<em>p</em>-value, the <code>AUC.n</code> fields provide the AUC for each
+pairwise comparison. The AUC is the probability that a randomly selected
+cell in cluster <em>A</em> has a greater expression of gene <em>X</em>
+than a randomly selected cell in <em>B</em>.</p>
+<p>We can then inspect the top marker genes for the first cluster using
+the <code>plotExpression</code> function from the <a href="https://bioconductor.org/packages/scater" class="external-link">scater</a> package.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">top.markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">markers</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotExpression.html" class="external-link">plotExpression</a></span><span class="op">(</span><span class="va">sce</span>, features <span class="op">=</span> <span class="va">top.markers</span>, x <span class="op">=</span> <span class="st">"label"</span>, color_by <span class="op">=</span> <span class="st">"label"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="cell_type_annotation_files/figure-html/plot-markers-1.png" width="960"></p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="cell-type-annotation">Cell type annotation<a class="anchor" aria-label="anchor" href="#cell-type-annotation"></a>
+</h2>
+<p>The most challenging task in scRNA-seq data analysis is arguably the
+interpretation of the results. Obtaining clusters of cells is fairly
+straightforward, but it is more difficult to determine what biological
+state is represented by each of those clusters. Doing so requires us to
+bridge the gap between the current dataset and prior biological
+knowledge, and the latter is not always available in a consistent and
+quantitative manner. Indeed, even the concept of a “cell type” is <a href="https://doi.org/10.1016/j.cels.2017.03.006" class="external-link">not clearly
+defined</a>, with most practitioners possessing a “I’ll know it when I
+see it” intuition that is not amenable to computational analysis. As
+such, interpretation of scRNA-seq data is often manual and a common
+bottleneck in the analysis workflow.</p>
+<p>To expedite this step, we can use various computational approaches
+that exploit prior information to assign meaning to an uncharacterized
+scRNA-seq dataset. The most obvious sources of prior information are the
+curated gene sets associated with particular biological processes, e.g.,
+from the Gene Ontology (GO) or the Kyoto Encyclopedia of Genes and
+Genomes (KEGG) collections. Alternatively, we can directly compare our
+expression profiles to published reference datasets where each sample or
+cell has already been annotated with its putative biological state by
+domain experts. Here, we will demonstrate both approaches with several
+different scRNA-seq datasets.</p>
+<div class="section level3">
+<h3 id="assigning-cell-labels-from-reference-data">Assigning cell labels from reference data<a class="anchor" aria-label="anchor" href="#assigning-cell-labels-from-reference-data"></a>
+</h3>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/EmbryoAtlasData.html" class="external-link">EmbryoAtlasData</a></span><span class="op">(</span>samples <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">ref</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 29452 716 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): counts</span></span>
+<span><span class="co">## rownames(29452): ENSMUSG00000051951 ENSMUSG00000089699 ...</span></span>
+<span><span class="co">##   ENSMUSG00000096730 ENSMUSG00000095742</span></span>
+<span><span class="co">## rowData names(2): ENSEMBL SYMBOL</span></span>
+<span><span class="co">## colnames(716): cell_1 cell_2 ... cell_715 cell_716</span></span>
+<span><span class="co">## colData names(17): cell barcode ... colour sizeFactor</span></span>
+<span><span class="co">## reducedDimNames(2): pca.corrected umap</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">ref</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">##                       Epiblast                   ExE ectoderm </span></span>
+<span><span class="co">##                            189                            110 </span></span>
+<span><span class="co">##                   ExE endoderm           Rostral neurectoderm </span></span>
+<span><span class="co">##                             78                             51 </span></span>
+<span><span class="co">##               Primitive Streak                     Mesenchyme </span></span>
+<span><span class="co">##                             47                             23 </span></span>
+<span><span class="co">##            Blood progenitors 2                Caudal epiblast </span></span>
+<span><span class="co">##                             19                             19 </span></span>
+<span><span class="co">##          Intermediate mesoderm              Visceral endoderm </span></span>
+<span><span class="co">##                             17                             15 </span></span>
+<span><span class="co">##                   ExE mesoderm                 Mixed mesoderm </span></span>
+<span><span class="co">##                             11                             11 </span></span>
+<span><span class="co">##            Pharyngeal mesoderm               Nascent mesoderm </span></span>
+<span><span class="co">##                             10                              8 </span></span>
+<span><span class="co">##              Paraxial mesoderm               Surface ectoderm </span></span>
+<span><span class="co">##                              8                              8 </span></span>
+<span><span class="co">##                            Gut Haematoendothelial progenitors </span></span>
+<span><span class="co">##                              7                              7 </span></span>
+<span><span class="co">##            Blood progenitors 1            Caudal neurectoderm </span></span>
+<span><span class="co">##                              4                              4 </span></span>
+<span><span class="co">##               Somitic mesoderm                Caudal Mesoderm </span></span>
+<span><span class="co">##                              4                              3 </span></span>
+<span><span class="co">##                      Notochord                            PGC </span></span>
+<span><span class="co">##                              2                              2 </span></span>
+<span><span class="co">##                     Erythroid1 </span></span>
+<span><span class="co">##                              1</span></span></code></pre>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">ref</span><span class="op">)</span></span></code></pre></div>
+<p>Some cleaning - remove cells for cell type annotation is missing.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nna</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">ref</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span></span>
+<span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="va">ref</span><span class="op">[</span>,<span class="va">nna</span><span class="op">]</span></span></code></pre></div>
+<p>Restrict to genes shared between query and reference dataset.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">isect</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">ref</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span><span class="va">isect</span>,<span class="op">]</span></span>
+<span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="va">ref</span><span class="op">[</span><span class="va">isect</span>,<span class="op">]</span></span></code></pre></div>
+<p>Convert sparse assay matrices to regular dense matrices for input to
+SingleR.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sce.mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"logcounts"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ref.mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">ref</span>, <span class="st">"logcounts"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleR/man/SingleR.html" class="external-link">SingleR</a></span><span class="op">(</span>test <span class="op">=</span> <span class="va">sce.mat</span>, ref <span class="op">=</span> <span class="va">ref.mat</span>, labels <span class="op">=</span> <span class="va">ref</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span>
+<span></span>
+<span><span class="co">## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE</span></span>
+<span><span class="co">## or useNames = TRUE.</span></span></code></pre>
+</div>
+<div class="section level3">
+<h3 id="assigning-cell-labels-from-gene-sets">Assigning cell labels from gene sets<a class="anchor" aria-label="anchor" href="#assigning-cell-labels-from-gene-sets"></a>
+</h3>
+</div>
 </div>
   </div>
 

@@ -102,11 +102,28 @@ SingleCellExperiment class</h1>
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">SingleCellExperiment</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">SingleCellExperiment</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="the-singlecellexperiment-class">The <code>SingleCellExperiment</code> class<a class="anchor" aria-label="anchor" href="#the-singlecellexperiment-class"></a>
 </h2>
+<p>Let’s start with an example dataset.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sce_processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">5</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
+<span><span class="va">sce_processed</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 29453 20935 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): counts</span></span>
+<span><span class="co">## rownames(29453): ENSMUSG00000051951 ENSMUSG00000089699 ...</span></span>
+<span><span class="co">##   ENSMUSG00000095742 tomato-td</span></span>
+<span><span class="co">## rowData names(2): ENSEMBL SYMBOL</span></span>
+<span><span class="co">## colnames(20935): cell_9769 cell_9770 ... cell_30702 cell_30703</span></span>
+<span><span class="co">## colData names(11): cell barcode ... doub.density sizeFactor</span></span>
+<span><span class="co">## reducedDimNames(2): pca.corrected.E7.5 pca.corrected.E8.5</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
 </div>
   </div>
 

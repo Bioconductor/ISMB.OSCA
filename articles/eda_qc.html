@@ -102,17 +102,47 @@ control</h1>
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span></code></pre></div>
+<p>Let’s start with an example dataset.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">5</span>, type<span class="op">=</span><span class="st">"raw"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## see ?MouseGastrulationData and browseVignettes('MouseGastrulationData') for documentation</span></span></code></pre>
+<pre><code><span><span class="co">## loading from cache</span></span></code></pre>
+<pre><code><span><span class="co">## see ?MouseGastrulationData and browseVignettes('MouseGastrulationData') for documentation</span></span></code></pre>
+<pre><code><span><span class="co">## loading from cache</span></span></code></pre>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="exploratory-data-analysis">Exploratory data analysis<a class="anchor" aria-label="anchor" href="#exploratory-data-analysis"></a>
+<h2 id="droplet-processing">Droplet processing<a class="anchor" aria-label="anchor" href="#droplet-processing"></a>
 </h2>
-<p>There is a lot to say here.</p>
+<p>Sections 7.2.1 and 7.2.2 of OSCA advanced.</p>
 </div>
 <div class="section level2">
 <h2 id="quality-control">Quality control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
 </h2>
-<p>Also an interesting topic.</p>
+<p>Sections 1.2, 1.3.2, 1.4, 1.5 of OSCA basics.</p>
+</div>
+<div class="section level2">
+<h2 id="normalization">Normalization<a class="anchor" aria-label="anchor" href="#normalization"></a>
+</h2>
+<p>Sections 2.1, 2.2, 2.3, 2.5, of OSCA basics.</p>
+</div>
+<div class="section level2">
+<h2 id="feature-selection">Feature Selection<a class="anchor" aria-label="anchor" href="#feature-selection"></a>
+</h2>
+<p>Sections 3.1, 3.2, 3.5 of OSCA basics.</p>
+</div>
+<div class="section level2">
+<h2 id="dimensionality-reduction">Dimensionality Reduction<a class="anchor" aria-label="anchor" href="#dimensionality-reduction"></a>
+</h2>
+<p>All sections of Chapter 4 of OSCA basics.</p>
+</div>
+<div class="section level2">
+<h2 id="doublet-identification">Doublet identification<a class="anchor" aria-label="anchor" href="#doublet-identification"></a>
+</h2>
+<p>Sections 8.1, 8.3 of OSCA advanced.</p>
 </div>
   </div>
 
