@@ -12,9 +12,190 @@ output:
 # Setup
 
 ```{r setup, message = FALSE}
+library(AUCell)
+library(MouseGastrulationData)
 library(SingleR)
+library(bluster)
+library(scater)
+library(scran)
 ```
 
 # Data retrieval
 
-There is a lot to say here.
+```{r data, message = FALSE}
+sce <- WTChimeraData(samples = 5, type = "processed")
+sce
+```
+
+# Preprocessing
+
+```{r preproc}
+sce <- logNormCounts(sce)
+sce <- runPCA(sce)
+```
+
+# Clustering
+
+Clustering is an unsupervised learning procedure that is used to empirically 
+define groups of cells with similar expression profiles. 
+Its primary purpose is to summarize complex scRNA-seq data into a digestible 
+format for human interpretation. 
+This allows us to describe population heterogeneity in terms of discrete labels 
+that are easily understood, rather than attempting to comprehend the 
+high-dimensional manifold on which the cells truly reside. After annotation 
+based on marker genes, the clusters can be treated as proxies for more abstract 
+biological concepts such as cell types or states.
+
+Popularized by its use in  
+[Seurat](https://cran.r-project.org/web/packages/Seurat/index.html), 
+graph-based clustering is a flexible and 
+scalable technique for clustering large scRNA-seq datasets. We first build a 
+graph where each node is a cell that is connected to its nearest neighbors in  
+the high-dimensional space. Edges are weighted based on the similarity between 
+the cells involved, with higher weight given to cells that are more closely 
+related. We then apply algorithms to identify "communities" of cells that are 
+more connected to cells in the same community than they are to cells of  
+different communities. Each community represents a cluster that we can use for 
+downstream interpretation.
+
+Here, we use the `clusterCells()` function from the 
+[scran](https://bioconductor.org/packages/scran) package to perform graph-based
+clustering using the 
+[Louvain algorithm](https://doi.org/10.1088/1742-5468/2008/10/P10008)
+for community detection. All calculations are performed using the top PCs to 
+take advantage of data compression and denoising. This function returns a vector
+containing cluster assignments for each cell in our `SingleCellExperiment` object.
+
+```{r cluster}
+colLabels(sce) <- clusterCells(sce, use.dimred = "PCA",
+                               BLUSPARAM = NNGraphParam(cluster.fun = "louvain"))
+table(colLabels(sce))
+```
+
+We assign the cluster assignments back into our `SingleCellExperiment` object as
+a `factor` in the column metadata. This allows us to conveniently visualize the
+distribution of clusters in eg. a *t*-SNE or a UMAP.
+
+```{r cluster-viz}
+sce <- runUMAP(sce, dimred = "PCA")
+plotReducedDim(sce, "UMAP", color_by = "label")
+```
+
+Exercise: The [Leiden algorithm](https://www.nature.com/articles/s41598-019-41695-z)
+is similar to the Louvain algorithm, but it is faster and has been shown to result
+in better connected communities. Modify the above call to `clusterCells` to
+carry out the community detection with the Leiden algorithm instead. Visualize
+the results in a UMAP plot.
+
+Hint: The `NNGraphParam` constructor has an argument `cluster.args`. This allows
+to specify arguments passed on to the `cluster_leiden` function from the 
+[igraph](https://cran.r-project.org/web/packages/igraph/index.html) package.
+Use the `cluster.args` argument to parameterize the clustering to use modularity
+as the objective function and a resolution parameter of 0.5.
+
+## Marker gene detection
+
+To interpret clustering results as obtained in the previous section, we identify
+the genes that drive separation between clusters. These marker genes allow us to 
+assign biological meaning to each cluster based on their functional annotation. 
+In the simplest case, we have *a priori* knowledge of the marker genes associated 
+with particular cell types, allowing us to treat the clustering as a proxy for 
+cell type identity.
+ 
+The most straightforward approach to marker gene detection involves testing for 
+differential expression between clusters. If a gene is strongly DE between 
+clusters, it is likely to have driven the separation of cells in the clustering 
+algorithm.
+
+Here, we perform a Wilcoxon rank sum test against a log2 fold change threshold
+of 1, focusing on up-regulated (positive) markers in one cluster when compared
+to another cluster. 
+
+```{r marker-detect}
+markers <- findMarkers(sce, test.type = "wilcox", direction = "up", lfc = 1)
+markers
+```
+
+The resulting object contains a sorted marker gene list for each cluster,
+in which the top genes are those that contribute the most to the separation of
+that cluster from mall other clusters. 
+
+Here, we inspect the ranked marker gene list for the first cluster.
+
+```{r marker-clust1}
+markers[[1]]
+```
+
+The `Top` field provides the the minimum rank across all pairwise comparisons.
+The `p.value` field provides the combined *p*-value across all comparisons, and 
+the `FDR` field the BH-adjusted *p*-value for each gene.
+The `summary.AUC` provides area under the curve (here the concordance probability)
+from the comparison with the lowest *p*-value, the `AUC.n` fields provide the
+AUC for each pairwise comparison. The AUC is the probability that a randomly
+selected cell in cluster *A* has a greater expression of gene *X* than a randomly
+selected cell in *B*.
+
+We can then inspect the top marker genes for the first cluster using the 
+`plotExpression` function from the 
+[scater](https://bioconductor.org/packages/scater) package.
+
+```{r plot-markers, fig.width = 10, fig.height = 10}
+top.markers <- head(rownames(markers[[1]]))
+plotExpression(sce, features = top.markers, x = "label", color_by = "label")
+```
+
+# Cell type annotation
+
+The most challenging task in scRNA-seq data analysis is arguably the interpretation of the results.
+Obtaining clusters of cells is fairly straightforward, but it is more difficult to determine what biological state is represented by each of those clusters. 
+Doing so requires us to bridge the gap between the current dataset and prior biological knowledge, and the latter is not always available in a consistent and quantitative manner.
+Indeed, even the concept of a "cell type" is [not clearly defined](https://doi.org/10.1016/j.cels.2017.03.006), with most practitioners possessing a "I'll know it when I see it" intuition that is not amenable to computational analysis.
+As such, interpretation of scRNA-seq data is often manual and a common bottleneck in the analysis workflow.
+
+To expedite this step, we can use various computational approaches that exploit prior information to assign meaning to an uncharacterized scRNA-seq dataset.
+The most obvious sources of prior information are the curated gene sets associated with particular biological processes, e.g., from the Gene Ontology (GO) or the Kyoto Encyclopedia of Genes and Genomes (KEGG) collections.
+Alternatively, we can directly compare our expression profiles to published reference datasets where each sample or cell has already been annotated with its putative biological state by domain experts.
+Here, we will demonstrate both approaches with several different scRNA-seq datasets.
+
+## Assigning cell labels from reference data
+
+```{r ref-data, message = FALSE}
+ref <- EmbryoAtlasData(samples = 1:2)
+ref
+```
+
+```{r ref-celltypes}
+sort(table(ref$celltype), decreasing = TRUE)
+```
+
+```{r ref-preproc}
+ref <- logNormCounts(ref)
+```
+
+Some cleaning - remove cells for cell type annotation is missing.
+
+```{r na-celltype}
+nna <- !is.na(ref$celltype)
+ref <- ref[,nna]
+```
+
+Restrict to genes shared between query and reference dataset.
+
+```{r}
+isect <- intersect(rownames(sce), rownames(ref))
+sce <- sce[isect,]
+ref <- ref[isect,]
+```
+
+Convert sparse assay matrices to regular dense matrices for input to SingleR. 
+
+```{r}
+sce.mat <- as.matrix(assay(sce, "logcounts"))
+ref.mat <- as.matrix(assay(ref, "logcounts"))
+```
+
+```{r singler}
+res <- SingleR(test = sce.mat, ref = ref.mat, labels = ref$celltype)
+```
+
+## Assigning cell labels from gene sets

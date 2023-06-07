@@ -19,11 +19,13 @@ RoxygenNote: 7.1.0
 Depends: 
     R (>= 4.3.0)
 Imports:
+    AUCell,
     CuratedAtlasQueryR,
     MouseGastrulationData,
-    SingleR,
     SingleCellExperiment,
+    SingleR,
     TENxBrainData,
+    bluster,
     scater,
     scran
 Suggests: 
