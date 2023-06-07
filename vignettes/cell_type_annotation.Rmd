@@ -29,7 +29,7 @@ sce
 
 # Preprocessing
 
-```{r preproc}
+```{r preproc, warning = FALSE}
 sce <- logNormCounts(sce)
 sce <- runPCA(sce)
 ```
@@ -93,7 +93,7 @@ to specify arguments passed on to the `cluster_leiden` function from the
 Use the `cluster.args` argument to parameterize the clustering to use modularity
 as the objective function and a resolution parameter of 0.5.
 
-## Marker gene detection
+# Marker gene detection
 
 To interpret clustering results as obtained in the previous section, we identify
 the genes that drive separation between clusters. These marker genes allow us to 
@@ -112,6 +112,7 @@ of 1, focusing on up-regulated (positive) markers in one cluster when compared
 to another cluster. 
 
 ```{r marker-detect}
+rownames(sce) <- rowData(sce)$SYMBOL
 markers <- findMarkers(sce, test.type = "wilcox", direction = "up", lfc = 1)
 markers
 ```
@@ -194,7 +195,7 @@ sce.mat <- as.matrix(assay(sce, "logcounts"))
 ref.mat <- as.matrix(assay(ref, "logcounts"))
 ```
 
-```{r singler}
+```{r singler, warning = FALSE}
 res <- SingleR(test = sce.mat, ref = ref.mat, labels = ref$celltype)
 ```
 

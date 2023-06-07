@@ -130,7 +130,7 @@ available hardware and operating system.
 For example, we might use forking across two cores to parallelize the variance
 calculations on a Unix system:
 
-```{r parallel-mc}
+```{r parallel-mc, message = FALSE}
 library(BiocParallel)
 library(MouseGastrulationData)
 library(scran)
