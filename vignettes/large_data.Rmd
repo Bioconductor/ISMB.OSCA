@@ -130,20 +130,22 @@ available hardware and operating system.
 For example, we might use forking across two cores to parallelize the variance
 calculations on a Unix system:
 
-```{r parallel}
+```{r parallel-mc}
 library(BiocParallel)
+library(MouseGastrulationData)
 library(scran)
-sce.brain <- logNormCounts(sce.brain)
-dec.brain.mc <- modelGeneVar(sce.brain, BPPARAM = MulticoreParam(2))
-dec.brain.mc
+sce <- WTChimeraData(samples = 5, type = "processed")
+sce <- logNormCounts(sce)
+dec.mc <- modelGeneVar(sce, BPPARAM = MulticoreParam(2))
+dec.mc
 ```
 
 Another approach would be to distribute jobs across a network of computers,
 which yields the same result:
 
-```{r}
-dec.brain.snow <- modelGeneVar(sce.brain, BPPARAM = SnowParam(2))
-dec.brain.snow
+```{r parallel-snow}
+dec.snow <- modelGeneVar(sce, BPPARAM = SnowParam(2))
+dec.snow
 ```
 
 For high-performance computing (HPC) systems with a cluster of compute nodes, 
