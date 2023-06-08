@@ -183,6 +183,7 @@ ref <- ref[,nna]
 Restrict to genes shared between query and reference dataset.
 
 ```{r}
+rownames(ref) <- rowData(ref)$SYMBOL
 isect <- intersect(rownames(sce), rownames(ref))
 sce <- sce[isect,]
 ref <- ref[isect,]
