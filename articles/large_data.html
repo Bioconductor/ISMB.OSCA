@@ -281,23 +281,10 @@ depending on the available hardware and operating system.</p>
 variance calculations on a Unix system:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Bioconductor/BiocParallel" class="external-link">BiocParallel</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Loading required package: SpatialExperiment</span></span></code></pre>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span>
-<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples <span class="op">=</span> <span class="fl">5</span>, type <span class="op">=</span> <span class="st">"processed"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## see ?MouseGastrulationData and browseVignettes('MouseGastrulationData') for documentation</span></span></code></pre>
-<pre><code><span><span class="co">## loading from cache</span></span></code></pre>
-<pre><code><span><span class="co">## see ?MouseGastrulationData and browseVignettes('MouseGastrulationData') for documentation</span></span></code></pre>
-<pre><code><span><span class="co">## loading from cache</span></span></code></pre>
-<pre><code><span><span class="co">## see ?MouseGastrulationData and browseVignettes('MouseGastrulationData') for documentation</span></span></code></pre>
-<pre><code><span><span class="co">## loading from cache</span></span></code></pre>
-<pre><code><span><span class="co">## see ?MouseGastrulationData and browseVignettes('MouseGastrulationData') for documentation</span></span></code></pre>
-<pre><code><span><span class="co">## loading from cache</span></span></code></pre>
-<pre><code><span><span class="co">## see ?MouseGastrulationData and browseVignettes('MouseGastrulationData') for documentation</span></span></code></pre>
-<pre><code><span><span class="co">## loading from cache</span></span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples <span class="op">=</span> <span class="fl">5</span>, type <span class="op">=</span> <span class="st">"processed"</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span><span class="va">dec.mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/modelGeneVar.html" class="external-link">modelGeneVar</a></span><span class="op">(</span><span class="va">sce</span>, BPPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/MulticoreParam-class.html" class="external-link">MulticoreParam</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">dec.mc</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 29453 rows and 6 columns</span></span>
@@ -329,7 +316,7 @@ variance calculations on a Unix system:</p>
 <span><span class="co">## tomato-td             0.756203</span></span></code></pre>
 <p>Another approach would be to distribute jobs across a network of
 computers, which yields the same result:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dec.snow</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/modelGeneVar.html" class="external-link">modelGeneVar</a></span><span class="op">(</span><span class="va">sce</span>, BPPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SnowParam-class.html" class="external-link">SnowParam</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">dec.snow</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 29453 rows and 6 columns</span></span>
@@ -365,7 +352,7 @@ compute nodes, we can distribute jobs via the job scheduler using the
 cluster, though the settings can be easily configured for a particular
 system (see <a href="https://bioconductor.org/packages/3.17/BiocParallel/vignettes/BiocParallel_BatchtoolsParam.pdf" class="external-link">here</a>
 for details).</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2 hours, 8 GB, 1 CPU per task, for 10 tasks.</span></span>
 <span><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>walltime <span class="op">=</span> <span class="fl">7200</span>, memory <span class="op">=</span> <span class="fl">8000</span>, ncpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">bpp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/BatchtoolsParam-class.html" class="external-link">BatchtoolsParam</a></span><span class="op">(</span><span class="fl">10</span>, cluster <span class="op">=</span> <span class="st">"slurm"</span>, resources <span class="op">=</span> <span class="va">rs</span><span class="op">)</span></span></code></pre></div>
