@@ -17,15 +17,17 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 Depends: 
-    R (>= 4.2.0)
+    R (>= 4.3.0)
 Imports:
+    AUCell,
     CuratedAtlasQueryR,
+    MouseGastrulationData,
+    SingleCellExperiment,
     SingleR,
     TENxBrainData,
+    bluster,
     scater,
-    scran,
-    MouseGastrulationData,
-    SingleCellExperiment
+    scran
 Suggests: 
     BiocStyle,
     knitr,
