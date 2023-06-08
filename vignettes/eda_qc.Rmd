@@ -11,39 +11,241 @@ output:
 
 # Setup
 
-```{r setup, message = FALSE}
-library(scater)
-library(MouseGastrulationData)
-```
-
 Let's start with an example dataset.
 
-```{r}
+```{r, message = FALSE}
+library(MouseGastrulationData)
 sce <- WTChimeraData(samples=5, type="raw")
 sce <- sce[[1]]
+sce
 ```
 
 # Droplet processing
 
 Sections 7.2.1 and 7.2.2 of OSCA advanced.
 
+```{r}
+library(DropletUtils)
+bcrank <- barcodeRanks(counts(sce))
+
+# Only showing unique points for plotting speed.
+uniq <- !duplicated(bcrank$rank)
+plot(bcrank$rank[uniq], bcrank$total[uniq], log="xy",
+    xlab="Rank", ylab="Total UMI count", cex.lab=1.2)
+
+abline(h=metadata(bcrank)$inflection, col="darkgreen", lty=2)
+abline(h=metadata(bcrank)$knee, col="dodgerblue", lty=2)
+
+legend("bottomleft", legend=c("Inflection", "Knee"), 
+        col=c("darkgreen", "dodgerblue"), lty=2, cex=1.2)
+```
+
+```{r}
+# emptyDrops performs Monte Carlo simulations to compute p-values,
+# so we need to set the seed to obtain reproducible results.
+set.seed(100)
+
+# this may take a few minutes
+e.out <- emptyDrops(counts(sce))
+
+summary(e.out$FDR <= 0.001)
+
+sce <- sce[,which(e.out$FDR <= 0.001)]
+sce
+```
+
 # Quality control
 
 Sections 1.2, 1.3.2, 1.4, 1.5 of OSCA basics.
+
+Identify mithocondrial genes.
+
+```{r}
+library(EnsDb.Mmusculus.v79)
+chr.loc <- mapIds(EnsDb.Mmusculus.v79, keys=rownames(sce),
+    keytype="GENEID", column="SEQNAME")
+is.mito <- which(chr.loc=="MT")
+```
+
+Compute qc metrics.
+
+```{r}
+library(scuttle)
+df <- perCellQCMetrics(sce, subsets=list(Mito=is.mito))
+
+# include them in the object
+colData(sce) <- cbind(colData(sce), df)
+colData(sce)
+```
+
+```{r}
+summary(df$detected)
+summary(df$subsets_Mito_percent)
+
+reasons <- perCellQCFilters(df, sub.fields="subsets_Mito_percent")
+colSums(as.matrix(reasons))
+summary(reasons$discard)
+
+# include in object
+sce$discard <- reasons$discard
+```
+
+Checking diagnostic plots.
+
+```{r}
+library(scater)
+
+plotColData(sce, y = "sum", colour_by = "discard") + ggtitle("Total count")
+plotColData(sce, y = "detected", colour_by = "discard") + ggtitle("Detected features")
+plotColData(sce, y = "subsets_Mito_percent", colour_by = "discard") + ggtitle("Mito percent")
+
+plotColData(sce, x="sum", y="subsets_Mito_percent", colour_by="discard")
+```
+
+Diagnosing cell type loss (consider removing).
+
+```{r}
+library(edgeR)
+
+## Diagnosing cell type loss
+lost <- calculateAverage(sce[,reasons$discard])
+kept <- calculateAverage(sce[,!reasons$discard])
+
+logged <- edgeR::cpm(cbind(lost, kept), log=TRUE, prior.count=2)
+logFC <- logged[,1] - logged[,2]
+abundance <- rowMeans(logged)
+plot(abundance, logFC, xlab="Average count", ylab="Log-FC (lost/kept)", pch=16)
+points(abundance[is.mito], logFC[is.mito], col="dodgerblue", pch=16)
+```
+
+Remove low-quality cells.
+
+```{r}
+sce <- sce[,!sce$discard]
+sce
+```
 
 # Normalization
 
 Sections 2.1, 2.2, 2.3, 2.5, of OSCA basics.
 
+Library size factors.
+
+```{r}
+lib.sf <- librarySizeFactors(sce)
+summary(lib.sf)
+hist(log10(lib.sf), xlab="Log10[Size factor]", col='grey80', breaks = 30)
+```
+
+Normalization by deconvolution.
+
+```{r}
+library(scran)
+set.seed(100)
+clust <- quickCluster(sce) 
+table(clust)
+```
+
+```{r}
+deconv.sf <- calculateSumFactors(sce, cluster=clust)
+summary(deconv.sf)
+
+plot(lib.sf, deconv.sf, xlab="Library size factor",
+    ylab="Deconvolution size factor", log='xy', pch=16,
+    col=as.integer(clust))
+abline(a=0, b=1, col="red")
+```
+
+Scaling and log-transforming.
+
+```{r}
+sizeFactors(sce) <- deconv.sf
+sce <- logNormCounts(sce)
+sce
+```
+
 # Feature Selection
 
 Sections 3.1, 3.2, 3.5 of OSCA basics.
+
+## 3.2 Quantifying per-gene variation
+
+```{r}
+dec.sce <- modelGeneVar(sce)
+fit.sce <- metadata(dec.sce)
+
+plot(fit.sce$mean, fit.sce$var, xlab = "Mean of log-expression",
+     ylab = "Variance of log-expression")
+curve(fit.sce$trend(x), col = "dodgerblue", add = TRUE, lwd = 2)
+```
+
+## 3.5 Selecting highly variable genes
+
+```{r}
+hvg.sce.var <- getTopHVGs(dec.sce, n=1000)
+head(hvg.sce.var)
+```
+
 
 # Dimensionality Reduction
 
 All sections of Chapter 4 of OSCA basics.
 
+## Principal Component Analysis (PCA)
+
+```{r}
+sce <- runPCA(sce, subset_row=hvg.sce.var)
+sce
+```
+
+```{r}
+plotPCA(sce, colour_by="sum")
+
+percent.var <- attr(reducedDim(sce), "percentVar")
+plot(percent.var, log="y", xlab="PC", ylab="Variance explained (%)")
+
+plotReducedDim(sce, dimred="PCA")
+plotReducedDim(sce, dimred="PCA", ncomponents=3)
+```
+
+## t-stochastic neighbor embedding (t-SNE)
+
+```{r}
+set.seed(100)
+sce <- runTSNE(sce, dimred="PCA")
+plotTSNE(sce)
+```
+
+## Uniform manifold approximation and projection (UMAP) (very long to run)
+```{r}
+set.seed(111)
+sce <- runUMAP(sce, dimred="PCA")
+plotUMAP(sce)
+```
+
 # Doublet identification
 
 Sections 8.1, 8.3 of OSCA advanced.
+
+## Computing doublet desities (very long to run)
+```{r}
+library(scDblFinder)
+set.seed(100)
+
+dbl.dens <- computeDoubletDensity(sce, subset.row=hvg.sce.var,
+                                  d=ncol(reducedDim(sce)))
+summary(dbl.dens)
+
+sce$DoubletScore <- dbl.dens
+
+plotTSNE(sce, colour_by="DoubletScore")
+
+dbl.calls <- doubletThresholding(data.frame(score=dbl.dens),
+                                 method="griffiths", returnType="call")
+summary(dbl.calls)
+sce$doublet <- dbl.calls
+plotColData(sce, y="DoubletScore", colour_by="doublet")
+plotTSNE(sce, colour_by="doublet")
+```
+
 

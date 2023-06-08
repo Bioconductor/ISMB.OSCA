@@ -20,14 +20,20 @@ Depends:
     R (>= 4.3.0)
 Imports:
     AUCell,
+    BiocSingular,
     CuratedAtlasQueryR,
+    edgeR,
     MouseGastrulationData,
+    scDblFinder,
     SingleCellExperiment,
     SingleR,
     TENxBrainData,
     bluster,
     scater,
-    scran
+    scran,
+    scuttle,
+    DropletUtils,
+    EnsDb.Mmusculus.v79
 Suggests: 
     BiocStyle,
     knitr,
