@@ -31,7 +31,9 @@ Imports:
     bluster,
     scater,
     scran,
-    scuttle
+    scuttle,
+    DropletUtils,
+    EnsDb.Mmusculus.v79
 Suggests: 
     BiocStyle,
     knitr,
