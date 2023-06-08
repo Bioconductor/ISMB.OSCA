@@ -72,7 +72,7 @@ There are a few options to access single cell data with R / Bioconductor.
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-BiocManager::install("CuratedAtlasQueryR")
+BiocManager::install("stemangiola/CuratedAtlasQueryR")
 ```
 
 # Package load 
@@ -121,7 +121,7 @@ single_cell_counts <-
         tissue == "lung parenchyma" &
         stringr::str_like(cell_type, "%CD4%")
     ) |>
-    get_SingleCellExperiment()
+    get_single_cell_experiment()
 
 single_cell_counts
 ```
@@ -139,7 +139,7 @@ metadata |>
       tissue == "lung parenchyma" &
       stringr::str_like(cell_type, "%CD4%")
   ) |>
-  get_SingleCellExperiment(assays = "cpm")
+  get_single_cell_experiment(assays = "cpm")
 ```
 
 ### Extract only a subset of genes
@@ -153,7 +153,7 @@ single_cell_counts <-
         tissue == "lung parenchyma" &
         stringr::str_like(cell_type, "%CD4%")
     ) |>
-    get_SingleCellExperiment(assays = "cpm", features = "PUM1")
+    get_single_cell_experiment(assays = "cpm", features = "PUM1")
 
 single_cell_counts
 ```
