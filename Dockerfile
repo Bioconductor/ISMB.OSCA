@@ -4,6 +4,8 @@ WORKDIR /home/rstudio
 
 COPY --chown=rstudio:rstudio . /home/rstudio/
 
-RUN Rscript -e "options(repos = c(CRAN = 'https://cran.r-project.org')); BiocManager::install(ask=FALSE)"
+ENV R_REMOTES_NO_ERRORS_FROM_WARNINGS=true
+ENV CRAN='https://packagemanager.rstudio.com/cran/__linux__/jammy/latest'
 
-RUN Rscript -e "options(repos = c(CRAN = 'https://cran.r-project.org')); devtools::install('.', dependencies=TRUE, build_vignettes=TRUE, repos = BiocManager::repositories())"
+RUN Rscript -e "BiocManager::install(update = TRUE, ask=FALSE)"
+RUN Rscript -e "devtools::install(dependencies=TRUE, build_vignettes=TRUE, repos = BiocManager::repositories())"
