@@ -143,9 +143,8 @@ dec.mc
 Another approach would be to distribute jobs across a network of computers,
 which yields the same result:
 
-```{r parallel-snow}
+```{r parallel-snow, eval=FALSE}
 dec.snow <- modelGeneVar(sce, BPPARAM = SnowParam(2))
-dec.snow
 ```
 
 For high-performance computing (HPC) systems with a cluster of compute nodes, 
