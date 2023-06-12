@@ -274,14 +274,47 @@ strategy for speeding up scRNA-seq analysis workflows.</p>
 <p>The <em><a href="https://bioconductor.org/packages/3.17/BiocParallel" class="external-link">BiocParallel</a></em>
 package provides a common interface for parallel computing throughout
 the Bioconductor ecosystem, manifesting as a <code>BPPARAM</code>
-argument in compatible functions.</p>
-<p>We can pick from a diverse range of parallelization backends
-depending on the available hardware and operating system.</p>
+argument in compatible functions. We can also use
+<code>BiocParallel</code> with more expressive functions directly
+through the package’s interface.</p>
+<div class="section level3">
+<h3 id="basic-use">Basic use<a class="anchor" aria-label="anchor" href="#basic-use"></a>
+</h3>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Bioconductor/BiocParallel" class="external-link">BiocParallel</a></span><span class="op">)</span></span></code></pre></div>
+<p><code>BiocParallel</code> makes it quite easy to iterate over a
+vector and distribute the computation across workers using the
+<code>bplapply</code> function. Basic knowledge of <code>lapply</code>
+is required.</p>
+<p>In this example, we find the square root of a vector of numbers in
+parallel by indicating the <code>BPPARAM</code> argument in
+<code>bplapply</code>.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">param</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/MulticoreParam-class.html" class="external-link">MulticoreParam</a></span><span class="op">(</span>workers <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span></span>
+<span>    X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">9</span>, <span class="fl">16</span>, <span class="fl">25</span><span class="op">)</span>,</span>
+<span>    FUN <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">}</span>,</span>
+<span>    BPPARAM <span class="op">=</span> <span class="va">param</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [[1]]</span></span>
+<span><span class="co">## [1] 2</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## [[2]]</span></span>
+<span><span class="co">## [1] 3</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## [[3]]</span></span>
+<span><span class="co">## [1] 4</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## [[4]]</span></span>
+<span><span class="co">## [1] 5</span></span></code></pre>
+<p><strong>Note</strong>. The number of workers is set to 1 due to
+continuous testing resource limitations.</p>
+<p>There exists a diverse set of parallelization backends depending on
+available hardware and operating systems.</p>
 <p>For example, we might use forking across two cores to parallelize the
 variance calculations on a Unix system:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Bioconductor/BiocParallel" class="external-link">BiocParallel</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples <span class="op">=</span> <span class="fl">5</span>, type <span class="op">=</span> <span class="st">"processed"</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
@@ -316,7 +349,7 @@ variance calculations on a Unix system:</p>
 <span><span class="co">## tomato-td             0.756203</span></span></code></pre>
 <p>Another approach would be to distribute jobs across a network of
 computers, which yields the same result:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dec.snow</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/modelGeneVar.html" class="external-link">modelGeneVar</a></span><span class="op">(</span><span class="va">sce</span>, BPPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/SnowParam-class.html" class="external-link">SnowParam</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>For high-performance computing (HPC) systems with a cluster of
 compute nodes, we can distribute jobs via the job scheduler using the
@@ -324,7 +357,7 @@ compute nodes, we can distribute jobs via the job scheduler using the
 cluster, though the settings can be easily configured for a particular
 system (see <a href="https://bioconductor.org/packages/3.17/BiocParallel/vignettes/BiocParallel_BatchtoolsParam.pdf" class="external-link">here</a>
 for details).</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2 hours, 8 GB, 1 CPU per task, for 10 tasks.</span></span>
 <span><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>walltime <span class="op">=</span> <span class="fl">7200</span>, memory <span class="op">=</span> <span class="fl">8000</span>, ncpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">bpp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/BatchtoolsParam-class.html" class="external-link">BatchtoolsParam</a></span><span class="op">(</span><span class="fl">10</span>, cluster <span class="op">=</span> <span class="st">"slurm"</span>, resources <span class="op">=</span> <span class="va">rs</span><span class="op">)</span></span></code></pre></div>
@@ -339,9 +372,17 @@ relevant packages and (iii) transmitting the data to that session.
 Depending on the nature and size of the task, this overhead may outweigh
 any benefit from parallel computing.</p>
 </div>
+</div>
 <div class="section level2">
 <h2 id="interoperability-with-popular-single-cell-analysis-ecosytems">Interoperability with popular single-cell analysis ecosytems<a class="anchor" aria-label="anchor" href="#interoperability-with-popular-single-cell-analysis-ecosytems"></a>
 </h2>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>See Chapter 14: Dealing with big data in the OSCA book. <a href="https://bioconductor.org/books/3.17/OSCA.advanced/dealing-with-big-data.html" class="external-link uri">https://bioconductor.org/books/3.17/OSCA.advanced/dealing-with-big-data.html</a>
+We also include examples from the <code>BiocParallel</code> <a href="https://bioconductor.org/packages/3.17/BiocParallel/vignettes/Introduction_To_BiocParallel.html" class="external-link">intro
+vignette</a>.</p>
 </div>
   </div>
 
