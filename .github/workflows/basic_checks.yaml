@@ -45,7 +45,7 @@ jobs:
         run: |
           BiocManager::repositories()
           remotes::install_deps(dependencies = TRUE, repos = BiocManager::repositories())
-          BiocManager::install("rcmdcheck", ask = FALSE, update = TRUE)
+          BiocManager::install("remotes", ask = FALSE, update = TRUE)
         shell: Rscript {0}
 
       - name: Check
