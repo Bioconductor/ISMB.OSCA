@@ -36,8 +36,10 @@ Imports:
     EnsDb.Mmusculus.v79
 Suggests: 
     BiocStyle,
+    dplyr,
     knitr,
     rmarkdown,
+    stringr,
     pkgdown
 Remotes: stemangiola/CuratedAtlasQueryR
 URL: https://bioconductor.github.io/ISMB.OSCA/
