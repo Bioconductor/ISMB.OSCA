@@ -68,7 +68,7 @@ There are a few options to access single cell data with R / Bioconductor.
 
 # Installation
 
-```{r}
+```{r,eval=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
