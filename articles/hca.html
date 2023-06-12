@@ -190,19 +190,12 @@ Portal API</a></td>
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"CuratedAtlasQueryR"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 'getOption("repos")' replaces Bioconductor standard repositories, see</span></span>
-<span><span class="co">## 'help("repositories", package = "BiocManager")' for details.</span></span>
-<span><span class="co">## Replacement repositories:</span></span>
-<span><span class="co">##     CRAN: https://packagemanager.posit.co/cran/__linux__/jammy/latest</span></span></code></pre>
-<pre><code><span><span class="co">## Bioconductor version 3.17 (BiocManager 1.30.20), R 4.3.0 (2023-04-21)</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: package(s) not installed when version(s) same as or greater than current; use</span></span>
-<span><span class="co">##   `force = TRUE` to re-install: 'CuratedAtlasQueryR'</span></span></code></pre>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"stemangiola/CuratedAtlasQueryR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="package-load">Package load<a class="anchor" aria-label="anchor" href="#package-load"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/stemangiola/CuratedAtlasQueryR" class="external-link">CuratedAtlasQueryR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -211,15 +204,15 @@ Portal API</a></td>
 </h2>
 <p>The metadata allows the user to get a lay of the land of what is
 available via the package.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_metadata.html" class="external-link">get_metadata</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_metadata.html" class="external-link">get_metadata</a></span><span class="op">(</span>remote_url <span class="op">=</span> <span class="fu">CuratedAtlasQueryR</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/SAMPLE_DATABASE_URL.html" class="external-link">SAMPLE_DATABASE_URL</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="summarizing-the-metadata">Summarizing the metadata<a class="anchor" aria-label="anchor" href="#summarizing-the-metadata"></a>
 </h2>
 <p>For each distinct tissue and dataset combination, count the number of
 datasets by tissue type.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">tissue</span>, <span class="va">dataset_id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">tissue</span><span class="op">)</span></span></code></pre></div>
@@ -227,22 +220,22 @@ datasets by tissue type.</p>
 <span><span class="co">## <span style="color: #949494;"># Database: DuckDB 0.8.0 [unknown@Linux 5.15.0-1038-azure:R 4.3.0/:memory:]</span></span></span>
 <span><span class="co">##    tissue                          n</span></span>
 <span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> peripheral zone of prostate    10</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> transition zone of prostate    10</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> blood                          47</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> intestine                      18</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> middle temporal gyrus          24</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> heart left ventricle           46</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> apex of heart                  16</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> heart right ventricle          16</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> left cardiac atrium             7</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">10</span> interventricular septum        16</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> transition zone of prostate     2</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> peripheral zone of prostate     2</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> heart left ventricle            7</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> lung                            4</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> blood                          17</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> bone marrow                     4</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> kidney                          8</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> renal medulla                   6</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> cortex of kidney                7</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> renal pelvis                    4</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ more rows</span></span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="columns-available-in-the-metadata">Columns available in the metadata<a class="anchor" aria-label="anchor" href="#columns-available-in-the-metadata"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">metadata</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##  [1] "cell_"                             "sample_"                          </span></span>
 <span><span class="co">##  [3] "cell_type"                         "cell_type_harmonised"             </span></span>
@@ -255,7 +248,7 @@ datasets by tissue type.</p>
 <div class="section level4">
 <h4 id="query-raw-counts">Query raw counts<a class="anchor" aria-label="anchor" href="#query-raw-counts"></a>
 </h4>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span> </span>
 <span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
@@ -264,14 +257,13 @@ datasets by tissue type.</p>
 <span>        <span class="va">tissue</span> <span class="op">==</span> <span class="st">"lung parenchyma"</span> <span class="op">&amp;</span></span>
 <span>        <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">cell_type</span>, <span class="st">"%CD4%"</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> This function name is deprecated. Please use `get_single_cell_experiment()` instead</span></span></code></pre>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_single_cell_experiment.html" class="external-link">get_single_cell_experiment</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Realising metadata.</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Synchronising files</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading files.</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Compiling Single Cell Experiment.</span></span></code></pre>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span></span></code></pre></div>
 <pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
 <span><span class="co">## dim: 36229 1571 </span></span>
@@ -279,8 +271,8 @@ datasets by tissue type.</p>
 <span><span class="co">## assays(1): counts</span></span>
 <span><span class="co">## rownames(36229): A1BG A1BG-AS1 ... ZZEF1 ZZZ3</span></span>
 <span><span class="co">## rowData names(0):</span></span>
-<span><span class="co">## colnames(1571): ACAGCCGGTCCGTTAA_F02526_1 GGGAATGAGCCCAGCT_F02526_1 ...</span></span>
-<span><span class="co">##   TACAACGTCAGCATTG_SC84_1 CATTCGCTCAATACCG_F02526_1</span></span>
+<span><span class="co">## colnames(1571): ACACCAAAGCCACCTG_SC18_1 TCAGCTCCAGACAAGC_SC18_1 ...</span></span>
+<span><span class="co">##   CAGCATAAGCTAACAA_F02607_1 AAGGAGCGTATAATGG_F02607_1</span></span>
 <span><span class="co">## colData names(56): sample_ cell_type ... updated_at_y original_cell_id</span></span>
 <span><span class="co">## reducedDimNames(0):</span></span>
 <span><span class="co">## mainExpName: NULL</span></span>
@@ -291,7 +283,7 @@ datasets by tissue type.</p>
 </h4>
 <p>This is helpful if just few genes are of interest, as they can be
 compared across samples.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
 <span>      <span class="va">ethnicity</span> <span class="op">==</span> <span class="st">"African"</span> <span class="op">&amp;</span></span>
@@ -299,8 +291,7 @@ compared across samples.</p>
 <span>      <span class="va">tissue</span> <span class="op">==</span> <span class="st">"lung parenchyma"</span> <span class="op">&amp;</span></span>
 <span>      <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">cell_type</span>, <span class="st">"%CD4%"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="st">"cpm"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> This function name is deprecated. Please use `get_single_cell_experiment()` instead</span></span></code></pre>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_single_cell_experiment.html" class="external-link">get_single_cell_experiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="st">"cpm"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Realising metadata.</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Synchronising files</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
@@ -312,8 +303,8 @@ compared across samples.</p>
 <span><span class="co">## assays(1): cpm</span></span>
 <span><span class="co">## rownames(36229): A1BG A1BG-AS1 ... ZZEF1 ZZZ3</span></span>
 <span><span class="co">## rowData names(0):</span></span>
-<span><span class="co">## colnames(1571): ACAGCCGGTCCGTTAA_F02526_1 GGGAATGAGCCCAGCT_F02526_1 ...</span></span>
-<span><span class="co">##   TACAACGTCAGCATTG_SC84_1 CATTCGCTCAATACCG_F02526_1</span></span>
+<span><span class="co">## colnames(1571): ACACCAAAGCCACCTG_SC18_1 TCAGCTCCAGACAAGC_SC18_1 ...</span></span>
+<span><span class="co">##   CAGCATAAGCTAACAA_F02607_1 AAGGAGCGTATAATGG_F02607_1</span></span>
 <span><span class="co">## colData names(56): sample_ cell_type ... updated_at_y original_cell_id</span></span>
 <span><span class="co">## reducedDimNames(0):</span></span>
 <span><span class="co">## mainExpName: NULL</span></span>
@@ -322,7 +313,7 @@ compared across samples.</p>
 <div class="section level4">
 <h4 id="extract-only-a-subset-of-genes">Extract only a subset of genes<a class="anchor" aria-label="anchor" href="#extract-only-a-subset-of-genes"></a>
 </h4>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span></span>
 <span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
@@ -331,14 +322,13 @@ compared across samples.</p>
 <span>        <span class="va">tissue</span> <span class="op">==</span> <span class="st">"lung parenchyma"</span> <span class="op">&amp;</span></span>
 <span>        <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_like.html" class="external-link">str_like</a></span><span class="op">(</span><span class="va">cell_type</span>, <span class="st">"%CD4%"</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_SingleCellExperiment.html" class="external-link">get_SingleCellExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="st">"cpm"</span>, features <span class="op">=</span> <span class="st">"PUM1"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> This function name is deprecated. Please use `get_single_cell_experiment()` instead</span></span></code></pre>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_single_cell_experiment.html" class="external-link">get_single_cell_experiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="st">"cpm"</span>, features <span class="op">=</span> <span class="st">"PUM1"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Realising metadata.</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Synchronising files</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading files.</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Compiling Single Cell Experiment.</span></span></code></pre>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span></span></code></pre></div>
 <pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
 <span><span class="co">## dim: 1 1571 </span></span>
@@ -346,8 +336,8 @@ compared across samples.</p>
 <span><span class="co">## assays(1): cpm</span></span>
 <span><span class="co">## rownames(1): PUM1</span></span>
 <span><span class="co">## rowData names(0):</span></span>
-<span><span class="co">## colnames(1571): ACAGCCGGTCCGTTAA_F02526_1 GGGAATGAGCCCAGCT_F02526_1 ...</span></span>
-<span><span class="co">##   TACAACGTCAGCATTG_SC84_1 CATTCGCTCAATACCG_F02526_1</span></span>
+<span><span class="co">## colnames(1571): ACACCAAAGCCACCTG_SC18_1 TCAGCTCCAGACAAGC_SC18_1 ...</span></span>
+<span><span class="co">##   CAGCATAAGCTAACAA_F02607_1 AAGGAGCGTATAATGG_F02607_1</span></span>
 <span><span class="co">## colData names(56): sample_ cell_type ... updated_at_y original_cell_id</span></span>
 <span><span class="co">## reducedDimNames(0):</span></span>
 <span><span class="co">## mainExpName: NULL</span></span>
@@ -359,7 +349,7 @@ compared across samples.</p>
 <p>If needed, the H5 <code>SingleCellExperiment</code> can be converted
 into a Seurat object. Note that it may take a long time and use a lot of
 memory depending on how many cells you are requesting.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span></span>
 <span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
@@ -383,7 +373,7 @@ memory depending on how many cells you are requesting.</p>
 objects, if necessary, is to use
 <code>saveHDF5SummarizedExperiment</code> from the
 <code>HDF5Array</code> package.</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">|&gt;</span> <span class="fu">saveHDF5SummarizedExperiment</span><span class="op">(</span><span class="st">"single_cell_counts"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
@@ -391,7 +381,7 @@ objects, if necessary, is to use
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.3.0 (2023-04-21)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
@@ -429,7 +419,7 @@ objects, if necessary, is to use
 <span><span class="co">##  [15] S4Arrays_1.0.4              Rhdf5lib_1.22.0            </span></span>
 <span><span class="co">##  [17] rhdf5_2.44.0                sass_0.4.6                 </span></span>
 <span><span class="co">##  [19] sctransform_0.3.5           parallelly_1.36.0          </span></span>
-<span><span class="co">##  [21] KernSmooth_2.23-21          bslib_0.4.2                </span></span>
+<span><span class="co">##  [21] KernSmooth_2.23-21          bslib_0.5.0                </span></span>
 <span><span class="co">##  [23] htmlwidgets_1.6.2           desc_1.4.2                 </span></span>
 <span><span class="co">##  [25] ica_1.0-3                   plyr_1.8.8                 </span></span>
 <span><span class="co">##  [27] plotly_4.10.2               zoo_1.8-12                 </span></span>
@@ -437,12 +427,12 @@ objects, if necessary, is to use
 <span><span class="co">##  [31] mime_0.12                   lifecycle_1.0.3            </span></span>
 <span><span class="co">##  [33] pkgconfig_2.0.3             Matrix_1.5-4.1             </span></span>
 <span><span class="co">##  [35] R6_2.5.1                    fastmap_1.1.1              </span></span>
-<span><span class="co">##  [37] GenomeInfoDbData_1.2.10     MatrixGenerics_1.12.0      </span></span>
+<span><span class="co">##  [37] GenomeInfoDbData_1.2.10     MatrixGenerics_1.12.2      </span></span>
 <span><span class="co">##  [39] fitdistrplus_1.1-11         future_1.32.0              </span></span>
 <span><span class="co">##  [41] shiny_1.7.4                 digest_0.6.31              </span></span>
 <span><span class="co">##  [43] colorspace_2.1-0            patchwork_1.1.2            </span></span>
-<span><span class="co">##  [45] S4Vectors_0.38.1            tensor_1.5                 </span></span>
-<span><span class="co">##  [47] rprojroot_2.0.3             Seurat_4.3.0               </span></span>
+<span><span class="co">##  [45] S4Vectors_0.38.1            rprojroot_2.0.3            </span></span>
+<span><span class="co">##  [47] Seurat_4.3.0                tensor_1.5                 </span></span>
 <span><span class="co">##  [49] irlba_2.3.5.1               GenomicRanges_1.52.0       </span></span>
 <span><span class="co">##  [51] textshaping_0.3.6           progressr_0.13.0           </span></span>
 <span><span class="co">##  [53] fansi_1.0.4                 spatstat.sparse_3.0-1      </span></span>
@@ -462,7 +452,7 @@ objects, if necessary, is to use
 <span><span class="co">##  [81] spatstat.data_3.0-1         tidyr_1.3.0                </span></span>
 <span><span class="co">##  [83] data.table_1.14.8           XVector_0.40.0             </span></span>
 <span><span class="co">##  [85] sp_1.6-1                    utf8_1.2.3                 </span></span>
-<span><span class="co">##  [87] spatstat.geom_3.2-1         BiocGenerics_0.46.0        </span></span>
+<span><span class="co">##  [87] BiocGenerics_0.46.0         spatstat.geom_3.2-1        </span></span>
 <span><span class="co">##  [89] RcppAnnoy_0.0.20            ggrepel_0.9.3              </span></span>
 <span><span class="co">##  [91] RANN_2.6.1                  pillar_1.9.0               </span></span>
 <span><span class="co">##  [93] stringr_1.5.0               later_1.3.1                </span></span>
@@ -477,22 +467,22 @@ objects, if necessary, is to use
 <span><span class="co">## [111] matrixStats_1.0.0           stringi_1.7.12             </span></span>
 <span><span class="co">## [113] lazyeval_0.2.2              yaml_2.3.7                 </span></span>
 <span><span class="co">## [115] evaluate_0.21               codetools_0.2-19           </span></span>
-<span><span class="co">## [117] tibble_3.2.1                BiocManager_1.30.20        </span></span>
-<span><span class="co">## [119] cli_3.6.1                   uwot_0.1.14                </span></span>
-<span><span class="co">## [121] xtable_1.8-4                reticulate_1.29            </span></span>
-<span><span class="co">## [123] systemfonts_1.0.4           munsell_0.5.0              </span></span>
-<span><span class="co">## [125] jquerylib_0.1.4             GenomeInfoDb_1.36.0        </span></span>
-<span><span class="co">## [127] Rcpp_1.0.10                 spatstat.random_3.1-5      </span></span>
-<span><span class="co">## [129] globals_0.16.2              dbplyr_2.3.2               </span></span>
-<span><span class="co">## [131] png_0.1-8                   parallel_4.3.0             </span></span>
-<span><span class="co">## [133] ellipsis_0.3.2              blob_1.2.4                 </span></span>
-<span><span class="co">## [135] assertthat_0.2.1            pkgdown_2.0.7              </span></span>
-<span><span class="co">## [137] ggplot2_3.4.2               bitops_1.0-7               </span></span>
-<span><span class="co">## [139] listenv_0.9.0               viridisLite_0.4.2          </span></span>
-<span><span class="co">## [141] scales_1.2.1                ggridges_0.5.4             </span></span>
-<span><span class="co">## [143] SeuratObject_4.1.3          leiden_0.4.3               </span></span>
-<span><span class="co">## [145] purrr_1.0.1                 crayon_1.5.2               </span></span>
-<span><span class="co">## [147] rlang_1.1.1                 cowplot_1.1.1</span></span></code></pre>
+<span><span class="co">## [117] tibble_3.2.1                cli_3.6.1                  </span></span>
+<span><span class="co">## [119] uwot_0.1.14                 xtable_1.8-4               </span></span>
+<span><span class="co">## [121] reticulate_1.30             systemfonts_1.0.4          </span></span>
+<span><span class="co">## [123] munsell_0.5.0               jquerylib_0.1.4            </span></span>
+<span><span class="co">## [125] GenomeInfoDb_1.36.0         Rcpp_1.0.10                </span></span>
+<span><span class="co">## [127] spatstat.random_3.1-5       globals_0.16.2             </span></span>
+<span><span class="co">## [129] dbplyr_2.3.2                png_0.1-8                  </span></span>
+<span><span class="co">## [131] parallel_4.3.0              ellipsis_0.3.2             </span></span>
+<span><span class="co">## [133] blob_1.2.4                  assertthat_0.2.1           </span></span>
+<span><span class="co">## [135] pkgdown_2.0.7               ggplot2_3.4.2              </span></span>
+<span><span class="co">## [137] bitops_1.0-7                listenv_0.9.0              </span></span>
+<span><span class="co">## [139] viridisLite_0.4.2           scales_1.2.1               </span></span>
+<span><span class="co">## [141] ggridges_0.5.4              SeuratObject_4.1.3         </span></span>
+<span><span class="co">## [143] leiden_0.4.3                purrr_1.0.1                </span></span>
+<span><span class="co">## [145] crayon_1.5.2                rlang_1.1.1                </span></span>
+<span><span class="co">## [147] cowplot_1.1.1</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
