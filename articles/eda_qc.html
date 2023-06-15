@@ -99,9 +99,25 @@ control</h1>
     
     
 <div class="section level2">
-<h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
+<h2 id="setup-and-experimental-design">Setup and experimental design<a class="anchor" aria-label="anchor" href="#setup-and-experimental-design"></a>
 </h2>
-<p>Let’s start with an example dataset.</p>
+<p>As mentioned in the introduction, in this tutorial we will use the
+data from the Tal1 chimera experiment. These data are available through
+the <a href="https://bioconductor.org/packages/release/data/experiment/html/MouseGastrulationData.html" class="external-link">MouseGastrulationData</a>
+Bioconductor package, which contains several datasets.</p>
+<p>In particular, the package contains the following samples that we
+will use for the tutorial:</p>
+<ul>
+<li>Sample 5: E8.5 injected cells (tomato positive), pool 3</li>
+<li>Sample 6: E8.5 host cells (tomato negative), pool 3</li>
+<li>Sample 7: E8.5 injected cells (tomato positive), pool 4</li>
+<li>Sample 8: E8.5 host cells (tomato negative), pool 4</li>
+<li>Sample 9: E8.5 injected cells (tomato positive), pool 5</li>
+<li>Sample 10: E8.5 host cells (tomato negative), pool 5</li>
+</ul>
+<p>We start our analysis by selecting only sample 5, which contains the
+injected cells in one biological replicate. We download the “raw” data
+that contains all the droplets for which we have sequenced reads.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">5</span>, type<span class="op">=</span><span class="st">"raw"</span><span class="op">)</span></span>
@@ -120,6 +136,10 @@ control</h1>
 <span><span class="co">## reducedDimNames(0):</span></span>
 <span><span class="co">## mainExpName: NULL</span></span>
 <span><span class="co">## altExpNames(0):</span></span></code></pre>
+<p>From the experiment, we expect to have only a few thousand cells,
+while we can see that we have data for more than 500,000 droplets. It is
+likely that most of these droplets are empty and are capturing only
+ambient or background RNA.</p>
 </div>
 <div class="section level2">
 <h2 id="droplet-processing">Droplet processing<a class="anchor" aria-label="anchor" href="#droplet-processing"></a>
