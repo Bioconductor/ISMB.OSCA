@@ -9,8 +9,8 @@ output:
     mathjax: null   
 ---
 
-```{r setup,echo=FALSE}
-# knitr::opts_chunk$set(eval = FALSE)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 library(BiocStyle)
 ```
 
@@ -122,16 +122,41 @@ speeding up scRNA-seq analysis workflows.
 
 The `r Biocpkg("BiocParallel")` package provides a common interface for parallel
 computing throughout the Bioconductor ecosystem, manifesting as a `BPPARAM`
-argument in compatible functions.
+argument in compatible functions. We can also use `BiocParallel` with more
+expressive functions directly through the package's interface.
 
-We can pick from a diverse range of parallelization backends depending on the
-available hardware and operating system.
+### Basic use
+
+```{r,include=TRUE,results="hide",message=FALSE,warning=FALSE}
+library(BiocParallel)
+```
+
+`BiocParallel` makes it quite easy to iterate over a vector and distribute the
+computation across workers using the `bplapply` function. Basic knowledge
+of `lapply` is required.
+
+In this example, we find the square root of a vector of numbers in parallel
+by indicating the `BPPARAM` argument in `bplapply`.
+
+```{r}
+param <- MulticoreParam(workers = 1)
+bplapply(
+    X = c(4, 9, 16, 25),
+    FUN = function(x) { sqrt(x) },
+    BPPARAM = param
+)
+```
+
+**Note**. The number of workers is set to 1 due to continuous testing resource
+limitations.
+
+There exists a diverse set of parallelization backends depending on available
+hardware and operating systems.
 
 For example, we might use forking across two cores to parallelize the variance
 calculations on a Unix system:
 
 ```{r parallel-mc, message = FALSE}
-library(BiocParallel)
 library(MouseGastrulationData)
 library(scran)
 sce <- WTChimeraData(samples = 5, type = "processed")
@@ -143,16 +168,16 @@ dec.mc
 Another approach would be to distribute jobs across a network of computers,
 which yields the same result:
 
-```{r parallel-snow}
+```{r parallel-snow, eval=FALSE}
 dec.snow <- modelGeneVar(sce, BPPARAM = SnowParam(2))
-dec.snow
 ```
 
 For high-performance computing (HPC) systems with a cluster of compute nodes, 
 we can distribute jobs via the job scheduler using the `BatchtoolsParam` class.
 The example below assumes a SLURM cluster, though the settings can be easily 
 configured for a particular system 
-(see `r Biocpkg("BiocParallel", "BiocParallel_BatchtoolsParam.pdf", "here")` for details).
+(see `r Biocpkg("BiocParallel", "BiocParallel_BatchtoolsParam.pdf", "here")` for
+details).
 
 ```{r, eval=FALSE}
 # 2 hours, 8 GB, 1 CPU per task, for 10 tasks.
@@ -161,15 +186,20 @@ bpp <- BatchtoolsParam(10, cluster = "slurm", resources = rs)
 ```
 
 Parallelization is best suited for CPU-intensive calculations where the division
-of labor results in a concomitant reduction in compute time.
-It is not suited for tasks that are bounded by other compute resources, 
-e.g., memory or file I/O (though the latter is less of an issue on HPC systems 
-with parallel read/write).
-In particular, R itself is inherently single-core, so many of the parallelization 
-backends involve (i) setting up one or more separate R sessions, (ii) loading 
-the relevant packages and (iii) transmitting the data to that session.
-Depending on the nature and size of the task, this overhead may outweigh any 
-benefit from parallel computing. 
-
+of labor results in a concomitant reduction in compute time. It is not suited
+for tasks that are bounded by other compute resources, e.g., memory or file I/O
+(though the latter is less of an issue on HPC systems with parallel read/write).
+In particular, R itself is inherently single-core, so many of the
+parallelization backends involve (i) setting up one or more separate R sessions,
+(ii) loading the relevant packages and (iii) transmitting the data to that
+session. Depending on the nature and size of the task, this overhead may
+outweigh any benefit from parallel computing.
 
 ## Interoperability with popular single-cell analysis ecosytems
+
+## References
+
+See Chapter 14: Dealing with big data in the OSCA book.
+https://bioconductor.org/books/3.17/OSCA.advanced/dealing-with-big-data.html
+We also include examples from the `BiocParallel` 
+`r Biocpkg("BiocParallel", vignette = "Introduction_To_BiocParallel.html", label = "intro vignette")`. 

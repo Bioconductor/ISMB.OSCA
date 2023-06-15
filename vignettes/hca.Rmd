@@ -10,6 +10,10 @@ output:
 bibliography: references.bib
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
 # HCA Project
 
 The Human Cell Atlas (HCA) is a large project that aims to learn from and map
@@ -68,7 +72,7 @@ There are a few options to access single cell data with R / Bioconductor.
 
 # Installation
 
-```{r}
+```{r,eval=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
@@ -88,7 +92,7 @@ The metadata allows the user to get a lay of the land of what is available
 via the package.
 
 ```{r}
-metadata <- get_metadata()
+metadata <- get_metadata(remote_url = CuratedAtlasQueryR::SAMPLE_DATABASE_URL)
 ```
 
 # Summarizing the metadata
