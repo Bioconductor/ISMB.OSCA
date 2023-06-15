@@ -15,6 +15,15 @@ output:
 library(scran)
 ```
 
-# Data retrieval
+# Correcting batch effects
 
-There is a lot to say here.
+Section 1 of OSCA multisample.
+
+# Differential Expression
+
+Section 4 of OSCA multisample.
+
+# Differential Abundance
+
+Section 6 of OSCA multisample.
+
