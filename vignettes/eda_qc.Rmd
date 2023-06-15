@@ -30,11 +30,13 @@ sce <- WTChimeraData(samples=5, type="raw")
 sce <- sce[[1]]
 sce
 ```
-From the experiment, we expect to have only a few thousand cells, while we can see that we have data for more than 500,000 droplets. It is likely that most of these droplets are empty and are capturing only ambient or background RNA.
 
 # Droplet processing
 
 Sections 7.2.1 and 7.2.2 of OSCA advanced.
+
+From the experiment, we expect to have only a few thousand cells, while we can see that we have data for more than 500,000 droplets. It is likely that most of these droplets are empty and are capturing only ambient or background RNA.
+
 
 ```{r}
 library(DropletUtils)
@@ -51,6 +53,16 @@ abline(h=metadata(bcrank)$knee, col="dodgerblue", lty=2)
 legend("bottomleft", legend=c("Inflection", "Knee"), 
         col=c("darkgreen", "dodgerblue"), lty=2, cex=1.2)
 ```
+
+The distribution of total counts exhibits a sharp transition between barcodes with large and small total counts, probably corresponding to cell-containing and empty droplets respectively. 
+
+A simple approach would be to apply a threshold on the total count to only retain those barcodes with large totals. However, this may unnecessarily discard libraries derived from cell types with low RNA content.
+
+## Testing for empty droplets
+
+A better approach is to test whether the expression profile for each cell barcode is significantly different from the ambient RNA pool [@lun2019emptydrops]. Any significant deviation indicates that the barcode corresponds to a cell-containing droplet. This allows us to discriminate between well-sequenced empty droplets and droplets derived from cells with little RNA, both of which would have similar total counts. 
+
+We call cells at a false discovery rate (FDR) of 0.1%, meaning that no more than 0.1% of our called barcodes should be empty droplets on average.
 
 ```{r}
 # emptyDrops performs Monte Carlo simulations to compute p-values,
