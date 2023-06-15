@@ -98,15 +98,139 @@
     
     
 <div class="section level2">
-<h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
+<h2 id="setup-and-data-exploration">Setup and data exploration<a class="anchor" aria-label="anchor" href="#setup-and-data-exploration"></a>
 </h2>
+<p>As said, we will use the the data from the Tal1 chimera
+experiment:</p>
+<ul>
+<li>Sample 5: E8.5 injected cells (tomato positive), pool 3</li>
+<li>Sample 6: E8.5 host cells (tomato negative), pool 3</li>
+<li>Sample 7: E8.5 injected cells (tomato positive), pool 4</li>
+<li>Sample 8: E8.5 host cells (tomato negative), pool 4</li>
+<li>Sample 9: E8.5 injected cells (tomato positive), pool 5</li>
+<li>Sample 10: E8.5 host cells (tomato negative), pool 5</li>
+</ul>
+<p>Note that this is a paired design in which for each biological
+replicate (pool 3, 4, and 5), we have both host and injected cells.</p>
+<p>We start by loading the data and doing a quick exploratory analysis,
+essentially applying the normalization and visualization techniques that
+we have seen in the previous lectures to all samples.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">5</span><span class="op">:</span><span class="fl">10</span>, type <span class="op">=</span> <span class="st">"processed"</span><span class="op">)</span></span>
+<span><span class="va">sce</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 29453 20935 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): counts</span></span>
+<span><span class="co">## rownames(29453): ENSMUSG00000051951 ENSMUSG00000089699 ...</span></span>
+<span><span class="co">##   ENSMUSG00000095742 tomato-td</span></span>
+<span><span class="co">## rowData names(2): ENSEMBL SYMBOL</span></span>
+<span><span class="co">## colnames(20935): cell_9769 cell_9770 ... cell_30702 cell_30703</span></span>
+<span><span class="co">## colData names(11): cell barcode ... doub.density sizeFactor</span></span>
+<span><span class="co">## reducedDimNames(2): pca.corrected.E7.5 pca.corrected.E8.5</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 20935 rows and 11 columns</span></span>
+<span><span class="co">##                   cell          barcode    sample       stage    tomato</span></span>
+<span><span class="co">##            &lt;character&gt;      &lt;character&gt; &lt;integer&gt; &lt;character&gt; &lt;logical&gt;</span></span>
+<span><span class="co">## cell_9769    cell_9769 AAACCTGAGACTGTAA         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9770    cell_9770 AAACCTGAGATGCCTT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9771    cell_9771 AAACCTGAGCAGCCTC         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9772    cell_9772 AAACCTGCATACTCTT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9773    cell_9773 AAACGGGTCAACACCA         5        E8.5      TRUE</span></span>
+<span><span class="co">## ...                ...              ...       ...         ...       ...</span></span>
+<span><span class="co">## cell_30699  cell_30699 TTTGTCACAGCTCGCA        10        E8.5     FALSE</span></span>
+<span><span class="co">## cell_30700  cell_30700 TTTGTCAGTCTAGTCA        10        E8.5     FALSE</span></span>
+<span><span class="co">## cell_30701  cell_30701 TTTGTCATCATCGGAT        10        E8.5     FALSE</span></span>
+<span><span class="co">## cell_30702  cell_30702 TTTGTCATCATTATCC        10        E8.5     FALSE</span></span>
+<span><span class="co">## cell_30703  cell_30703 TTTGTCATCCCATTTA        10        E8.5     FALSE</span></span>
+<span><span class="co">##                 pool stage.mapped        celltype.mapped closest.cell</span></span>
+<span><span class="co">##            &lt;integer&gt;  &lt;character&gt;            &lt;character&gt;  &lt;character&gt;</span></span>
+<span><span class="co">## cell_9769          3        E8.25             Mesenchyme   cell_24159</span></span>
+<span><span class="co">## cell_9770          3         E8.5            Endothelium   cell_96660</span></span>
+<span><span class="co">## cell_9771          3         E8.5              Allantois  cell_134982</span></span>
+<span><span class="co">## cell_9772          3         E8.5             Erythroid3  cell_133892</span></span>
+<span><span class="co">## cell_9773          3        E8.25             Erythroid1   cell_76296</span></span>
+<span><span class="co">## ...              ...          ...                    ...          ...</span></span>
+<span><span class="co">## cell_30699         5         E8.5             Erythroid3   cell_38810</span></span>
+<span><span class="co">## cell_30700         5         E8.5       Surface ectoderm   cell_38588</span></span>
+<span><span class="co">## cell_30701         5        E8.25 Forebrain/Midbrain/H..   cell_66082</span></span>
+<span><span class="co">## cell_30702         5         E8.5             Erythroid3  cell_138114</span></span>
+<span><span class="co">## cell_30703         5         E8.0                Doublet   cell_92644</span></span>
+<span><span class="co">##            doub.density sizeFactor</span></span>
+<span><span class="co">##               &lt;numeric&gt;  &lt;numeric&gt;</span></span>
+<span><span class="co">## cell_9769    0.02985045    1.41243</span></span>
+<span><span class="co">## cell_9770    0.00172753    1.22757</span></span>
+<span><span class="co">## cell_9771    0.01338013    1.15439</span></span>
+<span><span class="co">## cell_9772    0.00218402    1.28676</span></span>
+<span><span class="co">## cell_9773    0.00211723    1.78719</span></span>
+<span><span class="co">## ...                 ...        ...</span></span>
+<span><span class="co">## cell_30699   0.00146287   0.389311</span></span>
+<span><span class="co">## cell_30700   0.00374155   0.588784</span></span>
+<span><span class="co">## cell_30701   0.05651258   0.624455</span></span>
+<span><span class="co">## cell_30702   0.00108837   0.550807</span></span>
+<span><span class="co">## cell_30703   0.82369305   1.184919</span></span></code></pre>
+<p>We now normalize the data and visualize them in a tSNE plot.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Loading required package: scuttle</span></span></code></pre>
+<pre><code><span><span class="co">## Loading required package: ggplot2</span></span></code></pre>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># remove doublets</span></span>
+<span><span class="va">drop</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">$</span><span class="va">celltype.mapped</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stripped"</span>, <span class="st">"Doublet"</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span>,<span class="op">!</span><span class="va">drop</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># normalization</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># identify highly variable genes</span></span>
+<span><span class="va">dec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/modelGeneVar.html" class="external-link">modelGeneVar</a></span><span class="op">(</span><span class="va">sce</span>, block<span class="op">=</span><span class="va">sce</span><span class="op">$</span><span class="va">sample</span><span class="op">)</span></span>
+<span><span class="va">chosen.hvgs</span> <span class="op">&lt;-</span> <span class="va">dec</span><span class="op">$</span><span class="va">bio</span> <span class="op">&gt;</span> <span class="fl">0</span></span>
+<span></span>
+<span><span class="co"># dimensionality reduction</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/runPCA.html" class="external-link">runPCA</a></span><span class="op">(</span><span class="va">sce</span>, subset_row <span class="op">=</span> <span class="va">chosen.hvgs</span>, ntop <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runTSNE.html" class="external-link">runTSNE</a></span><span class="op">(</span><span class="va">sce</span>, dimred <span class="op">=</span> <span class="st">"PCA"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sce</span><span class="op">$</span><span class="va">sample</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">sample</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plot_reddim.html" class="external-link">plotTSNE</a></span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"sample"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="multi_sample_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plot_reddim.html" class="external-link">plotTSNE</a></span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"celltype.mapped"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_colour_discrete.html" class="external-link">scale_color_discrete</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Scale for <span style="color: #00BB00;">colour</span> is already present.</span></span>
+<span><span class="co">## Adding another scale for <span style="color: #00BB00;">colour</span>, which will replace the existing scale.</span></span></code></pre>
+<p><img src="multi_sample_files/figure-html/unnamed-chunk-1-2.png" width="700"></p>
+<p>There are evident sample effects. Depending on the analysis that you
+want to do you may want to remove or retain the sample effect. For
+instance, if the goal is to identify cell types with a clustering
+method, one may want to remove the sample effects with “batch effect”
+correction methods.</p>
+<p>For now, let’s assume that we want to remove this effect.</p>
 </div>
 <div class="section level2">
 <h2 id="correcting-batch-effects">Correcting batch effects<a class="anchor" aria-label="anchor" href="#correcting-batch-effects"></a>
 </h2>
-<p>Section 1 of OSCA multisample.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## This needs work</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">batchelor</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">10102</span><span class="op">)</span></span>
+<span><span class="va">merged</span> <span class="op">&lt;-</span> <span class="fu">correctExperiments</span><span class="op">(</span><span class="va">sce</span>, </span>
+<span>    batch<span class="op">=</span><span class="va">sample</span>, </span>
+<span>    subset.row<span class="op">=</span><span class="va">chosen.hvgs</span>,</span>
+<span>    PARAM<span class="op">=</span><span class="fu">FastMnnParam</span><span class="op">(</span></span>
+<span>        merge.order<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span>,<span class="fl">5</span><span class="op">)</span>, <span class="co"># WT (3 replicates)</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">4</span>,<span class="fl">6</span><span class="op">)</span>  <span class="co"># td-Tomato (3 replicates)</span></span>
+<span>        <span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="differential-expression">Differential Expression<a class="anchor" aria-label="anchor" href="#differential-expression"></a>

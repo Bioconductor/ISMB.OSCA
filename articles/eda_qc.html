@@ -136,15 +136,15 @@ that contains all the droplets for which we have sequenced reads.</p>
 <span><span class="co">## reducedDimNames(0):</span></span>
 <span><span class="co">## mainExpName: NULL</span></span>
 <span><span class="co">## altExpNames(0):</span></span></code></pre>
-<p>From the experiment, we expect to have only a few thousand cells,
-while we can see that we have data for more than 500,000 droplets. It is
-likely that most of these droplets are empty and are capturing only
-ambient or background RNA.</p>
 </div>
 <div class="section level2">
 <h2 id="droplet-processing">Droplet processing<a class="anchor" aria-label="anchor" href="#droplet-processing"></a>
 </h2>
 <p>Sections 7.2.1 and 7.2.2 of OSCA advanced.</p>
+<p>From the experiment, we expect to have only a few thousand cells,
+while we can see that we have data for more than 500,000 droplets. It is
+likely that most of these droplets are empty and are capturing only
+ambient or background RNA.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">DropletUtils</span><span class="op">)</span></span>
 <span><span class="va">bcrank</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DropletUtils/man/barcodeRanks.html" class="external-link">barcodeRanks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span>
@@ -162,6 +162,25 @@ ambient or background RNA.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"bottomleft"</span>, legend<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Inflection"</span>, <span class="st">"Knee"</span><span class="op">)</span>, </span>
 <span>        col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"darkgreen"</span>, <span class="st">"dodgerblue"</span><span class="op">)</span>, lty<span class="op">=</span><span class="fl">2</span>, cex<span class="op">=</span><span class="fl">1.2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="eda_qc_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
+<p>The distribution of total counts exhibits a sharp transition between
+barcodes with large and small total counts, probably corresponding to
+cell-containing and empty droplets respectively.</p>
+<p>A simple approach would be to apply a threshold on the total count to
+only retain those barcodes with large totals. However, this may
+unnecessarily discard libraries derived from cell types with low RNA
+content.</p>
+<div class="section level3">
+<h3 id="testing-for-empty-droplets">Testing for empty droplets<a class="anchor" aria-label="anchor" href="#testing-for-empty-droplets"></a>
+</h3>
+<p>A better approach is to test whether the expression profile for each
+cell barcode is significantly different from the ambient RNA pool <span class="citation">[@lun2019emptydrops]</span>. Any significant deviation
+indicates that the barcode corresponds to a cell-containing droplet.
+This allows us to discriminate between well-sequenced empty droplets and
+droplets derived from cells with little RNA, both of which would have
+similar total counts.</p>
+<p>We call cells at a false discovery rate (FDR) of 0.1%, meaning that
+no more than 0.1% of our called barcodes should be empty droplets on
+average.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># emptyDrops performs Monte Carlo simulations to compute p-values,</span></span>
 <span><span class="co"># so we need to set the seed to obtain reproducible results.</span></span>
@@ -189,6 +208,7 @@ ambient or background RNA.</p>
 <span><span class="co">## reducedDimNames(0):</span></span>
 <span><span class="co">## mainExpName: NULL</span></span>
 <span><span class="co">## altExpNames(0):</span></span></code></pre>
+</div>
 </div>
 <div class="section level2">
 <h2 id="quality-control">Quality control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
