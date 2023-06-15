@@ -9,9 +9,20 @@ output:
     mathjax: null   
 ---
 
-# Setup
+# Setup and experimental design
 
-Let's start with an example dataset.
+As mentioned in the introduction, in this tutorial we will use the data from the Tal1 chimera experiment. These data are available through the [MouseGastrulationData](https://bioconductor.org/packages/release/data/experiment/html/MouseGastrulationData.html) Bioconductor package, which contains several datasets.
+
+In particular, the package contains the following samples that we will use for the tutorial:
+
+- Sample 5: E8.5 injected cells (tomato positive), pool 3
+- Sample 6: E8.5 host cells (tomato negative), pool 3
+- Sample 7: E8.5 injected cells (tomato positive), pool 4
+- Sample 8: E8.5 host cells (tomato negative), pool 4
+- Sample 9: E8.5 injected cells (tomato positive), pool 5
+- Sample 10: E8.5 host cells (tomato negative), pool 5
+
+We start our analysis by selecting only sample 5, which contains the injected cells in one biological replicate. We download the "raw" data that contains all the droplets for which we have sequenced reads.
 
 ```{r, message = FALSE}
 library(MouseGastrulationData)
@@ -19,6 +30,7 @@ sce <- WTChimeraData(samples=5, type="raw")
 sce <- sce[[1]]
 sce
 ```
+From the experiment, we expect to have only a few thousand cells, while we can see that we have data for more than 500,000 droplets. It is likely that most of these droplets are empty and are capturing only ambient or background RNA.
 
 # Droplet processing
 
