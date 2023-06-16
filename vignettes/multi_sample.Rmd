@@ -2,11 +2,13 @@
 title: Multi-sample analyses
 vignette: >
   % \VignetteIndexEntry{Multi-sample analysis}
-  % \VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  % \VignetteEngine{knitr::rmarkdown}
 output:
   html_document:
     mathjax: null   
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Setup and data exploration
@@ -72,7 +74,7 @@ For now, let's assume that we want to remove this effect.
 library(batchelor)
 set.seed(10102)
 merged <- correctExperiments(sce, 
-    batch=sample, 
+    batch=sce$sample, 
     subset.row=chosen.hvgs,
     PARAM=FastMnnParam(
         merge.order=list(
@@ -81,6 +83,11 @@ merged <- correctExperiments(sce,
         )
     )
 )
+
+merged <- runTSNE(merged, dimred="corrected")
+plotTSNE(merged, colour_by="batch")
+
+# do we want to include the diagnostics about the batch correction?
 ```
 
 
@@ -89,7 +96,150 @@ merged <- correctExperiments(sce,
 
 Section 4 of OSCA multisample.
 
+In order to perform a Differential Expression Analysis, we need to identify 
+clusters of cells across samples/conditions (depending on the experimental 
+design and the final aim of the experiment) to proceed with it
+
+## clustering identification
+
+```{r}
+g <- buildSNNGraph(merged, use.dimred="corrected")
+clusters <- igraph::cluster_louvain(g)
+colLabels(merged) <- factor(clusters$membership)
+merged <- runTSNE(merged, dimred="corrected", external_neighbors=TRUE)
+merged <- runUMAP(merged, dimred="corrected", external_neighbors=TRUE)
+```
+
+```{r}
+# table(colLabels(merged), merged$tomato)
+gridExtra::grid.arrange(
+    plotTSNE(merged, colour_by="tomato", text_by="label"),
+    plotTSNE(merged, colour_by=data.frame(pool=factor(merged$pool))),
+    ncol=2
+)
+```
+
+As previously mentioned, to assign biological meaning to the found clusters, we
+need to detect and assign gene-markers and provide cell labels.
+For lack of time, we will skip this time and knowledge demanding process and we
+use the annotation included with the dataset.
+This annotation has been previously performed using a cell type atlas by 
+Pijuan-Sala et al. (2019), using it as a reference for our dataset.
+From the next figure we can see that there are quite a few similarities between
+the clusters and the assigned labels, but in some cases we can notice that a
+cluster can contain multiple cell types, highlighting the difficulty to identify
+cell types by using cell markers and clusters.
+
+```{r}
+library(bluster)
+pairwiseRand(colLabels(merged), merged$celltype.mapped, "index")
+by.label <- table(colLabels(merged), merged$celltype.mapped)
+pheatmap::pheatmap(log2(by.label+1), color=viridis::viridis(101))
+```
+
+## Pseudo-bulk samples
+
+```{r}
+# Using 'label' and 'sample' as our two factors; each column of the output
+# corresponds to one unique combination of these two factors.
+summed <- aggregateAcrossCells(merged, 
+    id=colData(merged)[,c("celltype.mapped", "sample")])
+summed
+
+```
+
+## Differential Expression Analysis
+
+```{r}
+label <- "Mesenchyme"
+current <- summed[,label==summed$celltype.mapped]
+
+# Creating up a DGEList object for use in edgeR:
+library(edgeR)
+y <- DGEList(counts(current), samples=colData(current))
+y
+```
+
+Discard lowly "sequenced" samples
+
+```{r}
+discarded <- current$ncells < 10
+y <- y[,!discarded]
+summary(discarded)
+```
+
+
+Discard lowly expressed genes
+
+```{r}
+keep <- filterByExpr(y, group=current$tomato)
+y <- y[keep,]
+summary(keep)
+```
+
+Normalization factors by TMM
+
+```{r}
+y <- calcNormFactors(y)
+y$samples
+```
+
+MD plot
+
+```{r}
+par(mfrow=c(2,3))
+for (i in seq_len(ncol(y))) {
+    plotMD(y, column=i)
+}
+```
+
+MDS plot
+    
+```{r}
+plotMDS(cpm(y, log=TRUE), 
+    col=ifelse(y$samples$tomato, "red", "blue"))
+```
+
+
+```{r}
+design <- model.matrix(~factor(pool) + factor(tomato), y$samples)
+design
+```
+
+```{r}
+y <- estimateDisp(y, design)
+summary(y$trended.dispersion)
+plotBCV(y)
+```
+
+```{r}
+fit <- glmQLFit(y, design, robust=TRUE)
+summary(fit$var.prior)
+summary(fit$df.prior)
+plotQLDisp(fit)
+```
+
+```{r}
+res <- glmQLFTest(fit, coef=ncol(design))
+summary(decideTests(res))
+topTags(res)
+```
+
+
+
+
+
 # Differential Abundance
 
 Section 6 of OSCA multisample.
+
+```{r}
+
+```
+
+# Session Info
+
+```{r, tidy=TRUE}
+sessionInfo()
+```
 
