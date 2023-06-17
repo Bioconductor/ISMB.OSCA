@@ -68,7 +68,7 @@ For now, let's assume that we want to remove this effect.
 
 # Correcting batch effects
 
-```{r, eval=FALSE}
+```{r}
 
 ## This needs work
 library(batchelor)
