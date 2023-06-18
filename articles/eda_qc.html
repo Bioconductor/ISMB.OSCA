@@ -99,25 +99,9 @@ control</h1>
     
     
 <div class="section level2">
-<h2 id="setup-and-experimental-design">Setup and experimental design<a class="anchor" aria-label="anchor" href="#setup-and-experimental-design"></a>
+<h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
-<p>As mentioned in the introduction, in this tutorial we will use the
-data from the Tal1 chimera experiment. These data are available through
-the <a href="https://bioconductor.org/packages/release/data/experiment/html/MouseGastrulationData.html" class="external-link">MouseGastrulationData</a>
-Bioconductor package, which contains several datasets.</p>
-<p>In particular, the package contains the following samples that we
-will use for the tutorial:</p>
-<ul>
-<li>Sample 5: E8.5 injected cells (tomato positive), pool 3</li>
-<li>Sample 6: E8.5 host cells (tomato negative), pool 3</li>
-<li>Sample 7: E8.5 injected cells (tomato positive), pool 4</li>
-<li>Sample 8: E8.5 host cells (tomato negative), pool 4</li>
-<li>Sample 9: E8.5 injected cells (tomato positive), pool 5</li>
-<li>Sample 10: E8.5 host cells (tomato negative), pool 5</li>
-</ul>
-<p>We start our analysis by selecting only sample 5, which contains the
-injected cells in one biological replicate. We download the “raw” data
-that contains all the droplets for which we have sequenced reads.</p>
+<p>Let’s start with an example dataset.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">5</span>, type<span class="op">=</span><span class="st">"raw"</span><span class="op">)</span></span>
@@ -141,16 +125,12 @@ that contains all the droplets for which we have sequenced reads.</p>
 <h2 id="droplet-processing">Droplet processing<a class="anchor" aria-label="anchor" href="#droplet-processing"></a>
 </h2>
 <p>Sections 7.2.1 and 7.2.2 of OSCA advanced.</p>
-<p>From the experiment, we expect to have only a few thousand cells,
-while we can see that we have data for more than 500,000 droplets. It is
-likely that most of these droplets are empty and are capturing only
-ambient or background RNA.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">DropletUtils</span><span class="op">)</span></span>
 <span><span class="va">bcrank</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DropletUtils/man/barcodeRanks.html" class="external-link">barcodeRanks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Only showing unique points for plotting speed.</span></span>
-<span><span class="va">uniq</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">bcrank</span><span class="op">$</span><span class="va">rank</span><span class="op">)</span></span>
+<span><span class="va">uniq</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">bcrank</span><span class="op">$</span><span class="va">rank</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bcrank</span><span class="op">$</span><span class="va">rank</span><span class="op">[</span><span class="va">uniq</span><span class="op">]</span>, <span class="va">bcrank</span><span class="op">$</span><span class="va">total</span><span class="op">[</span><span class="va">uniq</span><span class="op">]</span>, log<span class="op">=</span><span class="st">"xy"</span>,</span>
 <span>    xlab<span class="op">=</span><span class="st">"Rank"</span>, ylab<span class="op">=</span><span class="st">"Total UMI count"</span>, cex.lab<span class="op">=</span><span class="fl">1.2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning in xy.coords(x, y, xlabel, ylabel, log): 1 y value &lt;= 0 omitted from</span></span>
@@ -162,25 +142,6 @@ ambient or background RNA.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"bottomleft"</span>, legend<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Inflection"</span>, <span class="st">"Knee"</span><span class="op">)</span>, </span>
 <span>        col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"darkgreen"</span>, <span class="st">"dodgerblue"</span><span class="op">)</span>, lty<span class="op">=</span><span class="fl">2</span>, cex<span class="op">=</span><span class="fl">1.2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="eda_qc_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
-<p>The distribution of total counts exhibits a sharp transition between
-barcodes with large and small total counts, probably corresponding to
-cell-containing and empty droplets respectively.</p>
-<p>A simple approach would be to apply a threshold on the total count to
-only retain those barcodes with large totals. However, this may
-unnecessarily discard libraries derived from cell types with low RNA
-content.</p>
-<div class="section level3">
-<h3 id="testing-for-empty-droplets">Testing for empty droplets<a class="anchor" aria-label="anchor" href="#testing-for-empty-droplets"></a>
-</h3>
-<p>A better approach is to test whether the expression profile for each
-cell barcode is significantly different from the ambient RNA pool <span class="citation">[@lun2019emptydrops]</span>. Any significant deviation
-indicates that the barcode corresponds to a cell-containing droplet.
-This allows us to discriminate between well-sequenced empty droplets and
-droplets derived from cells with little RNA, both of which would have
-similar total counts.</p>
-<p>We call cells at a false discovery rate (FDR) of 0.1%, meaning that
-no more than 0.1% of our called barcodes should be empty droplets on
-average.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># emptyDrops performs Monte Carlo simulations to compute p-values,</span></span>
 <span><span class="co"># so we need to set the seed to obtain reproducible results.</span></span>
@@ -193,7 +154,7 @@ average.</p>
 <pre><code><span><span class="co">##    Mode   FALSE    TRUE    NA's </span></span>
 <span><span class="co">## logical    6184    3131  513239</span></span></code></pre>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">e.out</span><span class="op">$</span><span class="va">FDR</span> <span class="op">&lt;=</span> <span class="fl">0.001</span><span class="op">)</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">e.out</span><span class="op">$</span><span class="va">FDR</span> <span class="op">&lt;=</span> <span class="fl">0.001</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">sce</span></span></code></pre></div>
 <pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
 <span><span class="co">## dim: 29453 3131 </span></span>
@@ -208,7 +169,6 @@ average.</p>
 <span><span class="co">## reducedDimNames(0):</span></span>
 <span><span class="co">## mainExpName: NULL</span></span>
 <span><span class="co">## altExpNames(0):</span></span></code></pre>
-</div>
 </div>
 <div class="section level2">
 <h2 id="quality-control">Quality control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
@@ -227,11 +187,11 @@ average.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">##     filter</span></span></code></pre>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">chr.loc</span> <span class="op">&lt;-</span> <span class="fu">mapIds</span><span class="op">(</span><span class="va">EnsDb.Mmusculus.v79</span>, keys<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="va">chr.loc</span> <span class="op">&lt;-</span> <span class="fu">mapIds</span><span class="op">(</span><span class="va">EnsDb.Mmusculus.v79</span>, keys<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>,</span>
 <span>    keytype<span class="op">=</span><span class="st">"GENEID"</span>, column<span class="op">=</span><span class="st">"SEQNAME"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Unable to map 2918 of 29453 requested IDs.</span></span></code></pre>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">is.mito</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">chr.loc</span><span class="op">==</span><span class="st">"MT"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">is.mito</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">chr.loc</span><span class="op">==</span><span class="st">"MT"</span><span class="op">)</span></span></code></pre></div>
 <p>Compute qc metrics.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scuttle</span><span class="op">)</span></span>
@@ -369,7 +329,7 @@ average.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">clust</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/quickCluster.html" class="external-link">quickCluster</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> </span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">clust</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">clust</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## clust</span></span>
 <span><span class="co">##   1   2   3   4   5   6   7   8   9  10  11  12  13 </span></span>
 <span><span class="co">## 273 159 250 122 187 201 154 252 152 169 199 215 104</span></span></code></pre>
@@ -498,7 +458,7 @@ run)<a class="anchor" aria-label="anchor" href="#uniform-manifold-approximation-
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">dbl.dens</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scDblFinder/man/computeDoubletDensity.html" class="external-link">computeDoubletDensity</a></span><span class="op">(</span><span class="va">sce</span>, subset.row<span class="op">=</span><span class="va">hvg.sce.var</span>,</span>
-<span>                                  d<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>                                  d<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dbl.dens</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. </span></span>
 <span><span class="co">## 0.000000 0.000000 0.000000 0.002014 0.000000 1.886238</span></span></code></pre>
