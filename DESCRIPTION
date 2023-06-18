@@ -28,6 +28,7 @@ Imports:
     SingleCellExperiment,
     SingleR,
     TENxBrainData,
+    batchelor,
     bluster,
     scater,
     scran,

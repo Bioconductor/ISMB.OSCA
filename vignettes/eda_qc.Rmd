@@ -9,6 +9,13 @@ output:
     mathjax: null   
 ---
 
+```{r chunk-opts, include=FALSE}
+rm(list = ls())
+gc()
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+library(BiocStyle)
+```
+
 # Setup
 
 Let's start with an example dataset.

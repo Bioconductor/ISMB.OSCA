@@ -34,6 +34,14 @@ sce <- WTChimeraData(samples = 5, type = "processed")
 sce
 ```
 
+To speed up the computations, we subsample the dataset to 1,000 cells.
+
+```{r}
+set.seed(123)
+ind <- sample(ncol(sce), 1000)
+sce <- sce[,ind]
+```
+
 # Preprocessing
 
 ```{r preproc, warning = FALSE}
@@ -198,8 +206,17 @@ ref
 table(ref$stage)
 ```
 
+To speed up the computations, we subsample the dataset to 1,000 cells.
+
+```{r}
+set.seed(123)
+ind <- sample(ncol(ref), 1000)
+ref <- ref[,ind]
+```
+
 ```{r ref-celltypes}
-sort(table(ref$celltype), decreasing = TRUE)
+tab <- sort(table(ref$celltype), decreasing = TRUE)
+tab
 ```
 
 ```{r ref-preproc}
@@ -212,6 +229,15 @@ annotation is missing.
 ```{r na-celltype}
 nna <- !is.na(ref$celltype)
 ref <- ref[,nna]
+```
+
+Also remove cell types of very low abundance (here less than 10 cells) to remove
+noise prior to subsequent annotation tasks.
+
+```{r low-abu-ct}
+abu.ct <- names(tab)[tab >= 10]
+ind <- ref$celltype %in% abu.ct
+ref <- ref[,ind] 
 ```
 
 Restrict to genes shared between query and reference dataset.
