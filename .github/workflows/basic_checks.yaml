@@ -24,7 +24,8 @@ jobs:
           apt-get -y upgrade  
           apt-get -y install rsync
           apt-get -y install python3.10-venv  
-
+          apt-get -y install python-is-python3  
+    
       - name: Query dependencies and update old packages
         run: |
           BiocManager::install(ask=FALSE)
