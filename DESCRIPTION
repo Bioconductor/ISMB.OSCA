@@ -33,7 +33,11 @@ Imports:
     scran,
     scuttle,
     DropletUtils,
-    EnsDb.Mmusculus.v79
+    EnsDb.Mmusculus.v79,
+    batchelor,
+    igraph,
+    gridExtra,
+    pheatmap
 Suggests: 
     BiocParallel,
     BiocStyle,
