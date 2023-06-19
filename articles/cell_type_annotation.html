@@ -126,17 +126,11 @@
 <span><span class="co">## reducedDimNames(2): pca.corrected.E7.5 pca.corrected.E8.5</span></span>
 <span><span class="co">## mainExpName: NULL</span></span>
 <span><span class="co">## altExpNames(0):</span></span></code></pre>
-<p>To speed up the computations, we subsample the dataset to 1,000
-cells.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="fl">1000</span><span class="op">)</span></span>
-<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span>,<span class="va">ind</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="preprocessing">Preprocessing<a class="anchor" aria-label="anchor" href="#preprocessing"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/runPCA.html" class="external-link">runPCA</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -152,7 +146,7 @@ rather than attempting to comprehend the high-dimensional manifold on
 which the cells truly reside. After annotation based on marker genes,
 the clusters can be treated as proxies for more abstract biological
 concepts such as cell types or states.</p>
-<p>Popularized by its use in <a href="https://cran.r-project.org/web/packages/Seurat/index.html" class="external-link">Seurat</a>,
+<p>Popularized by its use in<br><a href="https://cran.r-project.org/web/packages/Seurat/index.html" class="external-link">Seurat</a>,
 graph-based clustering is a flexible and scalable technique for
 clustering large scRNA-seq datasets. We first build a graph where each
 node is a cell that is connected to its nearest neighbors in<br>
@@ -169,21 +163,33 @@ algorithm</a> for community detection. All calculations are performed
 using the top PCs to take advantage of data compression and denoising.
 This function returns a vector containing cluster assignments for each
 cell in our <code>SingleCellExperiment</code> object.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html" class="external-link">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/clusterCells.html" class="external-link">clusterCells</a></span><span class="op">(</span><span class="va">sce</span>, use.dimred <span class="op">=</span> <span class="st">"PCA"</span>,</span>
 <span>                               BLUSPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/bluster/man/NNGraphParam-class.html" class="external-link">NNGraphParam</a></span><span class="op">(</span>cluster.fun <span class="op">=</span> <span class="st">"louvain"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html" class="external-link">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">##   1   2   3   4   5   6   7   8   9  10  11 </span></span>
-<span><span class="co">## 192 160  60 142  63  60 108  44  91  41  39</span></span></code></pre>
+<span><span class="co">##   1   2   3   4   5   6   7   8   9  10  11  12  13  14 </span></span>
+<span><span class="co">##  91 144  75 397 399 209 246  95 108 129 154 198 146  20</span></span></code></pre>
 <p>We assign the cluster assignments back into our
 <code>SingleCellExperiment</code> object as a <code>factor</code> in the
 column metadata. This allows us to conveniently visualize the
 distribution of clusters in eg. a <em>t</em>-SNE or a UMAP.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runUMAP.html" class="external-link">runUMAP</a></span><span class="op">(</span><span class="va">sce</span>, dimred <span class="op">=</span> <span class="st">"PCA"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html" class="external-link">plotReducedDim</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"UMAP"</span>, color_by <span class="op">=</span> <span class="st">"label"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="cell_type_annotation_files/figure-html/cluster-viz-1.png" width="700"></p>
+<p>Exercise: The <a href="https://www.nature.com/articles/s41598-019-41695-z" class="external-link">Leiden
+algorithm</a> is similar to the Louvain algorithm, but it is faster and
+has been shown to result in better connected communities. Modify the
+above call to <code>clusterCells</code> to carry out the community
+detection with the Leiden algorithm instead. Visualize the results in a
+UMAP plot.</p>
+<p>Hint: The <code>NNGraphParam</code> constructor has an argument
+<code>cluster.args</code>. This allows to specify arguments passed on to
+the <code>cluster_leiden</code> function from the <a href="https://cran.r-project.org/web/packages/igraph/index.html" class="external-link">igraph</a>
+package. Use the <code>cluster.args</code> argument to parameterize the
+clustering to use modularity as the objective function and a resolution
+parameter of 0.5.</p>
 </div>
 <div class="section level2">
 <h2 id="marker-gene-detection">Marker gene detection<a class="anchor" aria-label="anchor" href="#marker-gene-detection"></a>
@@ -202,27 +208,27 @@ of cells in the clustering algorithm.</p>
 <p>Here, we perform a Wilcoxon rank sum test against a log2 fold change
 threshold of 1, focusing on up-regulated (positive) markers in one
 cluster when compared to another cluster.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">SYMBOL</span></span>
 <span><span class="va">markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/findMarkers.html" class="external-link">findMarkers</a></span><span class="op">(</span><span class="va">sce</span>, test.type <span class="op">=</span> <span class="st">"wilcox"</span>, direction <span class="op">=</span> <span class="st">"up"</span>, lfc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">markers</span></span></code></pre></div>
-<pre><code><span><span class="co">## List of length 11</span></span>
-<span><span class="co">## names(11): 1 2 3 4 5 6 7 8 9 10 11</span></span></code></pre>
+<pre><code><span><span class="co">## List of length 14</span></span>
+<span><span class="co">## names(14): 1 2 3 4 5 6 7 8 9 10 11 12 13 14</span></span></code></pre>
 <p>The resulting object contains a sorted marker gene list for each
 cluster, in which the top genes are those that contribute the most to
 the separation of that cluster from mall other clusters.</p>
 <p>Here, we inspect the ranked marker gene list for the first
 cluster.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">markers</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<pre><code><span><span class="co">## DataFrame with 29453 rows and 14 columns</span></span>
+<pre><code><span><span class="co">## DataFrame with 29453 rows and 17 columns</span></span>
 <span><span class="co">##                  Top     p.value         FDR summary.AUC     AUC.2     AUC.3</span></span>
 <span><span class="co">##            &lt;integer&gt;   &lt;numeric&gt;   &lt;numeric&gt;   &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">## Ptn                1 1.13058e-58 3.32991e-54    0.991178  0.991178  0.989931</span></span>
-<span><span class="co">## Slc2a3             1 5.11021e-20 2.38907e-17    0.788379  0.788379  0.586111</span></span>
-<span><span class="co">## Cdca7              2 7.33552e-13 2.48337e-10    0.867759  0.712500  0.597135</span></span>
-<span><span class="co">## Sox2               2 6.93903e-27 4.75292e-24    0.822624  0.822624  0.825694</span></span>
-<span><span class="co">## Crabp2             2 1.67985e-43 2.74870e-40    0.923958  0.923958  0.926997</span></span>
+<span><span class="co">## Arl4c              1 3.92896e-90 3.85732e-86    0.998644  0.908349  0.991502</span></span>
+<span><span class="co">## Pitx2              1 1.40465e-80 4.59680e-77    0.952612  0.942308  0.774359</span></span>
+<span><span class="co">## Slc2a3             1 7.27172e-43 1.91227e-40    0.961359  0.890797  0.937729</span></span>
+<span><span class="co">## Cryab              1 1.76158e-73 3.45892e-70    0.958563  0.942537  0.909890</span></span>
+<span><span class="co">## Tmem108            1 2.00077e-94 5.89286e-90    0.997979  0.944902  0.912674</span></span>
 <span><span class="co">## ...              ...         ...         ...         ...       ...       ...</span></span>
 <span><span class="co">## AC125149.2     29448           1           1           0         0         0</span></span>
 <span><span class="co">## AC125149.4     29449           1           1           0         0         0</span></span>
@@ -231,30 +237,30 @@ cluster.</p>
 <span><span class="co">## Vmn2r122       29453           1           1           0         0         0</span></span>
 <span><span class="co">##                AUC.4     AUC.5     AUC.6     AUC.7     AUC.8     AUC.9</span></span>
 <span><span class="co">##            &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">## Ptn         0.930935 0.7943948 0.8567708  0.599489  0.919626  0.966003</span></span>
-<span><span class="co">## Slc2a3      0.530773 0.0223214 0.0559896  0.809028  0.703362  0.298306</span></span>
-<span><span class="co">## Cdca7       0.303844 0.0976356 0.2732639  0.357350  0.207860  0.659570</span></span>
-<span><span class="co">## Sox2        0.799039 0.3102679 0.5137153  0.795380  0.805634  0.822745</span></span>
-<span><span class="co">## Crabp2      0.778976 0.3044808 0.6057292  0.758247  0.625710  0.931319</span></span>
+<span><span class="co">## Arl4c       0.998644  0.671156  0.911562  0.864514  0.942279  0.870065</span></span>
+<span><span class="co">## Pitx2       0.952612  0.811424  0.952101  0.948718  0.759630  0.421245</span></span>
+<span><span class="co">## Slc2a3      0.961359  0.879947  0.696041  0.705843  0.886293  0.894587</span></span>
+<span><span class="co">## Cryab       0.958563  0.953758  0.962721  0.963191  0.262348  0.349105</span></span>
+<span><span class="co">## Tmem108     0.997979  0.934892  0.962091  0.934691  0.665703  0.395910</span></span>
 <span><span class="co">## ...              ...       ...       ...       ...       ...       ...</span></span>
 <span><span class="co">## AC125149.2         0         0         0         0         0         0</span></span>
 <span><span class="co">## AC125149.4         0         0         0         0         0         0</span></span>
 <span><span class="co">## AC234645.1         0         0         0         0         0         0</span></span>
 <span><span class="co">## AC168977.2         0         0         0         0         0         0</span></span>
 <span><span class="co">## Vmn2r122           0         0         0         0         0         0</span></span>
-<span><span class="co">##               AUC.10    AUC.11</span></span>
-<span><span class="co">##            &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">## Ptn         0.980183  0.990919</span></span>
-<span><span class="co">## Slc2a3      0.637322  0.690438</span></span>
-<span><span class="co">## Cdca7       0.867759  0.774973</span></span>
-<span><span class="co">## Sox2        0.801448  0.822382</span></span>
-<span><span class="co">## Crabp2      0.816184  0.828125</span></span>
-<span><span class="co">## ...              ...       ...</span></span>
-<span><span class="co">## AC125149.2         0         0</span></span>
-<span><span class="co">## AC125149.4         0         0</span></span>
-<span><span class="co">## AC234645.1         0         0</span></span>
-<span><span class="co">## AC168977.2         0         0</span></span>
-<span><span class="co">## Vmn2r122           0         0</span></span></code></pre>
+<span><span class="co">##               AUC.10    AUC.11    AUC.12    AUC.13      AUC.14</span></span>
+<span><span class="co">##            &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;   &lt;numeric&gt;</span></span>
+<span><span class="co">## Arl4c       0.979981  0.942914  0.919358  0.735059 0.095604396</span></span>
+<span><span class="co">## Pitx2       0.935344  0.952547  0.873460  0.853229 0.938461538</span></span>
+<span><span class="co">## Slc2a3      0.949485  0.386685  0.960095  0.299187 0.000549451</span></span>
+<span><span class="co">## Cryab       0.954766  0.959612  0.958819  0.917883 0.459890110</span></span>
+<span><span class="co">## Tmem108     0.976318  0.956615  0.965756  0.959506 0.567582418</span></span>
+<span><span class="co">## ...              ...       ...       ...       ...         ...</span></span>
+<span><span class="co">## AC125149.2         0         0         0         0           0</span></span>
+<span><span class="co">## AC125149.4         0         0         0         0           0</span></span>
+<span><span class="co">## AC234645.1         0         0         0         0           0</span></span>
+<span><span class="co">## AC168977.2         0         0         0         0           0</span></span>
+<span><span class="co">## Vmn2r122           0         0         0         0           0</span></span></code></pre>
 <p>The <code>Top</code> field provides the the minimum rank across all
 pairwise comparisons. The <code>p.value</code> field provides the
 combined <em>p</em>-value across all comparisons, and the
@@ -267,7 +273,7 @@ cell in cluster <em>A</em> has a greater expression of gene <em>X</em>
 than a randomly selected cell in <em>B</em>.</p>
 <p>We can then inspect the top marker genes for the first cluster using
 the <code>plotExpression</code> function from the <a href="https://bioconductor.org/packages/scater" class="external-link">scater</a> package.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">top.markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">markers</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotExpression.html" class="external-link">plotExpression</a></span><span class="op">(</span><span class="va">sce</span>, features <span class="op">=</span> <span class="va">top.markers</span>, x <span class="op">=</span> <span class="st">"label"</span>, color_by <span class="op">=</span> <span class="st">"label"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="cell_type_annotation_files/figure-html/plot-markers-1.png" width="960"></p>
@@ -294,566 +300,79 @@ from the Gene Ontology (GO) or the Kyoto Encyclopedia of Genes and
 Genomes (KEGG) collections. Alternatively, we can directly compare our
 expression profiles to published reference datasets where each sample or
 cell has already been annotated with its putative biological state by
-domain experts. Here, we will demonstrate both approaches on the
-wild-type chimera dataset.</p>
+domain experts. Here, we will demonstrate both approaches with several
+different scRNA-seq datasets.</p>
 <div class="section level3">
 <h3 id="assigning-cell-labels-from-reference-data">Assigning cell labels from reference data<a class="anchor" aria-label="anchor" href="#assigning-cell-labels-from-reference-data"></a>
 </h3>
-<p>A conceptually straightforward annotation approach is to compare the
-single-cell expression profiles with previously annotated reference
-datasets. Labels can then be assigned to each cell in our
-uncharacterized test dataset based on the most similar reference
-sample(s), for some definition of “similar”. This is a standard
-classification challenge that can be tackled by standard machine
-learning techniques such as random forests and support vector machines.
-Any published and labelled RNA-seq dataset (bulk or single-cell) can be
-used as a reference, though its reliability depends greatly on the
-expertise of the original authors who assigned the labels in the first
-place.</p>
-<p>In this section, we will demonstrate the use of the <em><a href="https://bioconductor.org/packages/3.17/SingleR" class="external-link">SingleR</a></em>
-method for cell type annotation <a href="https://www.nature.com/articles/s41590-018-0276-y" class="external-link">Aran et al.,
-2019</a>. This method assigns labels to cells based on the reference
-samples with the highest Spearman rank correlations, using only the
-marker genes between pairs of labels to focus on the relevant
-differences between cell types. It also performs a fine-tuning step for
-each cell where the correlations are recomputed with just the marker
-genes for the top-scoring labels. This aims to resolve any ambiguity
-between those labels by removing noise from irrelevant markers for other
-labels. Further details can be found in the <a href="https://bioconductor.org/books/release/SingleRBook" class="external-link"><em>SingleR</em>
-book</a> from which most of the examples here are derived.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/EmbryoAtlasData.html" class="external-link">EmbryoAtlasData</a></span><span class="op">(</span>samples <span class="op">=</span> <span class="fl">29</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/EmbryoAtlasData.html" class="external-link">EmbryoAtlasData</a></span><span class="op">(</span>samples <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">ref</span></span></code></pre></div>
 <pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
-<span><span class="co">## dim: 29452 7569 </span></span>
+<span><span class="co">## dim: 29452 716 </span></span>
 <span><span class="co">## metadata(0):</span></span>
 <span><span class="co">## assays(1): counts</span></span>
 <span><span class="co">## rownames(29452): ENSMUSG00000051951 ENSMUSG00000089699 ...</span></span>
 <span><span class="co">##   ENSMUSG00000096730 ENSMUSG00000095742</span></span>
 <span><span class="co">## rowData names(2): ENSEMBL SYMBOL</span></span>
-<span><span class="co">## colnames(7569): cell_95727 cell_95728 ... cell_103294 cell_103295</span></span>
+<span><span class="co">## colnames(716): cell_1 cell_2 ... cell_715 cell_716</span></span>
 <span><span class="co">## colData names(17): cell barcode ... colour sizeFactor</span></span>
 <span><span class="co">## reducedDimNames(2): pca.corrected umap</span></span>
 <span><span class="co">## mainExpName: NULL</span></span>
 <span><span class="co">## altExpNames(0):</span></span></code></pre>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">ref</span><span class="op">$</span><span class="va">stage</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">ref</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## E8.5 </span></span>
-<span><span class="co">## 7569</span></span></code></pre>
-<p>To speed up the computations, we subsample the dataset to 1,000
-cells.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">ref</span><span class="op">)</span>, <span class="fl">1000</span><span class="op">)</span></span>
-<span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="va">ref</span><span class="op">[</span>,<span class="va">ind</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">ref</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">tab</span></span></code></pre></div>
-<pre><code><span><span class="co">## </span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain                     Erythroid3 </span></span>
-<span><span class="co">##                            131                             75 </span></span>
-<span><span class="co">##              Paraxial mesoderm                            NMP </span></span>
-<span><span class="co">##                             69                             51 </span></span>
-<span><span class="co">##                   ExE mesoderm               Surface ectoderm </span></span>
-<span><span class="co">##                             49                             47 </span></span>
-<span><span class="co">##                      Allantois                     Mesenchyme </span></span>
-<span><span class="co">##                             46                             45 </span></span>
-<span><span class="co">##                    Spinal cord            Pharyngeal mesoderm </span></span>
-<span><span class="co">##                             45                             41 </span></span>
-<span><span class="co">##                   ExE endoderm                   Neural crest </span></span>
-<span><span class="co">##                             38                             35 </span></span>
+<span><span class="co">##                       Epiblast                   ExE ectoderm </span></span>
+<span><span class="co">##                            189                            110 </span></span>
+<span><span class="co">##                   ExE endoderm           Rostral neurectoderm </span></span>
+<span><span class="co">##                             78                             51 </span></span>
+<span><span class="co">##               Primitive Streak                     Mesenchyme </span></span>
+<span><span class="co">##                             47                             23 </span></span>
+<span><span class="co">##            Blood progenitors 2                Caudal epiblast </span></span>
+<span><span class="co">##                             19                             19 </span></span>
+<span><span class="co">##          Intermediate mesoderm              Visceral endoderm </span></span>
+<span><span class="co">##                             17                             15 </span></span>
+<span><span class="co">##                   ExE mesoderm                 Mixed mesoderm </span></span>
+<span><span class="co">##                             11                             11 </span></span>
+<span><span class="co">##            Pharyngeal mesoderm               Nascent mesoderm </span></span>
+<span><span class="co">##                             10                              8 </span></span>
+<span><span class="co">##              Paraxial mesoderm               Surface ectoderm </span></span>
+<span><span class="co">##                              8                              8 </span></span>
 <span><span class="co">##                            Gut Haematoendothelial progenitors </span></span>
-<span><span class="co">##                             30                             27 </span></span>
-<span><span class="co">##          Intermediate mesoderm                 Cardiomyocytes </span></span>
-<span><span class="co">##                             27                             26 </span></span>
-<span><span class="co">##               Somitic mesoderm                    Endothelium </span></span>
-<span><span class="co">##                             25                             23 </span></span>
-<span><span class="co">##                     Erythroid2                  Def. endoderm </span></span>
-<span><span class="co">##                             11                              3 </span></span>
-<span><span class="co">##                     Erythroid1            Blood progenitors 1 </span></span>
-<span><span class="co">##                              2                              1 </span></span>
-<span><span class="co">##            Blood progenitors 2                Caudal Mesoderm </span></span>
-<span><span class="co">##                              1                              1 </span></span>
-<span><span class="co">##                            PGC </span></span>
+<span><span class="co">##                              7                              7 </span></span>
+<span><span class="co">##            Blood progenitors 1            Caudal neurectoderm </span></span>
+<span><span class="co">##                              4                              4 </span></span>
+<span><span class="co">##               Somitic mesoderm                Caudal Mesoderm </span></span>
+<span><span class="co">##                              4                              3 </span></span>
+<span><span class="co">##                      Notochord                            PGC </span></span>
+<span><span class="co">##                              2                              2 </span></span>
+<span><span class="co">##                     Erythroid1 </span></span>
 <span><span class="co">##                              1</span></span></code></pre>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">ref</span><span class="op">)</span></span></code></pre></div>
-<p>Some cleaning - remove cells of the reference dataset for which the
-cell type annotation is missing.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<p>Some cleaning - remove cells for cell type annotation is missing.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nna</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">ref</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span></span>
 <span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="va">ref</span><span class="op">[</span>,<span class="va">nna</span><span class="op">]</span></span></code></pre></div>
-<p>Also remove cell types of very low abundance (here less than 10
-cells) to remove noise prior to subsequent annotation tasks.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">abu.ct</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tab</span><span class="op">)</span><span class="op">[</span><span class="va">tab</span> <span class="op">&gt;=</span> <span class="fl">10</span><span class="op">]</span></span>
-<span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="va">ref</span><span class="op">$</span><span class="va">celltype</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">abu.ct</span></span>
-<span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="va">ref</span><span class="op">[</span>,<span class="va">ind</span><span class="op">]</span> </span></code></pre></div>
 <p>Restrict to genes shared between query and reference dataset.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">ref</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">ref</span><span class="op">)</span><span class="op">$</span><span class="va">SYMBOL</span></span>
 <span><span class="va">isect</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">ref</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span><span class="va">isect</span>,<span class="op">]</span></span>
 <span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="va">ref</span><span class="op">[</span><span class="va">isect</span>,<span class="op">]</span></span></code></pre></div>
 <p>Convert sparse assay matrices to regular dense matrices for input to
 SingleR.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce.mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"logcounts"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">ref.mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">ref</span>, <span class="st">"logcounts"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleR/man/SingleR.html" class="external-link">SingleR</a></span><span class="op">(</span>test <span class="op">=</span> <span class="va">sce.mat</span>, ref <span class="op">=</span> <span class="va">ref.mat</span>, labels <span class="op">=</span> <span class="va">ref</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span></span>
-<span><span class="va">res</span></span></code></pre></div>
-<pre><code><span><span class="co">## DataFrame with 1000 rows and 4 columns</span></span>
-<span><span class="co">##                                    scores                 labels delta.next</span></span>
-<span><span class="co">##                                  &lt;matrix&gt;            &lt;character&gt;  &lt;numeric&gt;</span></span>
-<span><span class="co">## cell_11995 0.348586:0.335451:0.314515:... Forebrain/Midbrain/H..  0.1285110</span></span>
-<span><span class="co">## cell_10294 0.273570:0.260013:0.298932:...             Erythroid3  0.1381951</span></span>
-<span><span class="co">## cell_9963  0.328538:0.291288:0.475611:...            Endothelium  0.2193295</span></span>
-<span><span class="co">## cell_11610 0.281161:0.269245:0.299961:...             Erythroid3  0.0359215</span></span>
-<span><span class="co">## cell_10910 0.422454:0.346897:0.355947:...           ExE mesoderm  0.0984285</span></span>
-<span><span class="co">## ...                                   ...                    ...        ...</span></span>
-<span><span class="co">## cell_11597 0.323805:0.292967:0.300485:...                    NMP  0.1663369</span></span>
-<span><span class="co">## cell_9807  0.464466:0.374189:0.381698:...             Mesenchyme  0.0833019</span></span>
-<span><span class="co">## cell_10095 0.341721:0.288215:0.485324:...            Endothelium  0.0889931</span></span>
-<span><span class="co">## cell_11706 0.267487:0.240215:0.286012:...             Erythroid2  0.0350557</span></span>
-<span><span class="co">## cell_11860 0.345786:0.343437:0.313994:... Forebrain/Midbrain/H..  0.0117001</span></span>
-<span><span class="co">##                     pruned.labels</span></span>
-<span><span class="co">##                       &lt;character&gt;</span></span>
-<span><span class="co">## cell_11995 Forebrain/Midbrain/H..</span></span>
-<span><span class="co">## cell_10294             Erythroid3</span></span>
-<span><span class="co">## cell_9963             Endothelium</span></span>
-<span><span class="co">## cell_11610             Erythroid3</span></span>
-<span><span class="co">## cell_10910           ExE mesoderm</span></span>
-<span><span class="co">## ...                           ...</span></span>
-<span><span class="co">## cell_11597                    NMP</span></span>
-<span><span class="co">## cell_9807              Mesenchyme</span></span>
-<span><span class="co">## cell_10095            Endothelium</span></span>
-<span><span class="co">## cell_11706             Erythroid2</span></span>
-<span><span class="co">## cell_11860 Forebrain/Midbrain/H..</span></span></code></pre>
-<p>We inspect the results using a heatmap of the per-cell and label
-scores. Ideally, each cell should exhibit a high score in one label
-relative to all of the others, indicating that the assignment to that
-label was unambiguous. This is largely the case for mesenchyme and
-endothelial cells, whereas we see expectedly more ambiguity between the
-three erythroid cell populations.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SingleR/man/plotScoreHeatmap.html" class="external-link">plotScoreHeatmap</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
-<p><img src="cell_type_annotation_files/figure-html/score-heat-1.png" width="960"></p>
-<p>We also compare the cell type assignments with the clustering results
-to determine the identity of each cluster. Here, several cell type
-classes are nested within the same cluster, indicating that these
-clusters are composed of several transcriptomically similar cell
-populations (such as cluster 4 and 6). On the other hand, there are also
-instances where we have several clusters for the same cell type,
-indicating that the clustering represents finer subdivisions within
-these cell types.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pheatmap</span><span class="op">)</span></span>
-<span><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>anno <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">pruned.labels</span>, cluster <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html" class="external-link">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html" class="external-link">pheatmap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">tab</span> <span class="op">+</span> <span class="fl">10</span><span class="op">)</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/colorRamp.html" class="external-link">colorRampPalette</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"white"</span>, <span class="st">"blue"</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fl">101</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="cell_type_annotation_files/figure-html/unnamed-chunk-3-1.png" width="960"></p>
-<p>As it so happens, we are in the fortunate position where our test
-dataset also contains independently defined labels. We see strong
-consistency between the two sets of labels, indicating that our
-automatic annotation is comparable to that generated manually by domain
-experts.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">pruned.labels</span>, <span class="va">sce</span><span class="op">$</span><span class="va">celltype.mapped</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html" class="external-link">pheatmap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">tab</span> <span class="op">+</span> <span class="fl">10</span><span class="op">)</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/colorRamp.html" class="external-link">colorRampPalette</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"white"</span>, <span class="st">"blue"</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fl">101</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="cell_type_annotation_files/figure-html/anno-vs-preanno-1.png" width="960"></p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleR/man/SingleR.html" class="external-link">SingleR</a></span><span class="op">(</span>test <span class="op">=</span> <span class="va">sce.mat</span>, ref <span class="op">=</span> <span class="va">ref.mat</span>, labels <span class="op">=</span> <span class="va">ref</span><span class="op">$</span><span class="va">celltype</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="assigning-cell-labels-from-gene-sets">Assigning cell labels from gene sets<a class="anchor" aria-label="anchor" href="#assigning-cell-labels-from-gene-sets"></a>
 </h3>
-<p>A related strategy is to explicitly identify sets of marker genes
-that are highly expressed in each individual cell. This does not require
-matching of individual cells to the expression values of the reference
-dataset, which is faster and more convenient when only the identities of
-the markers are available. We demonstrate this approach using cell type
-markers derived from the mouse embryo atlas dataset.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span>
-<span><span class="va">wilcox.z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/pairwiseWilcox.html" class="external-link">pairwiseWilcox</a></span><span class="op">(</span><span class="va">ref</span>, <span class="va">ref</span><span class="op">$</span><span class="va">celltype</span>, lfc <span class="op">=</span> <span class="fl">1</span>, direction <span class="op">=</span> <span class="st">"up"</span><span class="op">)</span></span>
-<span><span class="va">markers.z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/getTopMarkers.html" class="external-link">getTopMarkers</a></span><span class="op">(</span><span class="va">wilcox.z</span><span class="op">$</span><span class="va">statistics</span>, <span class="va">wilcox.z</span><span class="op">$</span><span class="va">pairs</span>, </span>
-<span>                           pairwise <span class="op">=</span> <span class="cn">FALSE</span>, n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/lengths.html" class="external-link">lengths</a></span><span class="op">(</span><span class="va">markers.z</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##                      Allantois                 Cardiomyocytes </span></span>
-<span><span class="co">##                            106                            106 </span></span>
-<span><span class="co">##                    Endothelium                     Erythroid2 </span></span>
-<span><span class="co">##                            103                             54 </span></span>
-<span><span class="co">##                     Erythroid3                   ExE endoderm </span></span>
-<span><span class="co">##                             84                            102 </span></span>
-<span><span class="co">##                   ExE mesoderm   Forebrain/Midbrain/Hindbrain </span></span>
-<span><span class="co">##                             97                             97 </span></span>
-<span><span class="co">##                            Gut Haematoendothelial progenitors </span></span>
-<span><span class="co">##                             90                             71 </span></span>
-<span><span class="co">##          Intermediate mesoderm                     Mesenchyme </span></span>
-<span><span class="co">##                             70                            118 </span></span>
-<span><span class="co">##                   Neural crest                            NMP </span></span>
-<span><span class="co">##                             66                             91 </span></span>
-<span><span class="co">##              Paraxial mesoderm            Pharyngeal mesoderm </span></span>
-<span><span class="co">##                             88                             85 </span></span>
-<span><span class="co">##               Somitic mesoderm                    Spinal cord </span></span>
-<span><span class="co">##                             86                             91 </span></span>
-<span><span class="co">##               Surface ectoderm </span></span>
-<span><span class="co">##                             92</span></span></code></pre>
-<p>Our test dataset will be as before the wild-type chimera dataset.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sce</span></span></code></pre></div>
-<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
-<span><span class="co">## dim: 29411 1000 </span></span>
-<span><span class="co">## metadata(0):</span></span>
-<span><span class="co">## assays(2): counts logcounts</span></span>
-<span><span class="co">## rownames(29411): Xkr4 Gm1992 ... Vmn2r122 CAAA01147332.1</span></span>
-<span><span class="co">## rowData names(2): ENSEMBL SYMBOL</span></span>
-<span><span class="co">## colnames(1000): cell_11995 cell_10294 ... cell_11706 cell_11860</span></span>
-<span><span class="co">## colData names(12): cell barcode ... sizeFactor label</span></span>
-<span><span class="co">## reducedDimNames(4): pca.corrected.E7.5 pca.corrected.E8.5 PCA UMAP</span></span>
-<span><span class="co">## mainExpName: NULL</span></span>
-<span><span class="co">## altExpNames(0):</span></span></code></pre>
-<p>We use the <em><a href="https://bioconductor.org/packages/3.17/AUCell" class="external-link">AUCell</a></em>
-package to identify marker sets that are highly expressed in each cell.
-This method ranks genes by their expression values within each cell and
-constructs a response curve of the number of genes from each marker set
-that are present with increasing rank. It then computes the area under
-the curve (AUC) for each marker set, quantifying the enrichment of those
-markers among the most highly expressed genes in that cell. This is
-roughly similar to performing a Wilcoxon rank sum test between genes in
-and outside of the set, but involving only the top ranking genes by
-expression in each cell.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">GSEABase</span><span class="op">)</span></span>
-<span><span class="va">all.sets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">markers.z</span><span class="op">)</span>, </span>
-<span>                   <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/GSEABase/man/GeneSet-methods.html" class="external-link">GeneSet</a></span><span class="op">(</span><span class="va">markers.z</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span>, setName <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">all.sets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GSEABase/man/GeneSetCollection-methods.html" class="external-link">GeneSetCollection</a></span><span class="op">(</span><span class="va">all.sets</span><span class="op">)</span></span>
-<span><span class="va">all.sets</span></span></code></pre></div>
-<pre><code><span><span class="co">## GeneSetCollection</span></span>
-<span><span class="co">##   names: Allantois, Cardiomyocytes, ..., Surface ectoderm (19 total)</span></span>
-<span><span class="co">##   unique identifiers: Prrx2, Spin2c, ..., Igf2bp3 (560 total)</span></span>
-<span><span class="co">##   types in collection:</span></span>
-<span><span class="co">##     geneIdType: NullIdentifier (1 total)</span></span>
-<span><span class="co">##     collectionType: NullCollection (1 total)</span></span></code></pre>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://scenic.aertslab.org" class="external-link">AUCell</a></span><span class="op">)</span></span>
-<span><span class="va">rankings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AUCell/man/AUCell_buildRankings.html" class="external-link">AUCell_buildRankings</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                                 plotStats <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">cell.aucs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AUCell/man/AUCell_calcAUC.html" class="external-link">AUCell_calcAUC</a></span><span class="op">(</span><span class="va">all.sets</span>, <span class="va">rankings</span><span class="op">)</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">cell.aucs</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##             gene sets</span></span>
-<span><span class="co">## cells         Allantois Cardiomyocytes Endothelium Erythroid2 Erythroid3</span></span>
-<span><span class="co">##   cell_11995 0.21994609      0.2336827   0.1947563 0.12228508  0.1639749</span></span>
-<span><span class="co">##   cell_10294 0.10066221      0.1246414   0.1104634 0.60732017  0.6081721</span></span>
-<span><span class="co">##   cell_9963  0.34273069      0.3158431   0.5407815 0.13588372  0.1797007</span></span>
-<span><span class="co">##   cell_11610 0.08244651      0.1340388   0.1048735 0.57892981  0.5706619</span></span>
-<span><span class="co">##   cell_10910 0.31763336      0.2784001   0.2445795 0.08175859  0.1354818</span></span>
-<span><span class="co">##   cell_11021 0.20549732      0.2320122   0.1869839 0.11351012  0.1769588</span></span>
-<span><span class="co">##             gene sets</span></span>
-<span><span class="co">## cells        ExE endoderm ExE mesoderm Forebrain/Midbrain/Hindbrain       Gut</span></span>
-<span><span class="co">##   cell_11995   0.06053637    0.4371076                    0.6319109 0.3779960</span></span>
-<span><span class="co">##   cell_10294   0.06369959    0.1900184                    0.2670988 0.1482988</span></span>
-<span><span class="co">##   cell_9963    0.09466189    0.4165978                    0.4972886 0.3805059</span></span>
-<span><span class="co">##   cell_11610   0.05720738    0.2060333                    0.2785028 0.1466698</span></span>
-<span><span class="co">##   cell_10910   0.11787498    0.5770948                    0.5721069 0.4450836</span></span>
-<span><span class="co">##   cell_11021   0.09285926    0.4736976                    0.6011933 0.3993608</span></span>
-<span><span class="co">##             gene sets</span></span>
-<span><span class="co">## cells        Haematoendothelial progenitors Intermediate mesoderm Mesenchyme</span></span>
-<span><span class="co">##   cell_11995                      0.3329538             0.5396029  0.2456757</span></span>
-<span><span class="co">##   cell_10294                      0.1621829             0.1781659  0.1078670</span></span>
-<span><span class="co">##   cell_9963                       0.6010306             0.4623277  0.3566887</span></span>
-<span><span class="co">##   cell_11610                      0.1526329             0.1968055  0.1118536</span></span>
-<span><span class="co">##   cell_10910                      0.4333710             0.5481614  0.3512731</span></span>
-<span><span class="co">##   cell_11021                      0.3336212             0.5197592  0.2403682</span></span>
-<span><span class="co">##             gene sets</span></span>
-<span><span class="co">## cells        Neural crest       NMP Paraxial mesoderm Pharyngeal mesoderm</span></span>
-<span><span class="co">##   cell_11995    0.6535231 0.4841026         0.5510547           0.5076289</span></span>
-<span><span class="co">##   cell_10294    0.2840264 0.2113283         0.2192031           0.2049349</span></span>
-<span><span class="co">##   cell_9963     0.5374756 0.3740042         0.5007010           0.4618718</span></span>
-<span><span class="co">##   cell_11610    0.2949987 0.2235049         0.2348724           0.2134701</span></span>
-<span><span class="co">##   cell_10910    0.5472885 0.5225294         0.5506325           0.5564014</span></span>
-<span><span class="co">##   cell_11021    0.5863399 0.5731637         0.4992671           0.4707530</span></span>
-<span><span class="co">##             gene sets</span></span>
-<span><span class="co">## cells        Somitic mesoderm Spinal cord Surface ectoderm</span></span>
-<span><span class="co">##   cell_11995        0.4654095   0.5807133        0.5251957</span></span>
-<span><span class="co">##   cell_10294        0.2141816   0.2290110        0.1874113</span></span>
-<span><span class="co">##   cell_9963         0.4307335   0.4373858        0.4173470</span></span>
-<span><span class="co">##   cell_11610        0.2339673   0.2564642        0.2054802</span></span>
-<span><span class="co">##   cell_10910        0.5179489   0.5167149        0.5049140</span></span>
-<span><span class="co">##   cell_11021        0.5186006   0.5526277        0.5052879</span></span></code></pre>
-<p>We assign cell type identity to each cell in the test dataset by
-taking the marker set with the top AUC as the label for that cell. Our
-new labels mostly agree with the original annotation, which is
-encouraging. The only exception involves misassignment of
-oligodendrocyte precursors to astrocytes, which may be understandable
-given that they are derived from a common lineage. In the absence of
-prior annotation, a more general diagnostic check is to compare the
-assigned labels to cluster identities, under the expectation that most
-cells of a single cluster would have the same label (or, if multiple
-labels are present, they should at least represent closely related cell
-states).</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">new.labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/maxCol.html" class="external-link">max.col</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">new.labels</span>, <span class="va">sce</span><span class="op">$</span><span class="va">celltype.mapped</span><span class="op">)</span></span>
-<span><span class="va">tab</span></span></code></pre></div>
-<pre><code><span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       Allantois Blood progenitors 1</span></span>
-<span><span class="co">##   Allantois                             28                   0</span></span>
-<span><span class="co">##   Cardiomyocytes                         0                   0</span></span>
-<span><span class="co">##   Endothelium                            0                   0</span></span>
-<span><span class="co">##   Erythroid2                             0                   0</span></span>
-<span><span class="co">##   Erythroid3                             0                   0</span></span>
-<span><span class="co">##   ExE mesoderm                           0                   0</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain           1                   0</span></span>
-<span><span class="co">##   Gut                                    0                   0</span></span>
-<span><span class="co">##   Haematoendothelial progenitors         1                   0</span></span>
-<span><span class="co">##   Intermediate mesoderm                  0                   0</span></span>
-<span><span class="co">##   Mesenchyme                             0                   0</span></span>
-<span><span class="co">##   Neural crest                          11                   4</span></span>
-<span><span class="co">##   NMP                                    0                   0</span></span>
-<span><span class="co">##   Paraxial mesoderm                      5                   0</span></span>
-<span><span class="co">##   Pharyngeal mesoderm                    0                   0</span></span>
-<span><span class="co">##   Somitic mesoderm                       0                   0</span></span>
-<span><span class="co">##   Spinal cord                            0                   0</span></span>
-<span><span class="co">##   Surface ectoderm                       0                   0</span></span>
-<span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       Blood progenitors 2 Cardiomyocytes</span></span>
-<span><span class="co">##   Allantois                                        0              0</span></span>
-<span><span class="co">##   Cardiomyocytes                                   0             27</span></span>
-<span><span class="co">##   Endothelium                                      0              0</span></span>
-<span><span class="co">##   Erythroid2                                       1              0</span></span>
-<span><span class="co">##   Erythroid3                                       0              0</span></span>
-<span><span class="co">##   ExE mesoderm                                     0              0</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain                     0              0</span></span>
-<span><span class="co">##   Gut                                              0              0</span></span>
-<span><span class="co">##   Haematoendothelial progenitors                   0              0</span></span>
-<span><span class="co">##   Intermediate mesoderm                            0              0</span></span>
-<span><span class="co">##   Mesenchyme                                       0              0</span></span>
-<span><span class="co">##   Neural crest                                     6              1</span></span>
-<span><span class="co">##   NMP                                              0              0</span></span>
-<span><span class="co">##   Paraxial mesoderm                                0              4</span></span>
-<span><span class="co">##   Pharyngeal mesoderm                              0              6</span></span>
-<span><span class="co">##   Somitic mesoderm                                 0              0</span></span>
-<span><span class="co">##   Spinal cord                                      0              0</span></span>
-<span><span class="co">##   Surface ectoderm                                 0              0</span></span>
-<span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       Caudal epiblast Caudal Mesoderm Def. endoderm</span></span>
-<span><span class="co">##   Allantois                                    0               0             0</span></span>
-<span><span class="co">##   Cardiomyocytes                               0               0             0</span></span>
-<span><span class="co">##   Endothelium                                  0               0             0</span></span>
-<span><span class="co">##   Erythroid2                                   0               0             0</span></span>
-<span><span class="co">##   Erythroid3                                   0               0             0</span></span>
-<span><span class="co">##   ExE mesoderm                                 0               0             0</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain                 1               0             2</span></span>
-<span><span class="co">##   Gut                                          0               0             0</span></span>
-<span><span class="co">##   Haematoendothelial progenitors               0               0             0</span></span>
-<span><span class="co">##   Intermediate mesoderm                        0               0             0</span></span>
-<span><span class="co">##   Mesenchyme                                   0               0             0</span></span>
-<span><span class="co">##   Neural crest                                 0               0             1</span></span>
-<span><span class="co">##   NMP                                          0               0             0</span></span>
-<span><span class="co">##   Paraxial mesoderm                            0               0             1</span></span>
-<span><span class="co">##   Pharyngeal mesoderm                          0               0             0</span></span>
-<span><span class="co">##   Somitic mesoderm                             0               1             1</span></span>
-<span><span class="co">##   Spinal cord                                  0               0             0</span></span>
-<span><span class="co">##   Surface ectoderm                             0               0             0</span></span>
-<span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       Doublet Endothelium Erythroid1 Erythroid2</span></span>
-<span><span class="co">##   Allantois                            0           0          0          0</span></span>
-<span><span class="co">##   Cardiomyocytes                       0           0          0          0</span></span>
-<span><span class="co">##   Endothelium                          0          13          0          0</span></span>
-<span><span class="co">##   Erythroid2                           0           0         14         21</span></span>
-<span><span class="co">##   Erythroid3                           0           0          6          5</span></span>
-<span><span class="co">##   ExE mesoderm                         0           0          0          0</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain         6           0          0          0</span></span>
-<span><span class="co">##   Gut                                  0           0          0          0</span></span>
-<span><span class="co">##   Haematoendothelial progenitors       0          19          0          0</span></span>
-<span><span class="co">##   Intermediate mesoderm               13           0          0          0</span></span>
-<span><span class="co">##   Mesenchyme                           0           0          0          0</span></span>
-<span><span class="co">##   Neural crest                        20           1          3          0</span></span>
-<span><span class="co">##   NMP                                  0           0          0          0</span></span>
-<span><span class="co">##   Paraxial mesoderm                    5           0          0          0</span></span>
-<span><span class="co">##   Pharyngeal mesoderm                  1           0          0          0</span></span>
-<span><span class="co">##   Somitic mesoderm                     1           0          0          0</span></span>
-<span><span class="co">##   Spinal cord                          1           0          0          0</span></span>
-<span><span class="co">##   Surface ectoderm                     0           0          0          0</span></span>
-<span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       Erythroid3 ExE mesoderm</span></span>
-<span><span class="co">##   Allantois                               0            0</span></span>
-<span><span class="co">##   Cardiomyocytes                          0            0</span></span>
-<span><span class="co">##   Endothelium                             0            0</span></span>
-<span><span class="co">##   Erythroid2                             51            0</span></span>
-<span><span class="co">##   Erythroid3                             49            0</span></span>
-<span><span class="co">##   ExE mesoderm                            0           23</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain            0            1</span></span>
-<span><span class="co">##   Gut                                     0            0</span></span>
-<span><span class="co">##   Haematoendothelial progenitors          0            0</span></span>
-<span><span class="co">##   Intermediate mesoderm                   0           16</span></span>
-<span><span class="co">##   Mesenchyme                              0            0</span></span>
-<span><span class="co">##   Neural crest                            0           17</span></span>
-<span><span class="co">##   NMP                                     0            0</span></span>
-<span><span class="co">##   Paraxial mesoderm                       0            0</span></span>
-<span><span class="co">##   Pharyngeal mesoderm                     0            0</span></span>
-<span><span class="co">##   Somitic mesoderm                        0            0</span></span>
-<span><span class="co">##   Spinal cord                             0            0</span></span>
-<span><span class="co">##   Surface ectoderm                        0            0</span></span>
-<span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       Forebrain/Midbrain/Hindbrain Gut</span></span>
-<span><span class="co">##   Allantois                                                 0   0</span></span>
-<span><span class="co">##   Cardiomyocytes                                            0   0</span></span>
-<span><span class="co">##   Endothelium                                               0   0</span></span>
-<span><span class="co">##   Erythroid2                                                0   0</span></span>
-<span><span class="co">##   Erythroid3                                                0   0</span></span>
-<span><span class="co">##   ExE mesoderm                                              0   0</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain                             83   4</span></span>
-<span><span class="co">##   Gut                                                       0   5</span></span>
-<span><span class="co">##   Haematoendothelial progenitors                            0   0</span></span>
-<span><span class="co">##   Intermediate mesoderm                                     0   0</span></span>
-<span><span class="co">##   Mesenchyme                                                0   0</span></span>
-<span><span class="co">##   Neural crest                                             20   0</span></span>
-<span><span class="co">##   NMP                                                       0   0</span></span>
-<span><span class="co">##   Paraxial mesoderm                                         0   0</span></span>
-<span><span class="co">##   Pharyngeal mesoderm                                       0   0</span></span>
-<span><span class="co">##   Somitic mesoderm                                          0   0</span></span>
-<span><span class="co">##   Spinal cord                                               0   0</span></span>
-<span><span class="co">##   Surface ectoderm                                          0  12</span></span>
-<span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       Haematoendothelial progenitors</span></span>
-<span><span class="co">##   Allantois                                                   0</span></span>
-<span><span class="co">##   Cardiomyocytes                                              0</span></span>
-<span><span class="co">##   Endothelium                                                 0</span></span>
-<span><span class="co">##   Erythroid2                                                  0</span></span>
-<span><span class="co">##   Erythroid3                                                  0</span></span>
-<span><span class="co">##   ExE mesoderm                                                0</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain                                0</span></span>
-<span><span class="co">##   Gut                                                         0</span></span>
-<span><span class="co">##   Haematoendothelial progenitors                             16</span></span>
-<span><span class="co">##   Intermediate mesoderm                                       0</span></span>
-<span><span class="co">##   Mesenchyme                                                  0</span></span>
-<span><span class="co">##   Neural crest                                                8</span></span>
-<span><span class="co">##   NMP                                                         0</span></span>
-<span><span class="co">##   Paraxial mesoderm                                           2</span></span>
-<span><span class="co">##   Pharyngeal mesoderm                                         0</span></span>
-<span><span class="co">##   Somitic mesoderm                                            0</span></span>
-<span><span class="co">##   Spinal cord                                                 0</span></span>
-<span><span class="co">##   Surface ectoderm                                            0</span></span>
-<span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       Intermediate mesoderm Mesenchyme Neural crest</span></span>
-<span><span class="co">##   Allantois                                          0          0            0</span></span>
-<span><span class="co">##   Cardiomyocytes                                     0          0            0</span></span>
-<span><span class="co">##   Endothelium                                        0          0            0</span></span>
-<span><span class="co">##   Erythroid2                                         0          0            0</span></span>
-<span><span class="co">##   Erythroid3                                         0          0            0</span></span>
-<span><span class="co">##   ExE mesoderm                                       1          7            0</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain                       0          3            0</span></span>
-<span><span class="co">##   Gut                                                0          0            0</span></span>
-<span><span class="co">##   Haematoendothelial progenitors                     0          0            0</span></span>
-<span><span class="co">##   Intermediate mesoderm                              9         15            0</span></span>
-<span><span class="co">##   Mesenchyme                                         0         69            0</span></span>
-<span><span class="co">##   Neural crest                                       4          4           10</span></span>
-<span><span class="co">##   NMP                                                0          0            0</span></span>
-<span><span class="co">##   Paraxial mesoderm                                  0          7            0</span></span>
-<span><span class="co">##   Pharyngeal mesoderm                                0         13            0</span></span>
-<span><span class="co">##   Somitic mesoderm                                   2          0            0</span></span>
-<span><span class="co">##   Spinal cord                                        0          0            0</span></span>
-<span><span class="co">##   Surface ectoderm                                   0          0            0</span></span>
-<span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       NMP Paraxial mesoderm Pharyngeal mesoderm</span></span>
-<span><span class="co">##   Allantois                        0                 0                   0</span></span>
-<span><span class="co">##   Cardiomyocytes                   0                 0                   0</span></span>
-<span><span class="co">##   Endothelium                      0                 0                   0</span></span>
-<span><span class="co">##   Erythroid2                       0                 0                   0</span></span>
-<span><span class="co">##   Erythroid3                       0                 0                   0</span></span>
-<span><span class="co">##   ExE mesoderm                     0                 0                   0</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain    41                 2                   4</span></span>
-<span><span class="co">##   Gut                              0                 0                   0</span></span>
-<span><span class="co">##   Haematoendothelial progenitors   0                 0                   0</span></span>
-<span><span class="co">##   Intermediate mesoderm            0                 1                   5</span></span>
-<span><span class="co">##   Mesenchyme                       0                 0                   0</span></span>
-<span><span class="co">##   Neural crest                     5                20                  10</span></span>
-<span><span class="co">##   NMP                             16                 0                   0</span></span>
-<span><span class="co">##   Paraxial mesoderm                0                43                   3</span></span>
-<span><span class="co">##   Pharyngeal mesoderm              0                 0                  18</span></span>
-<span><span class="co">##   Somitic mesoderm                 0                 0                   0</span></span>
-<span><span class="co">##   Spinal cord                      0                 0                   0</span></span>
-<span><span class="co">##   Surface ectoderm                 0                 0                   0</span></span>
-<span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       Rostral neurectoderm Somitic mesoderm</span></span>
-<span><span class="co">##   Allantois                                         0                0</span></span>
-<span><span class="co">##   Cardiomyocytes                                    0                0</span></span>
-<span><span class="co">##   Endothelium                                       0                0</span></span>
-<span><span class="co">##   Erythroid2                                        0                0</span></span>
-<span><span class="co">##   Erythroid3                                        0                0</span></span>
-<span><span class="co">##   ExE mesoderm                                      0                0</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain                     11                1</span></span>
-<span><span class="co">##   Gut                                               0                0</span></span>
-<span><span class="co">##   Haematoendothelial progenitors                    0                0</span></span>
-<span><span class="co">##   Intermediate mesoderm                             0                2</span></span>
-<span><span class="co">##   Mesenchyme                                        0                0</span></span>
-<span><span class="co">##   Neural crest                                      0                7</span></span>
-<span><span class="co">##   NMP                                               0                0</span></span>
-<span><span class="co">##   Paraxial mesoderm                                 0                0</span></span>
-<span><span class="co">##   Pharyngeal mesoderm                               0                0</span></span>
-<span><span class="co">##   Somitic mesoderm                                  0               25</span></span>
-<span><span class="co">##   Spinal cord                                       0                0</span></span>
-<span><span class="co">##   Surface ectoderm                                  0                0</span></span>
-<span><span class="co">##                                 </span></span>
-<span><span class="co">## new.labels                       Spinal cord Stripped Surface ectoderm</span></span>
-<span><span class="co">##   Allantois                                0        0                0</span></span>
-<span><span class="co">##   Cardiomyocytes                           0        0                0</span></span>
-<span><span class="co">##   Endothelium                              0        1                0</span></span>
-<span><span class="co">##   Erythroid2                               0        1                0</span></span>
-<span><span class="co">##   Erythroid3                               0        1                0</span></span>
-<span><span class="co">##   ExE mesoderm                             0        0                0</span></span>
-<span><span class="co">##   Forebrain/Midbrain/Hindbrain            37        0               17</span></span>
-<span><span class="co">##   Gut                                      0        0                2</span></span>
-<span><span class="co">##   Haematoendothelial progenitors           0        0                0</span></span>
-<span><span class="co">##   Intermediate mesoderm                    0        0                0</span></span>
-<span><span class="co">##   Mesenchyme                               0        0                2</span></span>
-<span><span class="co">##   Neural crest                             3        5                6</span></span>
-<span><span class="co">##   NMP                                      0        0                0</span></span>
-<span><span class="co">##   Paraxial mesoderm                        0        0                0</span></span>
-<span><span class="co">##   Pharyngeal mesoderm                      0        0                0</span></span>
-<span><span class="co">##   Somitic mesoderm                         0        0                0</span></span>
-<span><span class="co">##   Spinal cord                              9        0                0</span></span>
-<span><span class="co">##   Surface ectoderm                         0        0               20</span></span></code></pre>
-<p>As a diagnostic measure, we examine the distribution of AUCs across
-cells for each label. In heterogeneous populations, the distribution for
-each label should be bimodal with one high-scoring peak containing cells
-of that cell type and a low-scoring peak containing cells of other
-types. The gap between these two peaks can be used to derive a threshold
-for whether a label is “active” for a particular cell. (In this case, we
-simply take the single highest-scoring label per cell as the labels
-should be mutually exclusive.) In populations where a particular cell
-type is expected, lack of clear bimodality for the corresponding label
-may indicate that its gene set is not sufficiently informative.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/AUCell/man/AUCell_exploreThresholds.html" class="external-link">AUCell_exploreThresholds</a></span><span class="op">(</span><span class="va">cell.aucs</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span>, plotHist <span class="op">=</span> <span class="cn">TRUE</span>, assign <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="cell_type_annotation_files/figure-html/auc-dist-1.png" width="960"></p>
-<p>Shown is the distribution of AUCs in the wild-type chimera dataset
-for each label in the embryo atlas dataset. The blue curve represents
-the density estimate, the red curve represents a fitted two-component
-mixture of normals, the pink curve represents a fitted three-component
-mixture, and the grey curve represents a fitted normal distribution.
-Vertical lines represent threshold estimates corresponding to each
-estimate of the distribution.</p>
 </div>
-</div>
-<div class="section level2">
-<h2 id="exercises">Exercises<a class="anchor" aria-label="anchor" href="#exercises"></a>
-</h2>
-<p>Exercise: The <a href="https://www.nature.com/articles/s41598-019-41695-z" class="external-link">Leiden
-algorithm</a> is similar to the Louvain algorithm, but it is faster and
-has been shown to result in better connected communities. Modify the
-above call to <code>clusterCells</code> to carry out the community
-detection with the Leiden algorithm instead. Visualize the results in a
-UMAP plot.</p>
-<p>Hint: The <code>NNGraphParam</code> constructor has an argument
-<code>cluster.args</code>. This allows to specify arguments passed on to
-the <code>cluster_leiden</code> function from the <a href="https://cran.r-project.org/web/packages/igraph/index.html" class="external-link">igraph</a>
-package. Use the <code>cluster.args</code> argument to parameterize the
-clustering to use modularity as the objective function and a resolution
-parameter of 0.5.</p>
 </div>
   </div>
 
