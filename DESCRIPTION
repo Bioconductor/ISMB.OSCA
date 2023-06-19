@@ -20,30 +20,29 @@ Depends:
     R (>= 4.3.0)
 Imports:
     AUCell,
-    BiocSingular,
     CuratedAtlasQueryR,
-    edgeR,
+    DropletUtils,
+    EnsDb.Mmusculus.v79,
     MouseGastrulationData,
-    scDblFinder,
-    SingleCellExperiment,
+    Seurat,
+    SeuratData,
     SingleR,
     TENxBrainData,
     batchelor,
-    bluster,
     scater,
     scran,
-    scuttle,
-    DropletUtils,
-    EnsDb.Mmusculus.v79
+    scDblFinder,
+    zellkonverter
 Suggests: 
-    BiocParallel,
     BiocStyle,
     dplyr,
     knitr,
     rmarkdown,
     stringr,
     pkgdown
-Remotes: stemangiola/CuratedAtlasQueryR
+Remotes:
+    satijalab/seurat-data, 
+    stemangiola/CuratedAtlasQueryR
 URL: https://bioconductor.github.io/ISMB.OSCA/
 BugReports: https://github.com/Bioconductor/ISMB.OSCA/issues/new/choose
 VignetteBuilder: knitr

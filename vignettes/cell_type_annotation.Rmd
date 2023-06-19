@@ -63,13 +63,13 @@ biological concepts such as cell types or states.
 
 Popularized by its use in
 [Seurat](https://cran.r-project.org/web/packages/Seurat/index.html), 
-graph-based clustering is a flexible and 
+graph-based clustering is a flexible and
 scalable technique for clustering large scRNA-seq datasets. We first build a 
-graph where each node is a cell that is connected to its nearest neighbors in  
+graph where each node is a cell that is connected to its nearest neighbors in
 the high-dimensional space. Edges are weighted based on the similarity between 
 the cells involved, with higher weight given to cells that are more closely 
 related. We then apply algorithms to identify "communities" of cells that are 
-more connected to cells in the same community than they are to cells of  
+more connected to cells in the same community than they are to cells of
 different communities. Each community represents a cluster that we can use for 
 downstream interpretation.
 
@@ -265,7 +265,7 @@ We inspect the results using a heatmap of the per-cell and label scores.
 Ideally, each cell should exhibit a high score in one label relative to all of
 the others, indicating that the assignment to that label was unambiguous. 
 This is largely the case for mesenchyme and endothelial cells, whereas we see
-expectedly more ambiguity between the three erythroid cell populations.
+expectedly more ambiguity between the two erythroid cell populations.
 
 ```{r score-heat, fig.width = 10, fig.height = 10}
 plotScoreHeatmap(res)
@@ -349,8 +349,10 @@ head(results)
 
 We assign cell type identity to each cell in the test dataset by taking the
 marker set with the top AUC as the label for that cell.
-Our new labels mostly agree with the original annotation, which is encouraging.
-The only exception involves misassignment of oligodendrocyte precursors to astrocytes, which may be understandable given that they are derived from a common lineage.
+Our new labels mostly agree with the original annotation (and, thus, also with
+the reference-based annotation).
+Instances where the original annotation is divided into several new label groups
+typically points to large overlaps in their marker sets.
 In the absence of prior annotation, a more general diagnostic check is to compare
 the assigned labels to cluster identities, under the expectation that most cells
 of a single cluster would have the same label (or, if multiple labels are present,
