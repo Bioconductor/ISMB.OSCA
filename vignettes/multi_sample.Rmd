@@ -235,7 +235,86 @@ Section 6 of OSCA multisample.
 
 ```{r}
 
+abundances <- table(merged$celltype.mapped, merged$sample) 
+abundances <- as.data.frame(unclass(abundances))
+head(abundances)
+## add mosaic plot?
+# df <- as.data.frame(abundances)
+# Qui ho sommato le colonne REP1SHAM con REP2SHAM e le colonne REP1CAC con REP2CAC
+# df <- cbind(rowSums(df[,c(1,3)]), rowSums(df[,c(2,4)]))
+# colnames(df) <- c("CAC", "SHAM")
+# rownames(df) <- c("Endothelial", "FAPs", "Immune Cells", "MuSC", "Myonuclei", "Nervous System", "Pericyte", "Smooth Muscular","Tenocyte" )
+# Barplot
+# Create a df for barplot
+# cell.type <- rep(rownames(df), 6)
+# condition <- c(rep(paste0("S", 6:10), each=dim(df)[1]))
+# value <- c(df[,1], df[,2],df[,3], df[,4], df[,5], df[,6])
+# 
+# dfpl <- data.frame(cell.type,condition,value)
+# library(RColorBrewer)
+# newpal <- c(brewer.pal(12, "Set3"), brewer.pal(8, "Accent"), brewer.pal(8, "Dark2"), brewer.pal(8, "Set2"))
+# #Stacked
+# ggplot(dfpl, aes(y=value, x=condition, fill=cell.type,color=cell.type)) + 
+#     geom_bar(position="fill", stat="identity")+ scale_y_continuous(labels = scales::percent) +
+#   theme_classic()  +theme(legend.position="none")+ scale_color_manual(values=newpal)+
+#   scale_fill_manual(values=newpal) #+ labs(y="Nuclei proportion(%)", x="", fill=NULL, color=NULL)   
+#   # +theme_classic()  #+theme(legend.position="none")
 ```
+
+```{r}
+library(edgeR)
+# Attaching some column metadata.
+extra.info <- colData(merged)[match(colnames(abundances), merged$sample),]
+y.ab <- DGEList(abundances, samples=extra.info)
+y.ab
+```
+
+Filtering low abundance labels
+
+```{r}
+keep <- filterByExpr(y.ab, group=y.ab$samples$tomato)
+y.ab <- y.ab[keep,]
+summary(keep)
+```
+
+```{r}
+design <- model.matrix(~factor(pool) + factor(tomato), y.ab$samples)
+```
+
+
+```{r}
+y.ab <- estimateDisp(y.ab, design, trend="none")
+summary(y.ab$common.dispersion)
+plotBCV(y.ab, cex=1)
+```
+
+```{r}
+fit.ab <- glmQLFit(y.ab, design, robust=TRUE, abundance.trend=FALSE)
+summary(fit.ab$var.prior)
+summary(fit.ab$df.prior)
+plotQLDisp(fit.ab, cex=1)
+```
+
+
+```{r}
+res <- glmQLFTest(fit.ab, coef=ncol(design))
+summary(decideTests(res))
+topTags(res)
+```
+
+
+## Assuming most labels do not change
+
+```{r}
+y.ab2 <- calcNormFactors(y.ab)
+y.ab2$samples$norm.factors
+y.ab2 <- estimateDisp(y.ab2, design, trend="none")
+fit.ab2 <- glmQLFit(y.ab2, design, robust=TRUE, abundance.trend=FALSE)
+res2 <- glmQLFTest(fit.ab2, coef=ncol(design))
+topTags(res2, n=10)
+```
+
+    
 
 # Session Info
 
