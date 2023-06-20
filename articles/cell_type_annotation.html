@@ -169,7 +169,7 @@ cell in our <code>SingleCellExperiment</code> object.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html" class="external-link">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">##   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15 </span></span>
-<span><span class="co">##  93 144  75 342 415 210 246  83 108 117 143 208 152  20  55</span></span></code></pre>
+<span><span class="co">##  95 144  77 341 391 206 251  96 108 114 151 215 146  20  56</span></span></code></pre>
 <p>We assign the cluster assignments back into our
 <code>SingleCellExperiment</code> object as a <code>factor</code> in the
 column metadata. This allows us to conveniently visualize the
@@ -224,11 +224,11 @@ cluster.</p>
 <pre><code><span><span class="co">## DataFrame with 29453 rows and 18 columns</span></span>
 <span><span class="co">##                  Top     p.value         FDR summary.AUC     AUC.2     AUC.3</span></span>
 <span><span class="co">##            &lt;integer&gt;   &lt;numeric&gt;   &lt;numeric&gt;   &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">## Arl4c              1 6.34404e-83 9.34255e-79    0.998774  0.905989  0.991111</span></span>
-<span><span class="co">## Pitx2              1 6.36335e-70 1.70382e-66    0.943092  0.932572  0.764588</span></span>
-<span><span class="co">## Slc2a3             1 8.78828e-44 2.39977e-41    0.968717  0.882990  0.931613</span></span>
-<span><span class="co">## Cryab              1 3.28497e-62 2.93189e-59    0.938156  0.922267  0.890323</span></span>
-<span><span class="co">## Hand1              1 1.37058e-75 5.04598e-72    0.999560  0.989695  0.698638</span></span>
+<span><span class="co">## Arl4c              1 2.65826e-83 3.91468e-79    0.998796  0.905482  0.990157</span></span>
+<span><span class="co">## Pitx2              1 2.12479e-70 6.25814e-67    0.943973  0.932968  0.764320</span></span>
+<span><span class="co">## Msx1               1 3.82512e-55 2.08632e-52    0.948727  0.887573  0.572112</span></span>
+<span><span class="co">## Slc2a3             1 4.05884e-43 1.10690e-40    0.961506  0.872515  0.918113</span></span>
+<span><span class="co">## Cryab              1 4.23377e-61 3.46381e-58    0.924162  0.911915  0.880519</span></span>
 <span><span class="co">## ...              ...         ...         ...         ...       ...       ...</span></span>
 <span><span class="co">## AC125149.2     29448           1           1           0         0         0</span></span>
 <span><span class="co">## AC125149.4     29449           1           1           0         0         0</span></span>
@@ -237,11 +237,11 @@ cluster.</p>
 <span><span class="co">## Vmn2r122       29453           1           1           0         0         0</span></span>
 <span><span class="co">##                AUC.4     AUC.5     AUC.6     AUC.7     AUC.8     AUC.9</span></span>
 <span><span class="co">##            &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">## Arl4c       0.998774  0.667859  0.908193  0.859953  0.967094  0.864695</span></span>
-<span><span class="co">## Pitx2       0.943092  0.789921  0.942396  0.938981  0.798290  0.413381</span></span>
-<span><span class="co">## Slc2a3      0.968717  0.871538  0.684537  0.693330  0.881591  0.886002</span></span>
-<span><span class="co">## Cryab       0.938156  0.927555  0.942038  0.942477  0.187978  0.341597</span></span>
-<span><span class="co">## Hand1       0.999560  0.870838  0.999590  0.999738  0.882886  0.212166</span></span>
+<span><span class="co">## Arl4c       0.998796  0.663212  0.908993  0.858042  0.937939  0.863840</span></span>
+<span><span class="co">## Pitx2       0.943973  0.798546  0.943127  0.939694  0.752412  0.406725</span></span>
+<span><span class="co">## Msx1        0.948727  0.493256  0.833521  0.889033  0.936075  0.741618</span></span>
+<span><span class="co">## Slc2a3      0.961506  0.861408  0.676750  0.677501  0.868860  0.874659</span></span>
+<span><span class="co">## Cryab       0.928261  0.924162  0.932397  0.932858  0.255702  0.334600</span></span>
 <span><span class="co">## ...              ...       ...       ...       ...       ...       ...</span></span>
 <span><span class="co">## AC125149.2         0         0         0         0         0         0</span></span>
 <span><span class="co">## AC125149.4         0         0         0         0         0         0</span></span>
@@ -250,11 +250,11 @@ cluster.</p>
 <span><span class="co">## Vmn2r122           0         0         0         0         0         0</span></span>
 <span><span class="co">##               AUC.10    AUC.11    AUC.12    AUC.13      AUC.14    AUC.15</span></span>
 <span><span class="co">##            &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;   &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">## Arl4c       0.979138  0.944206  0.929384  0.730688 0.093548387  0.997263</span></span>
-<span><span class="co">## Pitx2       0.926110  0.942477  0.874535  0.848189 0.929032258  0.941349</span></span>
-<span><span class="co">## Slc2a3      0.929878  0.384089  0.962004  0.282400 0.000537634  0.887977</span></span>
-<span><span class="co">## Cryab       0.936954  0.939168  0.936363  0.899335 0.450000000  0.936657</span></span>
-<span><span class="co">## Hand1       0.962044  0.999624  0.999535  0.995756 0.152150538  0.999804</span></span>
+<span><span class="co">## Arl4c       0.978393  0.937888  0.921714  0.727181 0.092631579  0.997368</span></span>
+<span><span class="co">## Pitx2       0.925485  0.943534  0.868984  0.844484 0.928947368  0.942105</span></span>
+<span><span class="co">## Msx1        0.703139  0.490484  0.910502  0.704831 0.395789474  0.953759</span></span>
+<span><span class="co">## Slc2a3      0.928901  0.363332  0.953929  0.287671 0.000526316  0.877820</span></span>
+<span><span class="co">## Cryab       0.926870  0.928965  0.926854  0.887383 0.441052632  0.926692</span></span>
 <span><span class="co">## ...              ...       ...       ...       ...         ...       ...</span></span>
 <span><span class="co">## AC125149.2         0         0         0         0           0         0</span></span>
 <span><span class="co">## AC125149.4         0         0         0         0           0         0</span></span>

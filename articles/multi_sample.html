@@ -647,11 +647,47 @@ clusters.</p>
 <span><span class="co">## Erythroid2                     5.372534e-01</span></span>
 <span><span class="co">## Haematoendothelial progenitors 6.239689e-01</span></span></code></pre>
 </div>
+<div class="section level3">
+<h3 id="testing-against-a-log-fold-change-threshold">Testing against a log-fold change threshold<a class="anchor" aria-label="anchor" href="#testing-against-a-log-fold-change-threshold"></a>
+</h3>
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res.lfc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/glmTreat.html" class="external-link">glmTreat</a></span><span class="op">(</span><span class="va">fit.ab</span>, coef<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">design</span><span class="op">)</span>, lfc<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/decideTests.html" class="external-link">decideTests</a></span><span class="op">(</span><span class="va">res.lfc</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##        factor(tomato)TRUE</span></span>
+<span><span class="co">## Down                    1</span></span>
+<span><span class="co">## NotSig                 23</span></span>
+<span><span class="co">## Up                      0</span></span></code></pre>
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/topTags.html" class="external-link">topTags</a></span><span class="op">(</span><span class="va">res.lfc</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Coefficient:  factor(tomato)TRUE </span></span>
+<span><span class="co">##                                     logFC unshrunk.logFC   logCPM       PValue</span></span>
+<span><span class="co">## ExE ectoderm                   -6.5663339     -7.0014662 13.02497 2.626129e-09</span></span>
+<span><span class="co">## Mesenchyme                      1.1651500      1.1657834 16.29382 1.323301e-01</span></span>
+<span><span class="co">## Cardiomyocytes                  0.8484008      0.8498209 14.86430 3.795840e-01</span></span>
+<span><span class="co">## Allantois                       0.8345294      0.8353651 15.50702 3.974675e-01</span></span>
+<span><span class="co">## Neural crest                   -0.7706378     -0.7719154 14.76462 4.501007e-01</span></span>
+<span><span class="co">## Endothelium                     0.7518608      0.7536317 14.28905 4.665427e-01</span></span>
+<span><span class="co">## Haematoendothelial progenitors  0.6581135      0.6591452 14.72323 5.621684e-01</span></span>
+<span><span class="co">## Def. endoderm                   0.5262140      0.5310753 12.40076 5.933582e-01</span></span>
+<span><span class="co">## Erythroid3                     -0.6430834     -0.6432463 17.28041 6.118154e-01</span></span>
+<span><span class="co">## Caudal Mesoderm                -0.3996254     -0.4035521 12.08574 6.827271e-01</span></span>
+<span><span class="co">##                                         FDR</span></span>
+<span><span class="co">## ExE ectoderm                   6.302709e-08</span></span>
+<span><span class="co">## Mesenchyme                     9.950204e-01</span></span>
+<span><span class="co">## Cardiomyocytes                 9.950204e-01</span></span>
+<span><span class="co">## Allantois                      9.950204e-01</span></span>
+<span><span class="co">## Neural crest                   9.950204e-01</span></span>
+<span><span class="co">## Endothelium                    9.950204e-01</span></span>
+<span><span class="co">## Haematoendothelial progenitors 9.950204e-01</span></span>
+<span><span class="co">## Def. endoderm                  9.950204e-01</span></span>
+<span><span class="co">## Erythroid3                     9.950204e-01</span></span>
+<span><span class="co">## Caudal Mesoderm                9.950204e-01</span></span></code></pre>
+</div>
 </div>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.3.0 (2023-04-21)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
