@@ -314,7 +314,14 @@ res2 <- glmQLFTest(fit.ab2, coef=ncol(design))
 topTags(res2, n=10)
 ```
 
-    
+##  Testing against a log-fold change threshold
+
+```{r}
+res.lfc <- glmTreat(fit.ab, coef=ncol(design), lfc=1)
+summary(decideTests(res.lfc))
+topTags(res.lfc)
+```
+
 
 # Session Info
 
