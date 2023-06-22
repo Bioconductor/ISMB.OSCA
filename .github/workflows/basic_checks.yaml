@@ -1,6 +1,13 @@
 name: Check, build, and push image
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'DESCRIPTION'
+      - '**.yml'
+    branches:
+      - devel
+  pull_request:
 
 env:
   cache-version: v1
