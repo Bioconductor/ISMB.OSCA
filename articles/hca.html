@@ -203,19 +203,46 @@ Portal API</a></td>
 <h2 id="hca-metadata">HCA Metadata<a class="anchor" aria-label="anchor" href="#hca-metadata"></a>
 </h2>
 <p>The metadata allows the user to get a lay of the land of what is
-available via the package.</p>
+available via the package. In this example, we are using the sample
+database URL which allows us to get a small and quick subset of the
+available metadata.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_metadata.html" class="external-link">get_metadata</a></span><span class="op">(</span>remote_url <span class="op">=</span> <span class="fu">CuratedAtlasQueryR</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/SAMPLE_DATABASE_URL.html" class="external-link">SAMPLE_DATABASE_URL</a></span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="a-note-on-the-piping-operator">A note on the piping operator<a class="anchor" aria-label="anchor" href="#a-note-on-the-piping-operator"></a>
+</h2>
+<p>The vignette materials provided by <code>CuratedAtlasQueryR</code>
+show the use of the ‘native’ R pipe (implemented after R version
+<code>4.1.0</code>). For those not familiar with the pipe operator
+(<code>|&gt;</code>), it allows you to chain functions by passing the
+left-hand side (LHS) to the first input (typically) on the right-hand
+side (RHS).</p>
+<p>In this example, we are extracting the <code>iris</code> data set
+from the <code>datasets</code> package and ‘then’ taking a subset where
+the sepal lengths are greater than 5 and ‘then’ summarizing the data for
+each level in the <code>Species</code> variable with a
+<code>mean</code>. The pipe operator can be read as ‘then’.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"iris"</span>, package <span class="op">=</span> <span class="st">"datasets"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">iris</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">&gt;</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">.</span> <span class="op">~</span> <span class="va">Species</span>, data <span class="op">=</span> <span class="va">_</span>, <span class="va">mean</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##      Species Sepal.Length Sepal.Width Petal.Length Petal.Width</span></span>
+<span><span class="co">## 1     setosa     5.313636    3.713636     1.509091   0.2772727</span></span>
+<span><span class="co">## 2 versicolor     5.997872    2.804255     4.317021   1.3468085</span></span>
+<span><span class="co">## 3  virginica     6.622449    2.983673     5.573469   2.0326531</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="summarizing-the-metadata">Summarizing the metadata<a class="anchor" aria-label="anchor" href="#summarizing-the-metadata"></a>
 </h2>
 <p>For each distinct tissue and dataset combination, count the number of
 datasets by tissue type.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">tissue</span>, <span class="va">dataset_id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">tissue</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">tissue</span>, <span class="va">dataset_id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">tissue</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># Source:   SQL [?? x 2]</span></span></span>
 <span><span class="co">## <span style="color: #949494;"># Database: DuckDB 0.8.1 [unknown@Linux 5.15.0-1040-azure:R 4.3.1/:memory:]</span></span></span>
 <span><span class="co">##    tissue                          n</span></span>
@@ -235,20 +262,61 @@ datasets by tissue type.</p>
 <div class="section level2">
 <h2 id="columns-available-in-the-metadata">Columns available in the metadata<a class="anchor" aria-label="anchor" href="#columns-available-in-the-metadata"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">metadata</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##  [1] "cell_"                             "sample_"                          </span></span>
 <span><span class="co">##  [3] "cell_type"                         "cell_type_harmonised"             </span></span>
 <span><span class="co">##  [5] "confidence_class"                  "cell_annotation_azimuth_l2"       </span></span>
 <span><span class="co">##  [7] "cell_annotation_blueprint_singler" "cell_annotation_monaco_singler"   </span></span>
 <span><span class="co">##  [9] "sample_id_db"                      "_sample_name"</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="available-assays">Available assays<a class="anchor" aria-label="anchor" href="#available-assays"></a>
+</h2>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">assay</span>, <span class="va">dataset_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">assay</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># Source:   SQL [?? x 2]</span></span></span>
+<span><span class="co">## <span style="color: #949494;"># Database: DuckDB 0.8.1 [unknown@Linux 5.15.0-1040-azure:R 4.3.1/:memory:]</span></span></span>
+<span><span class="co">##    assay                              n</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> 10x 3' v2                         27</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> 10x 3' v3                         21</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> Visium Spatial Gene Expression     7</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> scRNA-seq                          4</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> Seq-Well                           2</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> sci-RNA-seq                        1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> Slide-seq                          4</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> 10x 5' v2                          2</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> 10x 5' v1                          7</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> 10x 3' v1                          1</span></span>
+<span><span class="co">## <span style="color: #949494;"># ℹ more rows</span></span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="available-organisms">Available organisms<a class="anchor" aria-label="anchor" href="#available-organisms"></a>
+</h2>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">organism</span>, <span class="va">dataset_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">organism</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># Source:   SQL [1 x 2]</span></span></span>
+<span><span class="co">## <span style="color: #949494;"># Database: DuckDB 0.8.1 [unknown@Linux 5.15.0-1040-azure:R 4.3.1/:memory:]</span></span></span>
+<span><span class="co">##   organism         n</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> Homo sapiens    63</span></span></code></pre>
 <div class="section level3">
 <h3 id="download-single-cell-rna-sequencing-counts">Download single-cell RNA sequencing counts<a class="anchor" aria-label="anchor" href="#download-single-cell-rna-sequencing-counts"></a>
 </h3>
+<p>The data can be provided as either “counts” or counts per million
+“cpm” as given by the <code>assays</code> argument in the
+<code><a href="https://rdrr.io/pkg/CuratedAtlasQueryR/man/get_single_cell_experiment.html" class="external-link">get_single_cell_experiment()</a></code> function. By default, the
+<code>SingleCellExperiment</code> provided will contain only the
+‘counts’ data.</p>
 <div class="section level4">
 <h4 id="query-raw-counts">Query raw counts<a class="anchor" aria-label="anchor" href="#query-raw-counts"></a>
 </h4>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span> </span>
 <span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
@@ -263,7 +331,7 @@ datasets by tissue type.</p>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading files.</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Compiling Single Cell Experiment.</span></span></code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span></span></code></pre></div>
 <pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
 <span><span class="co">## dim: 36229 1571 </span></span>
@@ -283,7 +351,7 @@ datasets by tissue type.</p>
 </h4>
 <p>This is helpful if just few genes are of interest, as they can be
 compared across samples.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
 <span>      <span class="va">ethnicity</span> <span class="op">==</span> <span class="st">"African"</span> <span class="op">&amp;</span></span>
@@ -313,7 +381,7 @@ compared across samples.</p>
 <div class="section level4">
 <h4 id="extract-only-a-subset-of-genes">Extract only a subset of genes<a class="anchor" aria-label="anchor" href="#extract-only-a-subset-of-genes"></a>
 </h4>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span></span>
 <span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
@@ -328,7 +396,7 @@ compared across samples.</p>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Downloading 0 files, totalling 0 GB</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading files.</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Compiling Single Cell Experiment.</span></span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span></span></code></pre></div>
 <pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
 <span><span class="co">## dim: 1 1571 </span></span>
@@ -349,7 +417,7 @@ compared across samples.</p>
 <p>If needed, the H5 <code>SingleCellExperiment</code> can be converted
 into a Seurat object. Note that it may take a long time and use a lot of
 memory depending on how many cells you are requesting.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">&lt;-</span></span>
 <span>    <span class="va">metadata</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
@@ -373,7 +441,7 @@ memory depending on how many cells you are requesting.</p>
 objects, if necessary, is to use
 <code>saveHDF5SummarizedExperiment</code> from the
 <code>HDF5Array</code> package.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">single_cell_counts</span> <span class="op">|&gt;</span> <span class="fu">saveHDF5SummarizedExperiment</span><span class="op">(</span><span class="st">"single_cell_counts"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
@@ -381,7 +449,7 @@ objects, if necessary, is to use
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.3.1 (2023-06-16)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
