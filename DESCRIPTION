@@ -24,6 +24,8 @@ Imports:
     DropletUtils,
     EnsDb.Mmusculus.v79,
     MouseGastrulationData,
+    Seurat,
+    SeuratData,
     SingleR,
     TENxBrainData,
     batchelor,
@@ -39,6 +41,7 @@ Suggests:
     stringr,
     pkgdown
 Remotes:
+    satijalab/seurat-data,
     stemangiola/CuratedAtlasQueryR
 URL: https://bioconductor.github.io/ISMB.OSCA/
 BugReports: https://github.com/Bioconductor/ISMB.OSCA/issues/new/choose

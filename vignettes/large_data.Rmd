@@ -181,7 +181,7 @@ configured for a particular system
 (see `r Biocpkg("BiocParallel", "BiocParallel_BatchtoolsParam.pdf", "here")` for
 details).
 
-```{r, eval=FALSE}
+```{r batch-param, eval=FALSE}
 # 2 hours, 8 GB, 1 CPU per task, for 10 tasks.
 rs <- list(walltime = 7200, memory = 8000, ncpus = 1)
 bpp <- BatchtoolsParam(10, cluster = "slurm", resources = rs)
@@ -198,6 +198,18 @@ session. Depending on the nature and size of the task, this overhead may
 outweigh any benefit from parallel computing.
 
 ## Interoperability with popular single-cell analysis ecosytems
+
+### Seurat
+
+```{r load-seurat, message = FALSE}
+library(Seurat)
+```
+
+### Scanpy
+
+```{r load-zellkonv, message = FALSE}
+library(zellkonverter)
+```
 
 ## References
 
