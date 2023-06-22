@@ -30,6 +30,7 @@ Imports:
     scater,
     scran,
     scDblFinder,
+    zellkonverter
 Suggests: 
     BiocStyle,
     dplyr,
