@@ -89,10 +89,32 @@ library(dplyr)
 # HCA Metadata
 
 The metadata allows the user to get a lay of the land of what is available
-via the package.
+via the package. In this example, we are using the sample database URL which
+allows us to get a small and quick subset of the available metadata.
 
 ```{r}
 metadata <- get_metadata(remote_url = CuratedAtlasQueryR::SAMPLE_DATABASE_URL)
+```
+
+# A note on the piping operator
+
+The vignette materials provided by `CuratedAtlasQueryR` show the use of the
+'native' R pipe (implemented after R version `4.1.0`). For those not familiar
+with the pipe operator (`|>`), it allows you to chain functions by passing the
+left-hand side (LHS) to the first input (typically) on the right-hand side
+(RHS). 
+
+In this example, we are extracting the `iris` data set from the `datasets`
+package and 'then' taking a subset where the sepal lengths are greater than 5
+and 'then' summarizing the data for each level in the `Species` variable with a
+`mean`. The pipe operator can be read as 'then'.
+
+```{r}
+data("iris", package = "datasets")
+
+iris |>
+  subset(Sepal.Length > 5) |>
+  aggregate(. ~ Species, data = _, mean)
 ```
 
 # Summarizing the metadata
@@ -102,8 +124,8 @@ by tissue type.
 
 ```{r}
 metadata |>
-  dplyr::distinct(tissue, dataset_id) |> 
-  dplyr::count(tissue)
+  distinct(tissue, dataset_id) |> 
+  count(tissue)
 ```
 
 # Columns available in the metadata
@@ -112,7 +134,28 @@ metadata |>
 head(names(metadata), 10)
 ```
 
+# Available assays
+
+```{r}
+metadata |>
+    distinct(assay, dataset_id) |>
+    count(assay)
+```
+
+# Available organisms
+
+```{r}
+metadata |>
+    distinct(organism, dataset_id) |>
+    count(organism)
+```
+
 ## Download single-cell RNA sequencing counts 
+
+The data can be provided as either "counts" or counts per million "cpm" as given
+by the `assays` argument in the `get_single_cell_experiment()` function. By
+default, the `SingleCellExperiment` provided will contain only the 'counts'
+data.
 
 ### Query raw counts
 
