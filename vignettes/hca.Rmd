@@ -57,7 +57,9 @@ transcriptional profiles. This platform offers a standardized workflow for
 accessing atlas-level datasets programmatically and reproducibly.
 
 ```{r,echo=FALSE}
-knitr::include_graphics("figures/HCA_sccomp_SUPPLEMENTARY_technical_cartoon_curatedAtlasQuery.png")
+knitr::include_graphics(
+    "figures/HCA_sccomp_SUPPLEMENTARY_technical_cartoon_curatedAtlasQuery.png"
+)
 ```
 
 # Data Sources in R / Bioconductor
@@ -94,6 +96,14 @@ allows us to get a small and quick subset of the available metadata.
 
 ```{r}
 metadata <- get_metadata(remote_url = CuratedAtlasQueryR::SAMPLE_DATABASE_URL)
+```
+
+Get a view of the first 10 columns in the metadata with `glimpse`
+
+```{r}
+metadata |>
+  select(1:10) |>
+  glimpse()
 ```
 
 # A note on the piping operator
