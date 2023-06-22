@@ -31,6 +31,15 @@ several analytic and visualization tools to help you to discover single cell
 data patterns. To see the list of tools, browse to
 https://cellxgene.cziscience.com/.
 
+# CELLxGENE | Census
+
+The Census provides efficient computational tooling to access, query, and
+analyze all single-cell RNA data from CZ CELLxGENE Discover. Using a new access
+paradigm of cell-based slicing and querying, you can interact with the data
+through TileDB-SOMA, or get slices in AnnData or Seurat objects, thus
+accelerating your research by significantly minimizing data harmonization at
+https://chanzuckerberg.github.io/cellxgene-census/.
+
 # The CuratedAtlasQueryR Project
 
 To systematically characterize the immune system across tissues, demographics
@@ -57,7 +66,9 @@ transcriptional profiles. This platform offers a standardized workflow for
 accessing atlas-level datasets programmatically and reproducibly.
 
 ```{r,echo=FALSE}
-knitr::include_graphics("figures/HCA_sccomp_SUPPLEMENTARY_technical_cartoon_curatedAtlasQuery.png")
+knitr::include_graphics(
+    "figures/HCA_sccomp_SUPPLEMENTARY_technical_cartoon_curatedAtlasQuery.png"
+)
 ```
 
 # Data Sources in R / Bioconductor
@@ -94,6 +105,14 @@ allows us to get a small and quick subset of the available metadata.
 
 ```{r}
 metadata <- get_metadata(remote_url = CuratedAtlasQueryR::SAMPLE_DATABASE_URL)
+```
+
+Get a view of the first 10 columns in the metadata with `glimpse`
+
+```{r}
+metadata |>
+  select(1:10) |>
+  glimpse()
 ```
 
 # A note on the piping operator
