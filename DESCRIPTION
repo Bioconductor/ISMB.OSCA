@@ -1,6 +1,6 @@
 Package: ISMB.OSCA
 Title: Orchestrating Large-Scale Single-Cell Analysis with Bioconductor
-Version: 0.99.2
+Version: 0.99.3
 Authors@R: 
     c(person("Davide", "Risso", role = "aut", email = "davide.risso@unipd.it"),
     person("Ludwig", "Geistlinger", role = c("aut", "cre"),
