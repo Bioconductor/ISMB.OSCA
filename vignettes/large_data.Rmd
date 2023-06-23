@@ -201,9 +201,91 @@ outweigh any benefit from parallel computing.
 
 ### Seurat
 
+[Seurat](https://satijalab.org/seurat) is an R package designed for QC, analysis,
+and exploration of single-cell RNA-seq data. Seurat can be used to identify and
+interpret sources of heterogeneity from single-cell transcriptomic measurements,
+and to integrate diverse types of single-cell data.
+
+Seurat is developed and maintained by the
+[Satija lab](https://satijalab.org/seurat/authors.html)
+and is released under the [MIT license](https://opensource.org/license/mit/).
+
 ```{r load-seurat, message = FALSE}
 library(Seurat)
 ```
+
+Although the basic processing of single-cell data with Bioconductor packages
+(described in the [OSCA book](https://bioconductor.org/books/release/OSCA/))
+and with Seurat is very similar and will produce overall roughly identical
+results, there is also complementary functionality with regard to cell type
+annotation, dataset integration, and downstream analysis.
+
+To make the most of both ecosystems it is therefore beneficial to be able 
+to easily switch between a `SeuratObject` and a `SingleCellExperiment`.  
+
+See also the Seurat
+[conversion vignette](https://satijalab.org/seurat/articles/conversion_vignette.html)
+for conversion to/from other popular single cell formats such as the AnnData
+format used by [scanpy](https://scanpy.readthedocs.io/en/stable/).
+
+Here, we demonstrate converting the Seurat object produced in Seurat's
+[PBMC tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html)
+to a `SingleCellExperiment` for further analysis with functionality from
+OSCA/Bioconductor.
+
+We therefore need to first install the 
+[SeuratData](https://github.com/satijalab/seurat-data) package, which is available
+from GitHub only. 
+
+```{r, eval = FALSE}
+BiocManager::install("satijalab/seurat-data")
+```
+
+We then proceed by loading all required packages and installing the PBMC dataset:
+
+```{r, eval = FALSE}
+library(SeuratData)
+InstallData("pbmc3k")
+```
+
+We then load the dataset as an `SeuratObject` and convert it to a 
+`SingleCellExperiment`.
+
+```{r seurat_singlecell}
+# Use PBMC3K from SeuratData
+pbmc <- LoadData(ds = "pbmc3k", type = "pbmc3k.final")
+pbmc
+pbmc.sce <- as.SingleCellExperiment(pbmc)
+pbmc.sce
+```
+
+**Exercise**: Use the `pbmc.sce` object to plot the expression level of MS4A1
+across cell types using functionality from the 
+[scater](https://bioconductor.org/packages/scater) package. 
+(Hint: use the `plotExpression` function).
+
+**Challenge**: Combine the marker gene expression plot with a reduced dimension
+plot of all cells in PCA space, with cells colored by cell type. 
+(Hint: use the `plotPCA` function).
+
+Seurat also allows conversion from `SingleCellExperiment` objects to Seurat objects; 
+we demonstrate this here on the wild-type chimera mouse gastrulation dataset. 
+
+```{r sce2sobj, message = FALSE}
+sce <- WTChimeraData(samples = 5, type = "processed")
+sce <- logNormCounts(sce)
+sce <- runPCA(sce)
+sobj <- as.Seurat(sce)
+Idents(sobj) <- "CellType"
+sobj
+```
+
+**Exercise**: Use the `manno.seurat` object to produce a PCA plot with cells 
+colored by timepoint (Hint: use the `DimPlot` function). 
+
+**Challenge**: Combine the PCA plot with a ridge plot of ACTB expression, 
+stratified by time point.
+(Hint: use the `RidgePlot` function).
 
 ### Scanpy
 
