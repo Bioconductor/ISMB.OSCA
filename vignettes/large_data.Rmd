@@ -56,7 +56,7 @@ We demonstrate with a subset of 20,000 cells from the 1.3 million brain cell
 data set, as provided by the
 [TENxBrainData](https://bioconductor.org/packages/TENxBrainData) package.
 
-```{r, message = FALSE}
+```{r tenx-brain, message = FALSE}
 library(TENxBrainData)
 sce.brain <- TENxBrainData20k() 
 sce.brain
@@ -69,7 +69,7 @@ simply a stub that points to the much larger HDF5 file that actually contains
 the data.
 This avoids the need for large RAM availability during analyses.
 
-```{r}
+```{r tenx-brain-size}
 counts(sce.brain)
 object.size(counts(sce.brain))
 file.info(path(counts(sce.brain)))$size
@@ -243,7 +243,7 @@ BiocManager::install("satijalab/seurat-data")
 
 We then proceed by loading all required packages and installing the PBMC dataset:
 
-```{r, eval = FALSE}
+```{r seurat-data}
 library(SeuratData)
 InstallData("pbmc3k")
 ```
@@ -259,33 +259,24 @@ pbmc.sce <- as.SingleCellExperiment(pbmc)
 pbmc.sce
 ```
 
-**Exercise**: Use the `pbmc.sce` object to plot the expression level of MS4A1
-across cell types using functionality from the 
-[scater](https://bioconductor.org/packages/scater) package. 
-(Hint: use the `plotExpression` function).
-
-**Challenge**: Combine the marker gene expression plot with a reduced dimension
-plot of all cells in PCA space, with cells colored by cell type. 
-(Hint: use the `plotPCA` function).
-
 Seurat also allows conversion from `SingleCellExperiment` objects to Seurat objects; 
 we demonstrate this here on the wild-type chimera mouse gastrulation dataset. 
 
 ```{r sce2sobj, message = FALSE}
 sce <- WTChimeraData(samples = 5, type = "processed")
+assay(sce) <- as.matrix(assay(sce))
 sce <- logNormCounts(sce)
-sce <- runPCA(sce)
-sobj <- as.Seurat(sce)
-Idents(sobj) <- "CellType"
-sobj
+sce
 ```
 
-**Exercise**: Use the `manno.seurat` object to produce a PCA plot with cells 
-colored by timepoint (Hint: use the `DimPlot` function). 
+After some processing of the dataset, the actual conversion is carried out with
+the `as.Seurat` function.
 
-**Challenge**: Combine the PCA plot with a ridge plot of ACTB expression, 
-stratified by time point.
-(Hint: use the `RidgePlot` function).
+```{r, warning = FALSE}
+sobj <- as.Seurat(sce)
+Idents(sobj) <- "celltype.mapped"
+sobj
+```
 
 ### Scanpy
 
