@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ISMB.OSCA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.5</span>
       </span>
     </div>
 
@@ -277,9 +277,9 @@ the Bioconductor ecosystem, manifesting as a <code>BPPARAM</code>
 argument in compatible functions. We can also use
 <code>BiocParallel</code> with more expressive functions directly
 through the package’s interface.</p>
-<div class="section level3">
-<h3 id="basic-use">Basic use<a class="anchor" aria-label="anchor" href="#basic-use"></a>
-</h3>
+<div class="section level4">
+<h4 id="basic-use">Basic use<a class="anchor" aria-label="anchor" href="#basic-use"></a>
+</h4>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Bioconductor/BiocParallel" class="external-link">BiocParallel</a></span><span class="op">)</span></span></code></pre></div>
 <p><code>BiocParallel</code> makes it quite easy to iterate over a
@@ -374,6 +374,143 @@ any benefit from parallel computing.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="fast-approximations">Fast approximations<a class="anchor" aria-label="anchor" href="#fast-approximations"></a>
+</h2>
+<div class="section level3">
+<h3 id="nearest-neighbor-searching">Nearest neighbor searching<a class="anchor" aria-label="anchor" href="#nearest-neighbor-searching"></a>
+</h3>
+<p>Identification of neighbouring cells in PC or expression space is a
+common procedure that is used in many functions, e.g.,
+<code><a href="https://rdrr.io/pkg/scran/man/buildSNNGraph.html" class="external-link">buildSNNGraph()</a></code>, <code><a href="https://rdrr.io/pkg/scran/man/defunct.html" class="external-link">doubletCells()</a></code>. The default
+is to favour accuracy over speed by using an exact nearest neighbour
+(NN) search, implemented with the <span class="math inline">\(k\)</span>-means for <span class="math inline">\(k\)</span>-nearest neighbours algorithm. However,
+for large data sets, it may be preferable to use a faster approximate
+approach.</p>
+<p>The <em><a href="https://bioconductor.org/packages/3.17/BiocNeighbors" class="external-link">BiocNeighbors</a></em>
+framework makes it easy to switch between search options by simply
+changing the <code>BNPARAM</code> argument in compatible functions. To
+demonstrate, we will use the wild-type chimera data for which we had
+applied graph-based clustering using the Louvain algorithm for community
+detection:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">bluster</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/runPCA.html" class="external-link">runPCA</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html" class="external-link">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/clusterCells.html" class="external-link">clusterCells</a></span><span class="op">(</span><span class="va">sce</span>, use.dimred <span class="op">=</span> <span class="st">"PCA"</span>,</span>
+<span>                               BLUSPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/bluster/man/NNGraphParam-class.html" class="external-link">NNGraphParam</a></span><span class="op">(</span>cluster.fun <span class="op">=</span> <span class="st">"louvain"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The above clusters on a nearest neighbor graph generated with an
+exact neighbour search. We repeat this below using an approximate
+search, implemented using the <a href="https://github.com/spotify/Annoy" class="external-link">Annoy</a> algorithm. This
+involves constructing a <code>AnnoyParam</code> object to specify the
+search algorithm and then passing it to the parameterization of the
+<code><a href="https://rdrr.io/pkg/bluster/man/NNGraphParam-class.html" class="external-link">NNGraphParam()</a></code> function. The results from the exact and
+approximate searches are consistent with most clusters from the former
+re-appearing in the latter. This suggests that the inaccuracy from the
+approximation can be largely ignored.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">BiocNeighbors</span><span class="op">)</span></span>
+<span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/clusterCells.html" class="external-link">clusterCells</a></span><span class="op">(</span><span class="va">sce</span>, use.dimred <span class="op">=</span> <span class="st">"PCA"</span>,</span>
+<span>                         BLUSPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/bluster/man/NNGraphParam-class.html" class="external-link">NNGraphParam</a></span><span class="op">(</span>cluster.fun <span class="op">=</span> <span class="st">"louvain"</span>,</span>
+<span>                                                  BNPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocNeighbors/man/AnnoyParam.html" class="external-link">AnnoyParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span>exact <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html" class="external-link">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, approx <span class="op">=</span> <span class="va">clusters</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##      approx</span></span>
+<span><span class="co">## exact   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15</span></span>
+<span><span class="co">##    1   89   0   0   0   2   0   0   0   1   0   0   0   0   0   0</span></span>
+<span><span class="co">##    2    0 143   0   0   0   0   0   0   0   0   0   0   0   0   1</span></span>
+<span><span class="co">##    3    0   0  75   0   0   0   0   0   0   0   0   0   0   0   0</span></span>
+<span><span class="co">##    4    0   0   0 341   0   0   0   0   0   0   0   0   0   0   0</span></span>
+<span><span class="co">##    5    0   0   2   0 391   0   0   1   0   0   0   1   0   0   0</span></span>
+<span><span class="co">##    6    0   0   0   0   0 209   0   0   0   0   0   0   0   0   0</span></span>
+<span><span class="co">##    7    0   0   0   0   0   1 244   0   0   1   0   0   0   0   0</span></span>
+<span><span class="co">##    8    0   0   0   0   0   0   0  95   0   0   0   0   0   0   0</span></span>
+<span><span class="co">##    9    1   0   0   0   2   0   0   0 106   0   0   0   0   0   0</span></span>
+<span><span class="co">##    10   0   0   0   0   1   0   0   0   0 113   0   0   0   0   0</span></span>
+<span><span class="co">##    11   0   0   0   0   0   1   0   0   0   0 153   0   0   0   0</span></span>
+<span><span class="co">##    12   0   0   0   0   1   0   0   0   0   0   0 214   0   0   0</span></span>
+<span><span class="co">##    13   0   0   0   0   0   0   0   0   0   0   0   0 146   0   0</span></span>
+<span><span class="co">##    14   0   0   0   0   0   0   0   0   0   0   0   0   0  20   0</span></span>
+<span><span class="co">##    15   0   0   0   0   0   0   0   0   0   0   0   0   0   0  56</span></span></code></pre>
+<p>Note that Annoy writes the NN index to disk prior to performing the
+search. Thus, it may not actually be faster than the default exact
+algorithm for small datasets, depending on whether the overhead of disk
+write is offset by the computational complexity of the search. It is
+also not difficult to find situations where the approximation
+deteriorates, especially at high dimensions, though this may not have an
+appreciable impact on the biological conclusions.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="va">y1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50000</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="va">y2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">50000</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">y1</span>, <span class="va">y2</span><span class="op">)</span></span>
+<span><span class="va">exact</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocNeighbors/man/findKNN-methods.html" class="external-link">findKNN</a></span><span class="op">(</span><span class="va">Y</span>, k <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">approx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocNeighbors/man/findKNN-methods.html" class="external-link">findKNN</a></span><span class="op">(</span><span class="va">Y</span>, k <span class="op">=</span> <span class="fl">20</span>, BNPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocNeighbors/man/AnnoyParam.html" class="external-link">AnnoyParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">exact</span><span class="op">$</span><span class="va">index</span> <span class="op">!=</span> <span class="va">approx</span><span class="op">$</span><span class="va">index</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 0.561925</span></span></code></pre>
+</div>
+<div class="section level3">
+<h3 id="singular-value-decomposition">Singular value decomposition<a class="anchor" aria-label="anchor" href="#singular-value-decomposition"></a>
+</h3>
+<p>The singular value decomposition (SVD) underlies the PCA used
+throughout our analyses, e.g., in <code><a href="https://rdrr.io/pkg/scran/man/denoisePCA.html" class="external-link">denoisePCA()</a></code>,
+<code>fastMNN()</code>, <code><a href="https://rdrr.io/pkg/scran/man/defunct.html" class="external-link">doubletCells()</a></code>. (Briefly, the right
+singular vectors are the eigenvectors of the gene-gene covariance
+matrix, where each eigenvector represents the axis of maximum remaining
+variation in the PCA.) The default <code><a href="https://rdrr.io/r/base/svd.html" class="external-link">base::svd()</a></code> function
+performs an exact SVD that is not performant for large datasets.
+Instead, we use fast approximate methods from the <em><a href="https://CRAN.R-project.org/package=irlba" class="external-link">irlba</a></em> and
+<em><a href="https://CRAN.R-project.org/package=rsvd" class="external-link">rsvd</a></em>
+packages, conveniently wrapped into the <em><a href="https://bioconductor.org/packages/3.17/BiocSingular" class="external-link">BiocSingular</a></em>
+package for ease of use and package development. Specifically, we can
+change the SVD algorithm used in any of these functions by simply
+specifying an alternative value for the <code>BSPARAM</code>
+argument.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/LTLA/BiocSingular" class="external-link">BiocSingular</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># As the name suggests, it is random, so we need to set the seed.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">101000</span><span class="op">)</span></span>
+<span><span class="va">r.out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/runPCA.html" class="external-link">runPCA</a></span><span class="op">(</span><span class="va">sce</span>, ncomponents <span class="op">=</span> <span class="fl">20</span>, BSPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/BiocSingularParam.html" class="external-link">RandomParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">r.out</span>, <span class="st">"PCA"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##  num [1:2411, 1:20] 14.79 5.79 13.07 -32.19 -26.45 ...</span></span>
+<span><span class="co">##  - attr(*, "dimnames")=List of 2</span></span>
+<span><span class="co">##   ..$ : chr [1:2411] "cell_9769" "cell_9770" "cell_9771" "cell_9772" ...</span></span>
+<span><span class="co">##   ..$ : chr [1:20] "PC1" "PC2" "PC3" "PC4" ...</span></span>
+<span><span class="co">##  - attr(*, "varExplained")= num [1:20] 192.6 87 29.4 23.1 21.6 ...</span></span>
+<span><span class="co">##  - attr(*, "percentVar")= num [1:20] 25.84 11.67 3.94 3.1 2.89 ...</span></span>
+<span><span class="co">##  - attr(*, "rotation")= num [1:500, 1:20] -0.174 -0.173 -0.157 0.105 -0.132 ...</span></span>
+<span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
+<span><span class="co">##   .. ..$ : chr [1:500] "ENSMUSG00000055609" "ENSMUSG00000052217" "ENSMUSG00000069919" "ENSMUSG00000048583" ...</span></span>
+<span><span class="co">##   .. ..$ : chr [1:20] "PC1" "PC2" "PC3" "PC4" ...</span></span></code></pre>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">101001</span><span class="op">)</span></span>
+<span><span class="va">i.out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/runPCA.html" class="external-link">runPCA</a></span><span class="op">(</span><span class="va">sce</span>, ncomponents <span class="op">=</span> <span class="fl">20</span>, BSPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/BiocSingularParam.html" class="external-link">IrlbaParam</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">i.out</span>, <span class="st">"PCA"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##  num [1:2411, 1:20] -14.79 -5.79 -13.07 32.19 26.45 ...</span></span>
+<span><span class="co">##  - attr(*, "dimnames")=List of 2</span></span>
+<span><span class="co">##   ..$ : chr [1:2411] "cell_9769" "cell_9770" "cell_9771" "cell_9772" ...</span></span>
+<span><span class="co">##   ..$ : chr [1:20] "PC1" "PC2" "PC3" "PC4" ...</span></span>
+<span><span class="co">##  - attr(*, "varExplained")= num [1:20] 192.6 87 29.4 23.1 21.6 ...</span></span>
+<span><span class="co">##  - attr(*, "percentVar")= num [1:20] 25.84 11.67 3.94 3.1 2.89 ...</span></span>
+<span><span class="co">##  - attr(*, "rotation")= num [1:500, 1:20] 0.174 0.173 0.157 -0.105 0.132 ...</span></span>
+<span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
+<span><span class="co">##   .. ..$ : chr [1:500] "ENSMUSG00000055609" "ENSMUSG00000052217" "ENSMUSG00000069919" "ENSMUSG00000048583" ...</span></span>
+<span><span class="co">##   .. ..$ : chr [1:20] "PC1" "PC2" "PC3" "PC4" ...</span></span></code></pre>
+<p>Both IRLBA and randomized SVD (RSVD) are much faster than the exact
+SVD with negligible loss of accuracy. This motivates their default use
+in many <em><a href="https://bioconductor.org/packages/3.17/scran" class="external-link">scran</a></em> and
+<em><a href="https://bioconductor.org/packages/3.17/scater" class="external-link">scater</a></em>
+functions, at the cost of requiring users to set the seed to guarantee
+reproducibility. IRLBA can occasionally fail to converge and require
+more iterations (passed via <code>maxit=</code> in
+<code><a href="https://rdrr.io/pkg/BiocSingular/man/BiocSingularParam.html" class="external-link">IrlbaParam()</a></code>), while RSVD involves an explicit trade-off
+between accuracy and speed based on its oversampling parameter
+(<code>p=</code>) and number of power iterations (<code>q=</code>). We
+tend to prefer IRLBA as its default behavior is more accurate, though
+RSVD is much faster for file-backed matrices.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="interoperability-with-popular-single-cell-analysis-ecosytems">Interoperability with popular single-cell analysis ecosytems<a class="anchor" aria-label="anchor" href="#interoperability-with-popular-single-cell-analysis-ecosytems"></a>
 </h2>
 <div class="section level3">
@@ -383,41 +520,39 @@ any benefit from parallel computing.</p>
 designed for QC, analysis, and exploration of single-cell RNA-seq data.
 Seurat can be used to identify and interpret sources of heterogeneity
 from single-cell transcriptomic measurements, and to integrate diverse
-types of single-cell data.</p>
-<p>Seurat is developed and maintained by the <a href="https://satijalab.org/seurat/authors.html" class="external-link">Satija lab</a> and is
+types of single-cell data. Seurat is developed and maintained by the <a href="https://satijalab.org/seurat/authors.html" class="external-link">Satija lab</a> and is
 released under the <a href="https://opensource.org/license/mit/" class="external-link">MIT
 license</a>.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://satijalab.org/seurat" class="external-link">Seurat</a></span><span class="op">)</span></span></code></pre></div>
 <p>Although the basic processing of single-cell data with Bioconductor
 packages (described in the <a href="https://bioconductor.org/books/release/OSCA/" class="external-link">OSCA book</a>) and
 with Seurat is very similar and will produce overall roughly identical
 results, there is also complementary functionality with regard to cell
-type annotation, dataset integration, and downstream analysis.</p>
-<p>To make the most of both ecosystems it is therefore beneficial to be
-able to easily switch between a <code>SeuratObject</code> and a
-<code>SingleCellExperiment</code>.</p>
-<p>See also the Seurat <a href="https://satijalab.org/seurat/articles/conversion_vignette.html" class="external-link">conversion
+type annotation, dataset integration, and downstream analysis. To make
+the most of both ecosystems it is therefore beneficial to be able to
+easily switch between a <code>SeuratObject</code> and a
+<code>SingleCellExperiment</code>. See also the Seurat <a href="https://satijalab.org/seurat/articles/conversion_vignette.html" class="external-link">conversion
 vignette</a> for conversion to/from other popular single cell formats
 such as the AnnData format used by <a href="https://scanpy.readthedocs.io/en/stable/" class="external-link">scanpy</a>.</p>
 <p>Here, we demonstrate converting the Seurat object produced in
 Seurat’s <a href="https://satijalab.org/seurat/articles/pbmc3k_tutorial.html" class="external-link">PBMC
 tutorial</a> to a <code>SingleCellExperiment</code> for further analysis
-with functionality from OSCA/Bioconductor.</p>
-<p>We therefore need to first install the <a href="https://github.com/satijalab/seurat-data" class="external-link">SeuratData</a> package,
+with functionality from OSCA/Bioconductor. We therefore need to first
+install the <a href="https://github.com/satijalab/seurat-data" class="external-link">SeuratData</a> package,
 which is available from GitHub only.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"satijalab/seurat-data"</span><span class="op">)</span></span></code></pre></div>
 <p>We then proceed by loading all required packages and installing the
 PBMC dataset:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.satijalab.org/seurat" class="external-link">SeuratData</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://satijalab.org/seurat/reference/InstallData.html" class="external-link">InstallData</a></span><span class="op">(</span><span class="st">"pbmc3k"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Installing package into '/tmp/RtmpmEgf4s/temp_libpath6c356929dda'</span></span>
+<pre><code><span><span class="co">## Installing package into '/tmp/RtmpykQBUQ/temp_libpath1d9719897034'</span></span>
 <span><span class="co">## (as 'lib' is unspecified)</span></span></code></pre>
 <p>We then load the dataset as an <code>SeuratObject</code> and convert
 it to a <code>SingleCellExperiment</code>.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Use PBMC3K from SeuratData</span></span>
 <span><span class="va">pbmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/LoadData.html" class="external-link">LoadData</a></span><span class="op">(</span>ds <span class="op">=</span> <span class="st">"pbmc3k"</span>, type <span class="op">=</span> <span class="st">"pbmc3k.final"</span><span class="op">)</span></span>
 <span><span class="va">pbmc</span></span></code></pre></div>
@@ -425,7 +560,7 @@ it to a <code>SingleCellExperiment</code>.</p>
 <span><span class="co">## 13714 features across 2638 samples within 1 assay </span></span>
 <span><span class="co">## Active assay: RNA (13714 features, 2000 variable features)</span></span>
 <span><span class="co">##  2 dimensional reductions calculated: pca, umap</span></span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pbmc.sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/as.SingleCellExperiment.html" class="external-link">as.SingleCellExperiment</a></span><span class="op">(</span><span class="va">pbmc</span><span class="op">)</span></span>
 <span><span class="va">pbmc.sce</span></span></code></pre></div>
 <pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
@@ -443,7 +578,7 @@ it to a <code>SingleCellExperiment</code>.</p>
 <p>Seurat also allows conversion from <code>SingleCellExperiment</code>
 objects to Seurat objects; we demonstrate this here on the wild-type
 chimera mouse gastrulation dataset.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples <span class="op">=</span> <span class="fl">5</span>, type <span class="op">=</span> <span class="st">"processed"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
@@ -462,7 +597,7 @@ chimera mouse gastrulation dataset.</p>
 <span><span class="co">## altExpNames(0):</span></span></code></pre>
 <p>After some processing of the dataset, the actual conversion is
 carried out with the <code>as.Seurat</code> function.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sobj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/as.Seurat.html" class="external-link">as.Seurat</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/Idents.html" class="external-link">Idents</a></span><span class="op">(</span><span class="va">sobj</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"celltype.mapped"</span></span>
 <span><span class="va">sobj</span></span></code></pre></div>
@@ -474,8 +609,62 @@ carried out with the <code>as.Seurat</code> function.</p>
 <div class="section level3">
 <h3 id="scanpy">Scanpy<a class="anchor" aria-label="anchor" href="#scanpy"></a>
 </h3>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<p><a href="https://scanpy.readthedocs.io" class="external-link">Scanpy</a> is a scalable
+toolkit for analyzing single-cell gene expression data built jointly
+with <a href="https://anndata.readthedocs.io/" class="external-link">anndata</a>. It includes
+preprocessing, visualization, clustering, trajectory inference and
+differential expression testing. The Python-based implementation
+efficiently deals with datasets of more than one million cells. Scanpy
+is developed and maintained by the <a href="">Theis lab</a> and is
+released under a <a href="https://github.com/scverse/scanpy/blob/master/LICENSE" class="external-link">BSD-3-Clause
+license</a>. Scanpy is part of the <a href="https://scverse.org/" class="external-link">scverse</a>, a Python-based ecosystem for
+single-cell omics data analysis.</p>
+<p>At the core of scanpy’s single-cell functionality is the
+<code>anndata</code> data structure, scanpy’s integrated single-cell
+data container, which is conceptually very similar to Bioconductor’s
+<code>SingleCellExperiment</code> class.</p>
+<p>Bioconductor’s <em><a href="https://bioconductor.org/packages/3.17/zellkonverter" class="external-link">zellkonverter</a></em>
+package provides a lightweight interface between the Bioconductor
+<code>SingleCellExperiment</code> data structure and the Python
+<code>AnnData</code>-based single-cell analysis environment. The idea is
+to enable users and developers to easily move data between these
+frameworks to construct a multi-language analysis pipeline across
+R/Bioconductor and Python.</p>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/theislab/zellkonverter" class="external-link">zellkonverter</a></span><span class="op">)</span></span></code></pre></div>
+<p>The <code><a href="https://rdrr.io/pkg/zellkonverter/man/readH5AD.html" class="external-link">readH5AD()</a></code> function can be used to read a
+<code>SingleCellExperiment</code> from an H5AD file. Here, we use an
+example H5AD file contained in the <em><a href="https://bioconductor.org/packages/3.17/zellkonverter" class="external-link">zellkonverter</a></em>
+package.</p>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">example_h5ad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"krumsiek11.h5ad"</span>,</span>
+<span>                            package <span class="op">=</span> <span class="st">"zellkonverter"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/zellkonverter/man/readH5AD.html" class="external-link">readH5AD</a></span><span class="op">(</span><span class="va">example_h5ad</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: The names of these selected <span style="color: #00BB00;">uns$highlights</span> items have been modified to match R</span></span>
+<span><span class="co">## conventions: <span style="color: #00BB00;">'0' -&gt; 'X0'</span>, <span style="color: #00BB00;">'159' -&gt; 'X159'</span>, <span style="color: #00BB00;">'319' -&gt; 'X319'</span>, <span style="color: #00BB00;">'459' -&gt; 'X459'</span>,</span></span>
+<span><span class="co">## and <span style="color: #00BB00;">'619' -&gt; 'X619'</span></span></span></code></pre>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 11 640 </span></span>
+<span><span class="co">## metadata(2): highlights iroot</span></span>
+<span><span class="co">## assays(1): X</span></span>
+<span><span class="co">## rownames(11): Gata2 Gata1 ... EgrNab Gfi1</span></span>
+<span><span class="co">## rowData names(0):</span></span>
+<span><span class="co">## colnames(640): 0 1 ... 158-3 159-3</span></span>
+<span><span class="co">## colData names(1): cell_type</span></span>
+<span><span class="co">## reducedDimNames(0):</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
+<p>We can also write a <code>SingleCellExperiment</code> to an H5AD file
+with the <code><a href="https://rdrr.io/pkg/zellkonverter/man/writeH5AD.html" class="external-link">writeH5AD()</a></code> function. This is demonstrated below
+on the wild-type chimera mouse gastrulation dataset.</p>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">out.file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>pattern <span class="op">=</span> <span class="st">".h5ad"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/zellkonverter/man/writeH5AD.html" class="external-link">writeH5AD</a></span><span class="op">(</span><span class="va">sce</span>, file <span class="op">=</span> <span class="va">out.file</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Using the <span style="color: #00BB00;">'counts'</span> assay as the <span style="color: #00BB00;">X matrix</span></span></span></code></pre>
+<p>The resulting H5AD file can then be read into Python using scanpy’s
+<a href="https://scanpy.readthedocs.io/en/stable/generated/scanpy.read_h5ad.html" class="external-link">read_h5ad</a>
+function and then directly used in compatible Python-based analysis
+frameworks.</p>
 </div>
 </div>
 <div class="section level2">
