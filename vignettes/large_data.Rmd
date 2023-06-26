@@ -382,9 +382,53 @@ sobj
 
 ## Scanpy
 
+[Scanpy](https://scanpy.readthedocs.io) is a scalable toolkit for analyzing
+single-cell gene expression data built jointly with
+[anndata](https://anndata.readthedocs.io/). It includes
+preprocessing, visualization, clustering, trajectory inference and differential
+expression testing. The Python-based implementation efficiently deals with
+datasets of more than one million cells. Scanpy is developed and maintained by
+the [Theis lab]() and is released under a
+[BSD-3-Clause license](https://github.com/scverse/scanpy/blob/master/LICENSE).
+Scanpy is part of the [scverse](https://scverse.org/), a Python-based ecosystem
+for single-cell omics data analysis.
+
+At the core of scanpy's single-cell functionality is the `anndata` data structure,
+scanpy's integrated single-cell data container, which is conceptually very similar
+to Bioconductor's `SingleCellExperiment` class.
+
+Bioconductor's `r Biocpkg("zellkonverter")` package provides a lightweight
+interface between the Bioconductor `SingleCellExperiment` data structure and the
+Python `AnnData`-based single-cell analysis environment. The idea is to enable
+users and developers to easily move data between these frameworks to construct a
+multi-language analysis pipeline across R/Bioconductor and Python.
+
 ```{r load-zellkonv, message = FALSE}
 library(zellkonverter)
 ```
+
+The `readH5AD()` function can be used to read a `SingleCellExperiment` from an
+H5AD file. Here, we use an example H5AD file contained in the  `r Biocpkg("zellkonverter")`
+package.
+
+```{r read-h5ad}
+example_h5ad <- system.file("extdata", "krumsiek11.h5ad",
+                            package = "zellkonverter")
+readH5AD(example_h5ad)
+```
+
+We can also write a `SingleCellExperiment` to an H5AD file with the
+`writeH5AD()` function. This is demonstrated below on the wild-type
+chimera mouse gastrulation dataset. 
+
+```{r write-h5ad}
+out.file <- tempfile(pattern = ".h5ad")
+writeH5AD(sce, file = out.file)
+```
+
+The resulting H5AD file can then be read into Python using scanpy's
+[read_h5ad](https://scanpy.readthedocs.io/en/stable/generated/scanpy.read_h5ad.html)
+function and then directly used in compatible Python-based analysis frameworks.
 
 # References
 
