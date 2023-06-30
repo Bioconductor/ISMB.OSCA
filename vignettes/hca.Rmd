@@ -344,13 +344,19 @@ metadata |>
 
 </details>
 
-
 # Session Info
 
 ```{r}
 sessionInfo()
 ```
 
-# Further Reading
+# Acknowledgements
 
-# Exercises
+Thank you to [Stefano Mangiola](https://github.com/stemangiola) and his team for
+developing
+[CuratedAtlasQueryR](https://github.com/stemangiola/CuratedAtlasQueryR) and
+graciously providing the content from their vignette. Make sure to keep an eye
+out for their publication for proper citation. Their bioRxiv paper can be found
+at <https://www.biorxiv.org/content/10.1101/2023.06.08.542671v1>.
+
+# References
