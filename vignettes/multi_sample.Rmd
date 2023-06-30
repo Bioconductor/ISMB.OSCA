@@ -68,6 +68,10 @@ For now, let's assume that we want to remove this effect.
 
 # Correcting batch effects
 
+We correct the effect of samples by aid of the `correctExperiment` function
+in the `batchelor` package and using the `sample` `colData` column as batch.
+
+
 ```{r}
 
 ## This needs work
@@ -90,6 +94,8 @@ plotTSNE(merged, colour_by="batch")
 # do we want to include the diagnostics about the batch correction?
 ```
 
+Once we removed the sample batch effect, we can proceed with the Differential 
+Expression Analysis.
 
 
 # Differential Expression
@@ -97,51 +103,33 @@ plotTSNE(merged, colour_by="batch")
 Section 4 of OSCA multisample.
 
 In order to perform a Differential Expression Analysis, we need to identify 
-clusters of cells across samples/conditions (depending on the experimental 
-design and the final aim of the experiment) to proceed with it
+group of cells across samples/conditions (depending on the experimental 
+design and the final aim of the experiment). 
 
-## clustering identification
-
-```{r}
-g <- buildSNNGraph(merged, use.dimred="corrected")
-clusters <- igraph::cluster_louvain(g)
-colLabels(merged) <- factor(clusters$membership)
-merged <- runTSNE(merged, dimred="corrected", external_neighbors=TRUE)
-merged <- runUMAP(merged, dimred="corrected", external_neighbors=TRUE)
-```
-
-```{r}
-# table(colLabels(merged), merged$tomato)
-gridExtra::grid.arrange(
-    plotTSNE(merged, colour_by="tomato", text_by="label"),
-    plotTSNE(merged, colour_by=data.frame(pool=factor(merged$pool))),
-    ncol=2
-)
-```
-
-As previously mentioned, to assign biological meaning to the found clusters, we
-need to detect and assign gene-markers and provide cell labels.
-For lack of time, we will skip this time and knowledge demanding process and we
-use the annotation included with the dataset.
-This annotation has been previously performed using a cell type atlas by 
-Pijuan-Sala et al. (2019), using it as a reference for our dataset.
-From the next figure we can see that there are quite a few similarities between
-the clusters and the assigned labels, but in some cases we can notice that a
-cluster can contain multiple cell types, highlighting the difficulty to identify
-cell types by using cell markers and clusters.
-
-```{r}
-library(bluster)
-pairwiseRand(colLabels(merged), merged$celltype.mapped, "index")
-by.label <- table(colLabels(merged), merged$celltype.mapped)
-pheatmap::pheatmap(log2(by.label+1), color=viridis::viridis(101))
-```
+As previously saw, we have two ways of grouping cells, cell clustering and cell
+labeling.
+In our case we will focus on this secon aspect to group cells accordingly to the 
+already annotated cell types to proceed with the computation of the 
+pseudo-bulk samples.
 
 ## Pseudo-bulk samples
+
+To compute differences between different group of cells, a possible way is to 
+compute pseudo-bulk samples, where we mediate the gene signal of all the cells
+for each specific cell type.
+In this manner, we are then able to detect differences between the same cell type 
+across two different condition, but also across different cell types in the same condition, etcetera.
+
+To compute pseudo-bulk samples, we use `aggregateAcrossCells` function in the 
+`scuttle` package, which takes as input not only the single cell experiment, 
+but also the id to use for the identification of the group of cells.
+In our case, we use as id not just the cell type, but also the sample, because
+we want be able to discern between replicates and conditions during further steps.
 
 ```{r}
 # Using 'label' and 'sample' as our two factors; each column of the output
 # corresponds to one unique combination of these two factors.
+library(scuttle)
 summed <- aggregateAcrossCells(merged, 
     id=colData(merged)[,c("celltype.mapped", "sample")])
 summed
@@ -149,6 +137,17 @@ summed
 ```
 
 ## Differential Expression Analysis
+
+The main advantage of using pseudo-bulk samples is the possibility to use 
+well-tested methods for differential analysis like `edgeR` and `DESeq2`, we will
+focus on the first one for this analysis.
+
+Before to begin our analysis, let's say that we are mostly interested in a specific
+cell type, the "Mesenchymal stem cells" and look into differences across different
+conditions.
+
+<!-- To proceed with our analysis, we need to create an edgeR object for our data, so -->
+<!-- we first subset our dataset for the specific cell type and then we create the object. -->
 
 ```{r}
 label <- "Mesenchyme"
@@ -226,80 +225,32 @@ topTags(res)
 ```
 
 
+All the previous steps can be easily performed with the followin function
+
+```{r}
+library(scran)
+?pseudoBulkDGE(y)
+```
 
 
 
 # Differential Abundance
 
-Section 6 of OSCA multisample.
+Section 6.3 of OSCA multisample.
 
-```{r}
-
-abundances <- table(merged$celltype.mapped, merged$sample) 
-abundances <- as.data.frame(unclass(abundances))
-head(abundances)
-## add mosaic plot?
-# df <- as.data.frame(abundances)
-# Qui ho sommato le colonne REP1SHAM con REP2SHAM e le colonne REP1CAC con REP2CAC
-# df <- cbind(rowSums(df[,c(1,3)]), rowSums(df[,c(2,4)]))
-# colnames(df) <- c("CAC", "SHAM")
-# rownames(df) <- c("Endothelial", "FAPs", "Immune Cells", "MuSC", "Myonuclei", "Nervous System", "Pericyte", "Smooth Muscular","Tenocyte" )
-# Barplot
-# Create a df for barplot
-# cell.type <- rep(rownames(df), 6)
-# condition <- c(rep(paste0("S", 6:10), each=dim(df)[1]))
-# value <- c(df[,1], df[,2],df[,3], df[,4], df[,5], df[,6])
-# 
-# dfpl <- data.frame(cell.type,condition,value)
-# library(RColorBrewer)
-# newpal <- c(brewer.pal(12, "Set3"), brewer.pal(8, "Accent"), brewer.pal(8, "Dark2"), brewer.pal(8, "Set2"))
-# #Stacked
-# ggplot(dfpl, aes(y=value, x=condition, fill=cell.type,color=cell.type)) + 
-#     geom_bar(position="fill", stat="identity")+ scale_y_continuous(labels = scales::percent) +
-#   theme_classic()  +theme(legend.position="none")+ scale_color_manual(values=newpal)+
-#   scale_fill_manual(values=newpal) #+ labs(y="Nuclei proportion(%)", x="", fill=NULL, color=NULL)   
-#   # +theme_classic()  #+theme(legend.position="none")
-```
+<!-- from section 6.2-->
 
 ```{r}
 library(edgeR)
+abundances <- table(merged$celltype.mapped, merged$sample) 
+abundances <- unclass(abundances) 
 # Attaching some column metadata.
 extra.info <- colData(merged)[match(colnames(abundances), merged$sample),]
 y.ab <- DGEList(abundances, samples=extra.info)
-y.ab
-```
-
-Filtering low abundance labels
-
-```{r}
 keep <- filterByExpr(y.ab, group=y.ab$samples$tomato)
 y.ab <- y.ab[keep,]
-summary(keep)
-```
-
-```{r}
 design <- model.matrix(~factor(pool) + factor(tomato), y.ab$samples)
-```
-
-
-```{r}
 y.ab <- estimateDisp(y.ab, design, trend="none")
-summary(y.ab$common.dispersion)
-plotBCV(y.ab, cex=1)
-```
-
-```{r}
-fit.ab <- glmQLFit(y.ab, design, robust=TRUE, abundance.trend=FALSE)
-summary(fit.ab$var.prior)
-summary(fit.ab$df.prior)
-plotQLDisp(fit.ab, cex=1)
-```
-
-
-```{r}
-res <- glmQLFTest(fit.ab, coef=ncol(design))
-summary(decideTests(res))
-topTags(res)
 ```
 
 
