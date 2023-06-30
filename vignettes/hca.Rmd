@@ -318,6 +318,33 @@ metadata |>
 To see the full list of curated columns in the metadata, see the Details section
 in the `?get_metadata` documentation page.
 
+4. Now that we are a little familiar with navigating the metadata, let's obtain
+a `SingleCellExperiment` of 10X scRNA-seq counts of `lung` `macrophages` for
+females older than `80` with `COVID-19`. Note: Use the harmonized columns, where
+possible.
+
+```{r}
+# enter your code here
+```
+
+<details> <summary> Answer 4 </summary>
+
+```{r}
+metadata |> 
+    dplyr::filter(
+        sex == "female" &
+        age_days > 80 * 365 &
+        stringr::str_like(assay, "%10x%") &
+        disease == "COVID-19" &  
+        tissue_harmonised == "lung" & 
+        cell_type_harmonised == "macrophage"
+    ) |>
+    get_single_cell_experiment()
+```
+
+</details>
+
+
 # Session Info
 
 ```{r}
