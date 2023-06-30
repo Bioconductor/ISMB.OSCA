@@ -443,3 +443,27 @@ sessionInfo()
 
 # Exercises
 
+1. Out of memory representation: Write the counts matrix of the wild-type chimera
+mouse gastrulation dataset to an HDF5 file. Create another counts matrix that
+reads the data from the HDF5 file. Compare memory usage of holding the entire
+matrix in memory as opposed to holding the data out of memory.  
+
+Hint: see the `HDF5Array` function for reading from HDF5 and the `writeHDF5Array`
+function for writing to HDF5 from the `r BiocPkg("HDF5Array")` package.
+
+2. Parallelization: Perform a PCA analysis of the  wild-type chimera mouse gastrulation
+dataset using a multicore backend for parallel computation. Compare the runtime
+of performing the PCA either in serial execution mode, in multicore execution
+mode with 2 workers, and in multicore execution mode with 3 workers.
+
+Hint: use the function `system.time` to obtain the runtime of each job.
+
+3. Conversion to Seurat: The [scRNAseq](https://bioconductor.org/packages/scRNAseq)
+package provides gene-level counts for a collection of public scRNA-seq datasets,
+stored as `SingleCellExperiment` objects with annotated cell- and gene-level metadata.
+Consult the vignette of the [scRNAseq](https://bioconductor.org/packages/scRNAseq)
+package to inspect all available datasets and select a dataset of your choice.
+Convert the chosen dataset to a Seurat object and produce a PCA plot with cells
+colored by a cell metadata column of your choice.
+
+Hint: use Seurat's `DimPlot` function.

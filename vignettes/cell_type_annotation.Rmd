@@ -403,7 +403,7 @@ sessionInfo()
 
 # Exercises
 
-Exercise: The [Leiden algorithm](https://www.nature.com/articles/s41598-019-41695-z)
+1. Clustering: The [Leiden algorithm](https://www.nature.com/articles/s41598-019-41695-z)
 is similar to the Louvain algorithm, but it is faster and has been shown to result
 in better connected communities. Modify the above call to `clusterCells` to
 carry out the community detection with the Leiden algorithm instead. Visualize
@@ -414,3 +414,23 @@ to specify arguments passed on to the `cluster_leiden` function from the
 [igraph](https://cran.r-project.org/web/packages/igraph/index.html) package.
 Use the `cluster.args` argument to parameterize the clustering to use modularity
 as the objective function and a resolution parameter of 0.5.
+
+2. Cluster annotation: Another strategy for annotating the clusters is to perform
+a gene set enrichment analysis on the marker genes defining each cluster. This
+identifies the pathways and processes that are (relatively) active in each cluster
+based on upregulation of the associated genes compared to other clusters.
+Focus on the top 100 up-regulated genes in a cluster of your choice and perform
+a gene set enrichment analysis of biological process (BP) gene sets from the Gene
+Ontology (GO).
+
+Hint: Use the `goana()` function from the `r Biocpkg("limma")` package to 
+identify GO BP terms that are overrepresented in the list of marker genes.
+
+3. Workflow: The [scRNAseq](https://bioconductor.org/packages/scRNAseq) package provides
+gene-level counts for a collection of public scRNA-seq datasets, stored as 
+`SingleCellExperiment` objects with annotated cell- and gene-level metadata.
+Consult the vignette of the 
+[scRNAseq](https://bioconductor.org/packages/scRNAseq) package to inspect all
+available datasets and select a dataset of your choice. Perform a typical
+scRNA-seq analysis on this dataset including QC, normalization, feature selection,
+dimensionality reduction, clustering, and marker gene detection.  
