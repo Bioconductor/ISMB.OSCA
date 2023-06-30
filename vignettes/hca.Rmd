@@ -256,6 +256,95 @@ package.
 single_cell_counts |> saveHDF5SummarizedExperiment("single_cell_counts")
 ```
 
+# Exercises
+
+1. Use `count` and `arrange` to get the number of cells per tissue in descending
+order.
+
+```{r}
+# enter your code here
+```
+
+<details> <summary> Answer 1 </summary>
+
+```{r,eval=FALSE}
+metadata |>
+    count(tissue) |>
+    arrange(-n)
+```
+
+</details>
+
+2. Use `dplyr`-isms to group by `tissue` and `cell_type` and get a tally of the
+highest number of cell types per tissue combination. What tissue has the most
+numerous type of cells?
+
+```{r}
+# enter your code here
+```
+
+<details> <summary> Answer 2 </summary>
+
+```{r,eval=FALSE}
+metadata |>
+    group_by(tissue, cell_type) |>
+    count() |>
+    arrange(-n)
+```
+
+</details>
+
+3. Spot some differences between the `tissue` and `tissue_harmonised` columns.
+Use `count` to summarise.
+
+```{r}
+# enter your code here
+```
+
+<details> <summary> Answer 3 </summary>
+
+```{r}
+metadata |>
+    count(tissue) |>
+    arrange(-n)
+
+metadata |>
+    count(tissue_harmonised) |>
+    arrange(-n)
+```
+
+</details>
+
+To see the full list of curated columns in the metadata, see the Details section
+in the `?get_metadata` documentation page.
+
+4. Now that we are a little familiar with navigating the metadata, let's obtain
+a `SingleCellExperiment` of 10X scRNA-seq counts of `lung` `macrophages` for
+females older than `80` with `COVID-19`. Note: Use the harmonized columns, where
+possible.
+
+```{r}
+# enter your code here
+```
+
+<details> <summary> Answer 4 </summary>
+
+```{r}
+metadata |> 
+    dplyr::filter(
+        sex == "female" &
+        age_days > 80 * 365 &
+        stringr::str_like(assay, "%10x%") &
+        disease == "COVID-19" &  
+        tissue_harmonised == "lung" & 
+        cell_type_harmonised == "macrophage"
+    ) |>
+    get_single_cell_experiment()
+```
+
+</details>
+
+
 # Session Info
 
 ```{r}
