@@ -229,7 +229,7 @@ All the previous steps can be easily performed with the followin function
 
 ```{r}
 library(scran)
-?pseudoBulkDGE(y)
+#?pseudoBulkDGE(y)
 ```
 
 
