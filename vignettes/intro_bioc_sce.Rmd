@@ -24,3 +24,16 @@ Let's start with an example dataset.
 sce_processed <- WTChimeraData(samples=5:10)
 sce_processed
 ```
+
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+# Further Reading
+
+* OSCA book, [Introduction](https://bioconductor.org/books/release/OSCA.intro)
+
+# Exercises
+

@@ -255,4 +255,15 @@ plotColData(sce, y="DoubletScore", colour_by="doublet")
 plotTSNE(sce, colour_by="doublet")
 ```
 
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+# Further Reading
+
+* OSCA book, Basics, [Chapters 1-4](https://bioconductor.org/books/release/OSCA.basic)
+
+# Exercises
 

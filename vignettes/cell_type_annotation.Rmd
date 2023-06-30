@@ -389,6 +389,18 @@ a fitted three-component mixture, and the grey curve represents a fitted normal
 distribution. Vertical lines represent threshold estimates corresponding to each
 estimate of the distribution. 
 
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+# Further Reading
+
+* OSCA book, [Chapters 5-7](https://bioconductor.org/books/release/OSCA.basic/clustering.html)
+* Assigning cell types with SingleR ([the book](https://bioconductor.org/books/release/SingleRBook/)).
+* The [AUCell](https://bioconductor.org/packages/AUCell) package vignette.
+
 # Exercises
 
 Exercise: The [Leiden algorithm](https://www.nature.com/articles/s41598-019-41695-z)
@@ -402,5 +414,3 @@ to specify arguments passed on to the `cluster_leiden` function from the
 [igraph](https://cran.r-project.org/web/packages/igraph/index.html) package.
 Use the `cluster.args` argument to parameterize the clustering to use modularity
 as the objective function and a resolution parameter of 0.5.
-
-

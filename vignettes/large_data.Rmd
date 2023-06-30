@@ -430,9 +430,16 @@ The resulting H5AD file can then be read into Python using scanpy's
 [read_h5ad](https://scanpy.readthedocs.io/en/stable/generated/scanpy.read_h5ad.html)
 function and then directly used in compatible Python-based analysis frameworks.
 
-# References
+# Session Info
 
-See Chapter 14: Dealing with big data in the OSCA book.
-https://bioconductor.org/books/3.17/OSCA.advanced/dealing-with-big-data.html
-We also include examples from the `BiocParallel` 
-`r Biocpkg("BiocParallel", vignette = "Introduction_To_BiocParallel.html", label = "intro vignette")`. 
+```{r sessionInfo}
+sessionInfo()
+```
+
+# Further Reading
+
+* OSCA book, [Chapter 14](https://bioconductor.org/books/release/OSCA.advanced/dealing-with-big-data.html): Dealing with big data 
+* The `BiocParallel` `r Biocpkg("BiocParallel", vignette = "Introduction_To_BiocParallel.html", label = "intro vignette")`. 
+
+# Exercises
+
