@@ -10,11 +10,13 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+rm(list = ls())
+gc()
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 library(BiocStyle)
 ```
 
-## Motivation 
+# Motivation 
 
 Advances in scRNA-seq technologies have increased the number of cells that can 
 be assayed in routine experiments.
@@ -28,7 +30,7 @@ increasing size of scRNA-seq data sets.
 This section discusses how we can use various aspects of the Bioconductor 
 ecosystem to tune our analysis pipelines for greater speed and efficiency.
 
-## Out of memory representations
+# Out of memory representations
 
 The count matrix is the central structure around which our analyses are based.
 In most of the previous chapters, this has been held fully in memory as a dense 
@@ -54,7 +56,7 @@ We demonstrate with a subset of 20,000 cells from the 1.3 million brain cell
 data set, as provided by the
 [TENxBrainData](https://bioconductor.org/packages/TENxBrainData) package.
 
-```{r, message = FALSE}
+```{r tenx-brain, message = FALSE}
 library(TENxBrainData)
 sce.brain <- TENxBrainData20k() 
 sce.brain
@@ -67,7 +69,7 @@ simply a stub that points to the much larger HDF5 file that actually contains
 the data.
 This avoids the need for large RAM availability during analyses.
 
-```{r}
+```{r tenx-brain-size}
 counts(sce.brain)
 object.size(counts(sce.brain))
 file.info(path(counts(sce.brain)))$size
@@ -115,7 +117,7 @@ in-memory representations on HPC systems with plentiful memory, and then
 distributing file-backed counterparts to individual users for exploration and 
 visualization on their personal machines.
 
-## Parallelization
+# Parallelization
 
 Parallelization of calculations across genes or cells is an obvious strategy for
 speeding up scRNA-seq analysis workflows.
@@ -179,7 +181,7 @@ configured for a particular system
 (see `r Biocpkg("BiocParallel", "BiocParallel_BatchtoolsParam.pdf", "here")` for
 details).
 
-```{r, eval=FALSE}
+```{r batch-param, eval=FALSE}
 # 2 hours, 8 GB, 1 CPU per task, for 10 tasks.
 rs <- list(walltime = 7200, memory = 8000, ncpus = 1)
 bpp <- BatchtoolsParam(10, cluster = "slurm", resources = rs)
@@ -195,11 +197,273 @@ parallelization backends involve (i) setting up one or more separate R sessions,
 session. Depending on the nature and size of the task, this overhead may
 outweigh any benefit from parallel computing.
 
-## Interoperability with popular single-cell analysis ecosytems
+# Fast approximations
 
-## References
+## Nearest neighbor searching
 
-See Chapter 14: Dealing with big data in the OSCA book.
-https://bioconductor.org/books/3.17/OSCA.advanced/dealing-with-big-data.html
-We also include examples from the `BiocParallel` 
-`r Biocpkg("BiocParallel", vignette = "Introduction_To_BiocParallel.html", label = "intro vignette")`. 
+Identification of neighbouring cells in PC or expression space is a common procedure
+that is used in many functions, e.g., `buildSNNGraph()`, `doubletCells()`.
+The default is to favour accuracy over speed by using an exact nearest neighbour
+(NN) search, implemented with the $k$-means for $k$-nearest neighbours algorithm.
+However, for large data sets, it may be preferable to use a faster approximate 
+approach.
+
+The `r Biocpkg("BiocNeighbors")` framework makes it easy to switch between search
+options by simply changing the `BNPARAM` argument in compatible functions.
+To demonstrate, we will use the wild-type chimera data for which we had applied
+graph-based clustering using the Louvain algorithm for community detection:
+
+```{r pca-and-cluster}
+library(bluster)
+sce <- runPCA(sce)
+colLabels(sce) <- clusterCells(sce, use.dimred = "PCA",
+                               BLUSPARAM = NNGraphParam(cluster.fun = "louvain"))
+```
+
+The above clusters on a nearest neighbor graph generated with
+an exact neighbour search.
+We repeat this below using an approximate search, implemented using the
+[Annoy](https://github.com/spotify/Annoy) algorithm.
+This involves constructing a `AnnoyParam` object to specify the search algorithm
+and then passing it to the parameterization of the `NNGraphParam()` function.
+The results from the exact and approximate searches are consistent with most
+clusters from the former re-appearing in the latter.
+This suggests that the inaccuracy from the approximation can be largely ignored.
+
+```{r cluster-annoy}
+library(scran)
+library(BiocNeighbors)
+clusters <- clusterCells(sce, use.dimred = "PCA",
+                         BLUSPARAM = NNGraphParam(cluster.fun = "louvain",
+                                                  BNPARAM = AnnoyParam()))
+table(exact = colLabels(sce), approx = clusters)
+```
+
+```{r check-annoy, echo = FALSE}
+# Check that clusterings are very similar
+library(bluster)
+rand <- pairwiseRand(colLabels(sce), clusters, mode = "index")
+stopifnot(rand > 0.85)
+```
+
+Note that Annoy writes the NN index to disk prior to performing the search.
+Thus, it may not actually be faster than the default exact algorithm for small
+datasets, depending on whether the overhead of disk write is offset by the
+computational complexity of the search.
+It is also not difficult to find situations where the approximation deteriorates,
+especially at high dimensions, though this may not have an appreciable impact on
+the biological conclusions.
+
+```{r bad-approx}
+set.seed(1000)
+y1 <- matrix(rnorm(50000), nrow = 1000)
+y2 <- matrix(rnorm(50000), nrow = 1000)
+Y <- rbind(y1, y2)
+exact <- findKNN(Y, k = 20)
+approx <- findKNN(Y, k = 20, BNPARAM = AnnoyParam())
+mean(exact$index != approx$index)
+```
+
+## Singular value decomposition 
+
+The singular value decomposition (SVD) underlies the PCA used throughout our
+analyses, e.g., in `denoisePCA()`, `fastMNN()`, `doubletCells()`.
+(Briefly, the right singular vectors are the eigenvectors of the gene-gene
+covariance matrix, where each eigenvector represents the axis of maximum remaining
+variation in the PCA.)
+The default `base::svd()` function performs an exact SVD that is not performant
+for large datasets.
+Instead, we use fast approximate methods from the `r CRANpkg("irlba")` and
+`r CRANpkg("rsvd")` packages, conveniently wrapped into the 
+`r Biocpkg("BiocSingular")` package for ease of use and package development.
+Specifically, we can change the SVD algorithm used in any of these functions by
+simply specifying an alternative value for the `BSPARAM` argument.
+
+```{r fast-svd}
+library(scater)
+library(BiocSingular)
+
+# As the name suggests, it is random, so we need to set the seed.
+set.seed(101000)
+r.out <- runPCA(sce, ncomponents = 20, BSPARAM = RandomParam())
+str(reducedDim(r.out, "PCA"))
+
+set.seed(101001)
+i.out <- runPCA(sce, ncomponents = 20, BSPARAM = IrlbaParam())
+str(reducedDim(i.out, "PCA"))
+```
+
+Both IRLBA and randomized SVD (RSVD) are much faster than the exact SVD with
+negligible loss of accuracy.
+This motivates their default use in many `r Biocpkg("scran")` and `r Biocpkg("scater")`
+functions, at the cost of requiring users to set the seed to guarantee reproducibility.
+IRLBA can occasionally fail to converge and require more iterations
+(passed via `maxit=` in `IrlbaParam()`), while RSVD involves an explicit trade-off
+between accuracy and speed based on its oversampling parameter (`p=`) and number
+of power iterations (`q=`).
+We tend to prefer IRLBA as its default behavior is more accurate, though RSVD is
+much faster for file-backed matrices.
+
+# Interoperability with popular single-cell analysis ecosytems
+
+## Seurat
+
+[Seurat](https://satijalab.org/seurat) is an R package designed for QC, analysis,
+and exploration of single-cell RNA-seq data. Seurat can be used to identify and
+interpret sources of heterogeneity from single-cell transcriptomic measurements,
+and to integrate diverse types of single-cell data. Seurat is developed and
+maintained by the [Satija lab](https://satijalab.org/seurat/authors.html)
+and is released under the [MIT license](https://opensource.org/license/mit/).
+
+```{r load-seurat, message = FALSE}
+library(Seurat)
+```
+
+Although the basic processing of single-cell data with Bioconductor packages
+(described in the [OSCA book](https://bioconductor.org/books/release/OSCA/))
+and with Seurat is very similar and will produce overall roughly identical
+results, there is also complementary functionality with regard to cell type
+annotation, dataset integration, and downstream analysis.
+To make the most of both ecosystems it is therefore beneficial to be able 
+to easily switch between a `SeuratObject` and a `SingleCellExperiment`.
+See also the Seurat
+[conversion vignette](https://satijalab.org/seurat/articles/conversion_vignette.html)
+for conversion to/from other popular single cell formats such as the AnnData
+format used by [scanpy](https://scanpy.readthedocs.io/en/stable/).
+
+Here, we demonstrate converting the Seurat object produced in Seurat's
+[PBMC tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html)
+to a `SingleCellExperiment` for further analysis with functionality from
+OSCA/Bioconductor.
+We therefore need to first install the 
+[SeuratData](https://github.com/satijalab/seurat-data) package, which is available
+from GitHub only. 
+
+```{r, eval = FALSE}
+BiocManager::install("satijalab/seurat-data")
+```
+
+We then proceed by loading all required packages and installing the PBMC dataset:
+
+```{r seurat-data}
+library(SeuratData)
+InstallData("pbmc3k")
+```
+
+We then load the dataset as an `SeuratObject` and convert it to a 
+`SingleCellExperiment`.
+
+```{r seurat_singlecell}
+# Use PBMC3K from SeuratData
+pbmc <- LoadData(ds = "pbmc3k", type = "pbmc3k.final")
+pbmc
+pbmc.sce <- as.SingleCellExperiment(pbmc)
+pbmc.sce
+```
+
+Seurat also allows conversion from `SingleCellExperiment` objects to Seurat objects; 
+we demonstrate this here on the wild-type chimera mouse gastrulation dataset. 
+
+```{r sce2sobj, message = FALSE}
+sce <- WTChimeraData(samples = 5, type = "processed")
+assay(sce) <- as.matrix(assay(sce))
+sce <- logNormCounts(sce)
+sce
+```
+
+After some processing of the dataset, the actual conversion is carried out with
+the `as.Seurat` function.
+
+```{r, warning = FALSE}
+sobj <- as.Seurat(sce)
+Idents(sobj) <- "celltype.mapped"
+sobj
+```
+
+## Scanpy
+
+[Scanpy](https://scanpy.readthedocs.io) is a scalable toolkit for analyzing
+single-cell gene expression data built jointly with
+[anndata](https://anndata.readthedocs.io/). It includes
+preprocessing, visualization, clustering, trajectory inference and differential
+expression testing. The Python-based implementation efficiently deals with
+datasets of more than one million cells. Scanpy is developed and maintained by
+the [Theis lab]() and is released under a
+[BSD-3-Clause license](https://github.com/scverse/scanpy/blob/master/LICENSE).
+Scanpy is part of the [scverse](https://scverse.org/), a Python-based ecosystem
+for single-cell omics data analysis.
+
+At the core of scanpy's single-cell functionality is the `anndata` data structure,
+scanpy's integrated single-cell data container, which is conceptually very similar
+to Bioconductor's `SingleCellExperiment` class.
+
+Bioconductor's `r Biocpkg("zellkonverter")` package provides a lightweight
+interface between the Bioconductor `SingleCellExperiment` data structure and the
+Python `AnnData`-based single-cell analysis environment. The idea is to enable
+users and developers to easily move data between these frameworks to construct a
+multi-language analysis pipeline across R/Bioconductor and Python.
+
+```{r load-zellkonv, message = FALSE}
+library(zellkonverter)
+```
+
+The `readH5AD()` function can be used to read a `SingleCellExperiment` from an
+H5AD file. Here, we use an example H5AD file contained in the  `r Biocpkg("zellkonverter")`
+package.
+
+```{r read-h5ad}
+example_h5ad <- system.file("extdata", "krumsiek11.h5ad",
+                            package = "zellkonverter")
+readH5AD(example_h5ad)
+```
+
+We can also write a `SingleCellExperiment` to an H5AD file with the
+`writeH5AD()` function. This is demonstrated below on the wild-type
+chimera mouse gastrulation dataset. 
+
+```{r write-h5ad}
+out.file <- tempfile(pattern = ".h5ad")
+writeH5AD(sce, file = out.file)
+```
+
+The resulting H5AD file can then be read into Python using scanpy's
+[read_h5ad](https://scanpy.readthedocs.io/en/stable/generated/scanpy.read_h5ad.html)
+function and then directly used in compatible Python-based analysis frameworks.
+
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+# Further Reading
+
+* OSCA book, [Chapter 14](https://bioconductor.org/books/release/OSCA.advanced/dealing-with-big-data.html): Dealing with big data 
+* The `BiocParallel` `r Biocpkg("BiocParallel", vignette = "Introduction_To_BiocParallel.html", label = "intro vignette")`. 
+
+# Exercises
+
+1. Out of memory representation: Write the counts matrix of the wild-type chimera
+mouse gastrulation dataset to an HDF5 file. Create another counts matrix that
+reads the data from the HDF5 file. Compare memory usage of holding the entire
+matrix in memory as opposed to holding the data out of memory.  
+
+Hint: see the `HDF5Array` function for reading from HDF5 and the `writeHDF5Array`
+function for writing to HDF5 from the `r BiocPkg("HDF5Array")` package.
+
+2. Parallelization: Perform a PCA analysis of the  wild-type chimera mouse gastrulation
+dataset using a multicore backend for parallel computation. Compare the runtime
+of performing the PCA either in serial execution mode, in multicore execution
+mode with 2 workers, and in multicore execution mode with 3 workers.
+
+Hint: use the function `system.time` to obtain the runtime of each job.
+
+3. Conversion to Seurat: The [scRNAseq](https://bioconductor.org/packages/scRNAseq)
+package provides gene-level counts for a collection of public scRNA-seq datasets,
+stored as `SingleCellExperiment` objects with annotated cell- and gene-level metadata.
+Consult the vignette of the [scRNAseq](https://bioconductor.org/packages/scRNAseq)
+package to inspect all available datasets and select a dataset of your choice.
+Convert the chosen dataset to a Seurat object and produce a PCA plot with cells
+colored by a cell metadata column of your choice.
+
+Hint: use Seurat's `DimPlot` function.

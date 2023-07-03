@@ -1,6 +1,6 @@
 Package: ISMB.OSCA
 Title: Orchestrating Large-Scale Single-Cell Analysis with Bioconductor
-Version: 0.99.0
+Version: 0.99.8
 Authors@R: 
     c(person("Davide", "Risso", role = "aut", email = "davide.risso@unipd.it"),
     person("Ludwig", "Geistlinger", role = c("aut", "cre"),
@@ -20,15 +20,15 @@ Depends:
     R (>= 4.3.0)
 Imports:
     AUCell,
-    BiocSingular,
     CuratedAtlasQueryR,
-    edgeR,
+    DropletUtils,
+    EnsDb.Mmusculus.v79,
     MouseGastrulationData,
-    scDblFinder,
-    SingleCellExperiment,
+    Seurat,
+    SeuratData,
     SingleR,
     TENxBrainData,
-    bluster,
+    batchelor,
     scater,
     scran,
     scuttle,
@@ -38,15 +38,18 @@ Imports:
     igraph,
     gridExtra,
     pheatmap
+    scDblFinder,
+    zellkonverter
 Suggests: 
-    BiocParallel,
     BiocStyle,
     dplyr,
     knitr,
     rmarkdown,
     stringr,
     pkgdown
-Remotes: stemangiola/CuratedAtlasQueryR
+Remotes:
+    lgeistlinger/SeuratData,
+    stemangiola/CuratedAtlasQueryR
 URL: https://bioconductor.github.io/ISMB.OSCA/
 BugReports: https://github.com/Bioconductor/ISMB.OSCA/issues/new/choose
 VignetteBuilder: knitr

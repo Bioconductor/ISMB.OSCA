@@ -9,7 +9,15 @@ output:
     mathjax: null   
 ---
 
+
 # Setup and experimental design
+
+```{r chunk-opts, include=FALSE}
+rm(list = ls())
+gc()
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+library(BiocStyle)
+```
 
 As mentioned in the introduction, in this tutorial we will use the data from the Tal1 chimera experiment. These data are available through the [MouseGastrulationData](https://bioconductor.org/packages/release/data/experiment/html/MouseGastrulationData.html) Bioconductor package, which contains several datasets.
 
@@ -272,4 +280,15 @@ plotColData(sce, y="DoubletScore", colour_by="doublet")
 plotTSNE(sce, colour_by="doublet")
 ```
 
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+# Further Reading
+
+* OSCA book, Basics, [Chapters 1-4](https://bioconductor.org/books/release/OSCA.basic)
+
+# Exercises
 

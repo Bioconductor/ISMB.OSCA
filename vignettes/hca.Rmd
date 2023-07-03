@@ -31,6 +31,15 @@ several analytic and visualization tools to help you to discover single cell
 data patterns. To see the list of tools, browse to
 https://cellxgene.cziscience.com/.
 
+# CELLxGENE | Census
+
+The Census provides efficient computational tooling to access, query, and
+analyze all single-cell RNA data from CZ CELLxGENE Discover. Using a new access
+paradigm of cell-based slicing and querying, you can interact with the data
+through TileDB-SOMA, or get slices in AnnData or Seurat objects, thus
+accelerating your research by significantly minimizing data harmonization at
+https://chanzuckerberg.github.io/cellxgene-census/.
+
 # The CuratedAtlasQueryR Project
 
 To systematically characterize the immune system across tissues, demographics
@@ -57,7 +66,9 @@ transcriptional profiles. This platform offers a standardized workflow for
 accessing atlas-level datasets programmatically and reproducibly.
 
 ```{r,echo=FALSE}
-knitr::include_graphics("figures/HCA_sccomp_SUPPLEMENTARY_technical_cartoon_curatedAtlasQuery.png")
+knitr::include_graphics(
+    "figures/HCA_sccomp_SUPPLEMENTARY_technical_cartoon_curatedAtlasQuery.png"
+)
 ```
 
 # Data Sources in R / Bioconductor
@@ -89,10 +100,40 @@ library(dplyr)
 # HCA Metadata
 
 The metadata allows the user to get a lay of the land of what is available
-via the package.
+via the package. In this example, we are using the sample database URL which
+allows us to get a small and quick subset of the available metadata.
 
 ```{r}
 metadata <- get_metadata(remote_url = CuratedAtlasQueryR::SAMPLE_DATABASE_URL)
+```
+
+Get a view of the first 10 columns in the metadata with `glimpse`
+
+```{r}
+metadata |>
+  select(1:10) |>
+  glimpse()
+```
+
+# A note on the piping operator
+
+The vignette materials provided by `CuratedAtlasQueryR` show the use of the
+'native' R pipe (implemented after R version `4.1.0`). For those not familiar
+with the pipe operator (`|>`), it allows you to chain functions by passing the
+left-hand side (LHS) to the first input (typically) on the right-hand side
+(RHS). 
+
+In this example, we are extracting the `iris` data set from the `datasets`
+package and 'then' taking a subset where the sepal lengths are greater than 5
+and 'then' summarizing the data for each level in the `Species` variable with a
+`mean`. The pipe operator can be read as 'then'.
+
+```{r}
+data("iris", package = "datasets")
+
+iris |>
+  subset(Sepal.Length > 5) |>
+  aggregate(. ~ Species, data = _, mean)
 ```
 
 # Summarizing the metadata
@@ -102,8 +143,8 @@ by tissue type.
 
 ```{r}
 metadata |>
-  dplyr::distinct(tissue, dataset_id) |> 
-  dplyr::count(tissue)
+  distinct(tissue, dataset_id) |> 
+  count(tissue)
 ```
 
 # Columns available in the metadata
@@ -112,7 +153,28 @@ metadata |>
 head(names(metadata), 10)
 ```
 
+# Available assays
+
+```{r}
+metadata |>
+    distinct(assay, dataset_id) |>
+    count(assay)
+```
+
+# Available organisms
+
+```{r}
+metadata |>
+    distinct(organism, dataset_id) |>
+    count(organism)
+```
+
 ## Download single-cell RNA sequencing counts 
+
+The data can be provided as either "counts" or counts per million "cpm" as given
+by the `assays` argument in the `get_single_cell_experiment()` function. By
+default, the `SingleCellExperiment` provided will contain only the 'counts'
+data.
 
 ### Query raw counts
 
@@ -194,10 +256,107 @@ package.
 single_cell_counts |> saveHDF5SummarizedExperiment("single_cell_counts")
 ```
 
+# Exercises
+
+1. Use `count` and `arrange` to get the number of cells per tissue in descending
+order.
+
+```{r}
+# enter your code here
+```
+
+<details> <summary> Answer 1 </summary>
+
+```{r,eval=FALSE}
+metadata |>
+    count(tissue) |>
+    arrange(-n)
+```
+
+</details>
+
+2. Use `dplyr`-isms to group by `tissue` and `cell_type` and get a tally of the
+highest number of cell types per tissue combination. What tissue has the most
+numerous type of cells?
+
+```{r}
+# enter your code here
+```
+
+<details> <summary> Answer 2 </summary>
+
+```{r,eval=FALSE}
+metadata |>
+    group_by(tissue, cell_type) |>
+    count() |>
+    arrange(-n)
+```
+
+</details>
+
+3. Spot some differences between the `tissue` and `tissue_harmonised` columns.
+Use `count` to summarise.
+
+```{r}
+# enter your code here
+```
+
+<details> <summary> Answer 3 </summary>
+
+```{r}
+metadata |>
+    count(tissue) |>
+    arrange(-n)
+
+metadata |>
+    count(tissue_harmonised) |>
+    arrange(-n)
+```
+
+</details>
+
+To see the full list of curated columns in the metadata, see the Details section
+in the `?get_metadata` documentation page.
+
+4. Now that we are a little familiar with navigating the metadata, let's obtain
+a `SingleCellExperiment` of 10X scRNA-seq counts of `lung` `macrophages` for
+females older than `80` with `COVID-19`. Note: Use the harmonized columns, where
+possible.
+
+```{r}
+# enter your code here
+```
+
+<details> <summary> Answer 4 </summary>
+
+```{r}
+metadata |> 
+    dplyr::filter(
+        sex == "female" &
+        age_days > 80 * 365 &
+        stringr::str_like(assay, "%10x%") &
+        disease == "COVID-19" &  
+        tissue_harmonised == "lung" & 
+        cell_type_harmonised == "macrophage"
+    ) |>
+    get_single_cell_experiment()
+```
+
+</details>
+
 # Session Info
 
 ```{r}
 sessionInfo()
 ```
+
+# Acknowledgements
+
+Thank you to [Stefano Mangiola](https://github.com/stemangiola) and his team for
+developing
+[CuratedAtlasQueryR](https://github.com/stemangiola/CuratedAtlasQueryR) and
+graciously providing the content from their vignette. Make sure to keep an eye
+out for their publication for proper citation. Their bioRxiv paper can be found
+at <https://www.biorxiv.org/content/10.1101/2023.06.08.542671v1>.
 
 # References
