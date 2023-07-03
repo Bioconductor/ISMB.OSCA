@@ -382,7 +382,14 @@ plotColData(sce, y="DoubletScore", colour_by="doublet")
 plotTSNE(sce, colour_by="doublet")
 ```
 
-In this case, we only have a few doublets at the periphery of clusters. It could be fine to keep the doublets in the analysis, but it may be safer to discard them to avoid biases in downstream analysis (e.g., differential expression).
+One way to determine whether a cell is in a real transient state or it is a doublet is to check the number of detected genes and total UMI counts.
+
+```{r}
+plotColData(sce, "detected", "sum", colour_by = "DoubletScore")
+plotColData(sce, "detected", "sum", colour_by = "doublet")
+```
+
+In this case, we only have a few doublets at the periphery of some clusters. It could be fine to keep the doublets in the analysis, but it may be safer to discard them to avoid biases in downstream analysis (e.g., differential expression).
 
 # Session Info
 
