@@ -331,12 +331,33 @@ sce
 ```
 
 Despite their shortcomings, t-SNE and UMAP may be useful visualization techniques.
+When using them, it is important to consider that they are stochastic methods that involve a random component (each run will lead to different plots) and that there are key parameters to be set that change the results substantially (e.g., the "perplexity" parameter of t-SNE).
 
 # Doublet identification
 
 Sections 8.1, 8.3 of OSCA advanced.
 
-## Computing doublet desities (very long to run)
+_Doublets_ are artifactual libraries generated from two cells. They typically arise due to errors in cell sorting or capture. Specifically, in droplet-based protocols, it may happen that two cells are captured in the same droplet. 
+
+Doublets are obviously undesirable when the aim is to characterize populations at the single-cell level. In particular, doublets can be mistaken for intermediate populations or transitory states that do not actually exist. Thus, it is desirable to identify and remove doublet libraries so that they do not compromise interpretation of the results.
+
+It is not easy to computationally identify doublets as they can be hard to distinguish from transient states and/or cell populations with high RNA content. When possible, it is good to rely on experimental strategies to minimize doublets, e.g., by using genetic variation (e.g., pooling multiple donors in one run) or antibody tagging (e.g., CITE-seq).
+
+There are several computational methods to identify doublets; we describe only one here based on in-silico simulation of doublets.
+
+## Computing doublet desities
+
+At a high level, the algorithm can be defined by the following steps:
+
+1. Simulate thousands of doublets by adding together two randomly chosen single-cell profiles.
+2. For each original cell, compute the density of simulated doublets in the surrounding neighborhood.
+3. For each original cell, compute the density of other observed cells in the neighborhood.
+4. Return the ratio between the two densities as a "doublet score" for each cell.
+
+Intuitively, if a "cell" is surrounded only by simulated doublets is very likely to be a doublet itself.
+
+This approach is implemented below, where we visualize the scores in a t-SNE plot.
+
 ```{r}
 library(scDblFinder)
 set.seed(100)
@@ -348,7 +369,11 @@ summary(dbl.dens)
 sce$DoubletScore <- dbl.dens
 
 plotTSNE(sce, colour_by="DoubletScore")
+```
 
+We can explicitly convert this into doublet calls by identifying large outliers for the score within each sample. Here we use the "griffiths" method to do so.
+
+```{r}
 dbl.calls <- doubletThresholding(data.frame(score=dbl.dens),
                                  method="griffiths", returnType="call")
 summary(dbl.calls)
@@ -356,6 +381,8 @@ sce$doublet <- dbl.calls
 plotColData(sce, y="DoubletScore", colour_by="doublet")
 plotTSNE(sce, colour_by="doublet")
 ```
+
+In this case, we only have a few doublets at the periphery of clusters. It could be fine to keep the doublets in the analysis, but it may be safer to discard them to avoid biases in downstream analysis (e.g., differential expression).
 
 # Session Info
 
