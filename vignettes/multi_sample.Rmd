@@ -289,20 +289,9 @@ topTags(res.lfc)
 sessionInfo()
 ```
 
-<<<<<<< HEAD
-=======
-There is a lot to say here.
-
-# Session Info
-
-```{r sessionInfo}
-sessionInfo()
-```
 
 # Further Reading
 
 * OSCA book, Multi-sample analysis, [Chapters 1, 4, and 6](https://bioconductor.org/books/release/OSCA.multisample)
 
 # Exercises
-
->>>>>>> devel
