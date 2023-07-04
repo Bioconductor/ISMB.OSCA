@@ -91,7 +91,6 @@ merged <- correctExperiments(sce,
 merged <- runTSNE(merged, dimred="corrected")
 plotTSNE(merged, colour_by="batch")
 
-# do we want to include the diagnostics about the batch correction?
 ```
 
 Once we removed the sample batch effect, we can proceed with the Differential 
@@ -141,6 +140,8 @@ summed
 The main advantage of using pseudo-bulk samples is the possibility to use 
 well-tested methods for differential analysis like `edgeR` and `DESeq2`, we will
 focus on the first one for this analysis.
+`edgeR` uses a Negative Binomial Generalized Linear Modal for data with a limited 
+number of replicates, like our case.
 
 Before to begin our analysis, let's say that we are mostly interested in a specific
 cell type, the "Mesenchymal stem cells" and look into differences across different
@@ -159,7 +160,12 @@ y <- DGEList(counts(current), samples=colData(current))
 y
 ```
 
-Discard lowly "sequenced" samples
+A typical step is the discard of low quality samples due to low sequenced library 
+size. We discard these samples because they can affect further steps like normalization
+and/or DEGs analysis.
+
+We can see that in our case we don't have low quality samples and we don't need 
+to filter out any of them.
 
 ```{r}
 discarded <- current$ncells < 10
@@ -167,8 +173,11 @@ y <- y[,!discarded]
 summary(discarded)
 ```
 
+The same idea is typically applied to the genes, indeed we need to discard low 
+expressed genes to improve accuracy for the DEGs modeling.
 
-Discard lowly expressed genes
+We can see that in the case of the genes we discard 5688 of them, reducing the 
+number of genes to test for further analysis to 9011.
 
 ```{r}
 keep <- filterByExpr(y, group=current$tomato)
@@ -176,14 +185,24 @@ y <- y[keep,]
 summary(keep)
 ```
 
-Normalization factors by TMM
+Once we consider the data satisfying, we can proceed to normalize them.
+There are several approaches for normalizing bulk, and so pseudo-bulk data, but
+we stick with the Trimmed Mean of M-values method implemented in the `edgeR` 
+package with the `calcNormFactors` function.
+Keep in mind that because we are going to normalize the pseudo-bulk counts,
+we don't need to normalize the data in "single cell form".
 
 ```{r}
 y <- calcNormFactors(y)
 y$samples
 ```
 
-MD plot
+To investigate the effect of our normalization, we use an MD plot for each sample
+in order to detect possible normalization problems due to insufficient cells/reads/UMIs composing a particular pseudo-bulk profile.
+
+In our case, we verify that all these plots are centered in 0 (on y-axis) and present
+a trumpet shape, as expected.
+
 
 ```{r}
 par(mfrow=c(2,3))
@@ -192,31 +211,68 @@ for (i in seq_len(ncol(y))) {
 }
 ```
 
-MDS plot
+On the other hand, we want to understand if the samples weel-group together based
+on their known factors (like the tomato injection in this case).
+
+To do so, we use the MDS plot, which is very close to a PCA representation.
     
 ```{r}
+par(mfrow=c(1,1))
 plotMDS(cpm(y, log=TRUE), 
     col=ifelse(y$samples$tomato, "red", "blue"))
 ```
 
+We then construct a matrix factor by including both the pool and the tomato as factors.
+This design indicates which samples belong to which pool and condition, so we can
+use it in the next step of the analysis.
 
 ```{r}
 design <- model.matrix(~factor(pool) + factor(tomato), y$samples)
 design
 ```
 
+Now we can compute the Negative Binomial (NB) overdispersion parameter, to model
+the mean-variance trend.
+
 ```{r}
 y <- estimateDisp(y, design)
 summary(y$trended.dispersion)
+```
+
+The BCV plot allows us to investigate the relation between the Biological Coefficient
+of Variation and the Average log CPM for each gene.
+Additionally, the Common and Trend BCV are shown in `red` and `blue`.
+
+```{r}
 plotBCV(y)
 ```
+
+
+TO REPHRASE
+
+This fits a Generalized Linear Model (GLM) to the counts for each gene and estimates 
+the Quasi Likelihood (QL) dispersion from the GLM deviance, with `robust=TRUE` to
+avoid distorsions from highly variable clusters. 
+The QL dispersion models the uncertainty and variability of the per-gene variance which is not well handled by the NB dispersions, so the two dispersion types complement each other in the final analysis.
+
 
 ```{r}
 fit <- glmQLFit(y, design, robust=TRUE)
 summary(fit$var.prior)
 summary(fit$df.prior)
+```
+
+TO REPHRASE
+QL dispersion estimates for each gene as a function of abundance. Raw estimates (black) are shrunk towards the trend (blue) to yield squeezed estimates (red)
+
+```{r}
 plotQLDisp(fit)
 ```
+
+We then use the QL-test function to test for Fold-Change (FC) differences 
+(due to tomato injection) per each gene at a False Discovery Rate (FDR) of 5%.
+The low amount of DGEs highlights that the tomato injection effect has a low 
+influence on the mesenchyme cells.
 
 ```{r}
 res <- glmQLFTest(fit, coef=ncol(design))
@@ -224,14 +280,30 @@ summary(decideTests(res))
 topTags(res)
 ```
 
-
-All the previous steps can be easily performed with the followin function
+All the previous steps can be easily performed with the following function 
+for each cell type, thanks to the `pseudoBulkDGE` function in the `scran` package.
 
 ```{r}
 library(scran)
-#?pseudoBulkDGE(y)
+summed.filt <- summed[,summed$ncells >= 10]
+
+library(scran)
+de.results <- pseudoBulkDGE(summed.filt, 
+    label=summed.filt$celltype.mapped,
+    design=~factor(pool) + tomato,
+    coef="tomatoTRUE",
+    condition=summed.filt$tomato 
+)
 ```
 
+The returned object is a list of `DataFrame`s each with the results for a cell type.
+Each of these contains also the intermediate results in `edgeR` format to perform
+any intermediate plot or diagnostic.
+
+```{r}
+cur.results <- de.results[["Allantois"]]
+cur.results[order(cur.results$PValue),]
+```
 
 
 # Differential Abundance
@@ -239,6 +311,8 @@ library(scran)
 Section 6.3 of OSCA multisample.
 
 <!-- from section 6.2-->
+
+We first setup some code and variables for further analysis.
 
 ```{r}
 library(edgeR)
@@ -252,7 +326,6 @@ y.ab <- y.ab[keep,]
 design <- model.matrix(~factor(pool) + factor(tomato), y.ab$samples)
 y.ab <- estimateDisp(y.ab, design, trend="none")
 ```
-
 
 ## Assuming most labels do not change
 
