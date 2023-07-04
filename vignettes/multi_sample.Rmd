@@ -257,13 +257,9 @@ plotBCV(y)
 ```
 
 
-TO REPHRASE
-
-This fits a Generalized Linear Model (GLM) to the counts for each gene and estimates 
-the Quasi Likelihood (QL) dispersion from the GLM deviance, with `robust=TRUE` to
-avoid distorsions from highly variable clusters. 
-The QL dispersion models the uncertainty and variability of the per-gene variance which is not well handled by the NB dispersions, so the two dispersion types complement each other in the final analysis.
-
+We then estimate a QL dispersion from the deviance of a GLM for each gene.
+The `robust=TRUE` parameter avoids distorsion from highly variable clusters.
+This is useful to handle the uncertainty and variability of the per-gene variance which is not well estimated by the NB dispersions, so the two dispersion types complement each other in the final analysis.
 
 ```{r}
 fit <- glmQLFit(y, design, robust=TRUE)
@@ -271,8 +267,7 @@ summary(fit$var.prior)
 summary(fit$df.prior)
 ```
 
-TO REPHRASE
-QL dispersion estimates for each gene as a function of abundance. Raw estimates (black) are shrunk towards the trend (blue) to yield squeezed estimates (red)
+QL dispersion estimates for each gene as a function of abundance. Raw estimates (black) are shrunk towards the trend (blue) to yield squeezed estimates (red).
 
 ```{r}
 plotQLDisp(fit)
@@ -306,8 +301,7 @@ de.results <- pseudoBulkDGE(summed.filt,
 ```
 
 The returned object is a list of `DataFrame`s each with the results for a cell type.
-Each of these contains also the intermediate results in `edgeR` format to perform
-any intermediate plot or diagnostic.
+Each of these contains also the intermediate results in `edgeR` format to perform any intermediate plot or diagnostic.
 
 ```{r}
 cur.results <- de.results[["Allantois"]]
@@ -379,10 +373,10 @@ y.ab2 <- calcNormFactors(y.ab)
 y.ab2$samples$norm.factors
 ```
 
-
-TO REPHRASE 
-
-We then proceed with the remainder of the edgeR analysis, shown below in condensed format. Many of the positive log-fold changes are shifted towards zero, consistent with the removal of composition biases from the presence of extra-embryonic ectoderm in only background cells. In particular, the mesenchyme is no longer significantly DA after injection.
+We then follow the already saw edgeR analysis steps. 
+Many of the positive log-fold changes are shifted towards zero, 
+consistent with the removal of composition biases from the presence of extra-embryonic ectoderm in only background cells. 
+As it is possible to notice, the mesenchyme is no longer significantly DA after injection.
 
 ```{r}
 y.ab2 <- estimateDisp(y.ab2, design, trend="none")
@@ -393,11 +387,10 @@ topTags(res2, n=10)
 
 ##  Testing against a log-fold change threshold
 
-TO REPHRASE
-
-Here, we assume that composition bias introduces a spurious log2-fold change of no more than \tau for a non-DA label. This can be roughly interpreted as the maximum log-fold change in the total number of cells caused by DA in other labels. (By comparison, fold-differences in the totals due to differences in capture efficiency or the size of the original cell population are not attributable to composition bias and should not be considered when choosing  \tau.) We then mitigate the effect of composition biases by testing each label for changes in abundance beyond \tau.
- 
-
+This other approach assumes that the composition bias introduces a spurious log2-fold change of no more than a \tau quantity for a non-DA label. 
+In other words, we interpret this as the maximum log-fold change in the total number of cells given by DA in other labels.
+On the other hand, when choosing \tau, we should not consider fold-differences in the totals due to differences in capture efficiency or the size of the original cell population are not attributable to composition bias.
+We then mitigate the effect of composition biases by testing each label for changes in abundance beyond \tau.
 
 ```{r}
 res.lfc <- glmTreat(fit.ab, coef=ncol(design), lfc=1)
@@ -405,9 +398,8 @@ summary(decideTests(res.lfc))
 topTags(res.lfc)
 ```
 
-TO REPHRASE
+Addionally, the choice of \tau can be guided by other external experimental data, like a previous or a pilot experiment.
 
-The choice of \tau can be loosely motivated by external experimental data. For example, if we observe a doubling of cell numbers in an in vitro system after treatment, we might be inclined to set \tau=1. This ensures that any non-DA subpopulation is not reported as being depleted after treatment. Some caution is still required, though - even if the external numbers are accurate, we need to assume that cell capture efficiency is (on average) equal between conditions to justify their use as \tau. And obviously, the use of a non-zero \tau will reduce power to detect real changes when the composition bias is not present.
 
 
 # Session Info
@@ -422,4 +414,9 @@ sessionInfo()
 * OSCA book, Multi-sample analysis, [Chapters 1, 4, and 6](https://bioconductor.org/books/release/OSCA.multisample)
 
 # Exercises
-TBD
+
+* Test differential expressed genes with just 2 replicates per condition and look into the changes in the results and possible emerging issues.
+
+
+
+
