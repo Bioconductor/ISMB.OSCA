@@ -317,11 +317,16 @@ cur.results[order(cur.results$PValue),]
 
 # Differential Abundance
 
-Section 6.3 of OSCA multisample.
+With DA we test for differences between clusters across conditions, to investigate
+which clusters change accordingly to the treatment (the tomato injection in our case).
 
-<!-- from section 6.2-->
+We first setup some code and variables for further analysis, like quantifying the
+number of cells per each cell type and fit a model to catch differences between the 
+injected cells and the background.
 
-We first setup some code and variables for further analysis.
+The performed steps are very similar to the ones for DEGs analysis, but this time
+we start our analysis on the computed abundances and without normalizing the 
+data with TMM.
 
 ```{r}
 library(edgeR)
@@ -334,13 +339,52 @@ keep <- filterByExpr(y.ab, group=y.ab$samples$tomato)
 y.ab <- y.ab[keep,]
 design <- model.matrix(~factor(pool) + factor(tomato), y.ab$samples)
 y.ab <- estimateDisp(y.ab, design, trend="none")
+# fit.ab <- glmQLFit(y.ab, design, robust=TRUE, abundance.trend=FALSE)
 ```
 
+## Background on compositional effect
+
+As mentioned before, in DA we don't normalize our data with `calcNormFactors` 
+function, because this approach considers that most of the input features do not
+vary between conditions.
+Which cannot be applied to this analysis because we have a small number of cell
+populations that all can change due to the treatment.
+Leaving us to normalize only for library depth, which in pseudo-bulk data means 
+by the total number of cells in each sample (cell type).
+
+On the other hand, this can lead our data to be susceptible to compositional 
+effect, that means that our conclusions can be biased by the amount of cells 
+present in each cell type. And this amount of cells can be totally unbalanced 
+between cell types.
+
+For example, a specific cell type can have the 40% of the total amount of cells
+present in the experiment, while another just the 3%. 
+The differences in terms of abundance of these cell types are detected between 
+the different conditions, but our final interpretation could be biased if we don't
+consider this aspect.
+
+We now look at different approaches for handling the compositional effect.
+
 ## Assuming most labels do not change
+
+We can use a similar approach used during the DEGs analysis, assuming that most
+labels are not changing, in particular if we think about the low number of DEGs 
+resulted from the previous analysis.
+
+To do so, we first normalize the data with `calcNormFactors` and then we fit and 
+estimate a QL-model for our abundance data.
 
 ```{r}
 y.ab2 <- calcNormFactors(y.ab)
 y.ab2$samples$norm.factors
+```
+
+
+TO REPHRASE 
+
+We then proceed with the remainder of the edgeR analysis, shown below in condensed format. Many of the positive log-fold changes are shifted towards zero, consistent with the removal of composition biases from the presence of extra-embryonic ectoderm in only background cells. In particular, the mesenchyme is no longer significantly DA after injection.
+
+```{r}
 y.ab2 <- estimateDisp(y.ab2, design, trend="none")
 fit.ab2 <- glmQLFit(y.ab2, design, robust=TRUE, abundance.trend=FALSE)
 res2 <- glmQLFTest(fit.ab2, coef=ncol(design))
@@ -349,11 +393,21 @@ topTags(res2, n=10)
 
 ##  Testing against a log-fold change threshold
 
+TO REPHRASE
+
+Here, we assume that composition bias introduces a spurious log2-fold change of no more than \tau for a non-DA label. This can be roughly interpreted as the maximum log-fold change in the total number of cells caused by DA in other labels. (By comparison, fold-differences in the totals due to differences in capture efficiency or the size of the original cell population are not attributable to composition bias and should not be considered when choosing  \tau.) We then mitigate the effect of composition biases by testing each label for changes in abundance beyond \tau.
+ 
+
+
 ```{r}
 res.lfc <- glmTreat(fit.ab, coef=ncol(design), lfc=1)
 summary(decideTests(res.lfc))
 topTags(res.lfc)
 ```
+
+TO REPHRASE
+
+The choice of \tau can be loosely motivated by external experimental data. For example, if we observe a doubling of cell numbers in an in vitro system after treatment, we might be inclined to set \tau=1. This ensures that any non-DA subpopulation is not reported as being depleted after treatment. Some caution is still required, though - even if the external numbers are accurate, we need to assume that cell capture efficiency is (on average) equal between conditions to justify their use as \tau. And obviously, the use of a non-zero \tau will reduce power to detect real changes when the composition bias is not present.
 
 
 # Session Info
@@ -368,3 +422,4 @@ sessionInfo()
 * OSCA book, Multi-sample analysis, [Chapters 1, 4, and 6](https://bioconductor.org/books/release/OSCA.multisample)
 
 # Exercises
+TBD
