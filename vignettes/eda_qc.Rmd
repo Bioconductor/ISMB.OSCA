@@ -9,7 +9,15 @@ output:
     mathjax: null   
 ---
 
+
 # Setup and experimental design
+
+```{r chunk-opts, include=FALSE}
+rm(list = ls())
+gc()
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+library(BiocStyle)
+```
 
 As mentioned in the introduction, in this tutorial we will use the data from the Tal1 chimera experiment. These data are available through the [MouseGastrulationData](https://bioconductor.org/packages/release/data/experiment/html/MouseGastrulationData.html) Bioconductor package, which contains several datasets.
 
@@ -32,8 +40,6 @@ sce
 ```
 
 # Droplet processing
-
-Sections 7.2.1 and 7.2.2 of OSCA advanced.
 
 From the experiment, we expect to have only a few thousand cells, while we can see that we have data for more than 500,000 droplets. It is likely that most of these droplets are empty and are capturing only ambient or background RNA.
 
@@ -78,11 +84,32 @@ sce <- sce[,which(e.out$FDR <= 0.001)]
 sce
 ```
 
+The end result confirms our prior expectation: only 3131 droplets contain a cell, while the large majority of droplets are empty.
+
 # Quality control
 
-Sections 1.2, 1.3.2, 1.4, 1.5 of OSCA basics.
+While we have removed empty droplets, this does not necessarily imply that all the cell-containing droplets should be kept for downstream analysis.
+In fact, some droplets could contain low-quality samples, due to cell damage or failure in library preparation.
 
-Identify mithocondrial genes.
+Retaining these low-quality samples in the analysis could be problematic as they could:
+
+- form their own cluster, complicating the interpretation of the results
+- interfere with variance estimation and principal component analysis
+- contain contaminating transcripts from ambient RNA
+
+To mitigate these problems, we can check a few quality-control metrics and, if needed, remove low-quality samples.
+
+## Choice of quality-control metrics
+
+There are many possibile ways to define a set of quality-control metrics, see for instance @cole2019performance. Here, we keep it simple and consider only:
+
+- the _library size_, defined as the total sum of counts across all relevant features for each cell;
+- the number of expressed features in each cell, defined as the number of endogenous genes with non-zero counts for that cell;
+- the proportion of reads mapped to genes in the mitochondrial genome.
+
+In particular, high proportions of mitochondrial genes are indicative of poor-quality cells, presumably because of loss of cytoplasmic RNA from perforated cells. The reasoning is that, in the presence of modest damage, the holes in the cell membrane permit efflux of individual transcript molecules but are too small to allow mitochondria to escape, leading to a relative enrichment of mitochondrial transcripts. For single-nucleus RNA-seq experiments, high proportions are also useful as they can mark cells where the cytoplasm has not been successfully stripped.
+
+First, we need to identify mitochondrial genes. We use the available `EnsDb` mouse package available in Bioconductor, but a more updated version of Ensembl can be used through the `AnnotationHub` or `biomaRt` packages.
 
 ```{r}
 library(EnsDb.Mmusculus.v79)
@@ -91,7 +118,7 @@ chr.loc <- mapIds(EnsDb.Mmusculus.v79, keys=rownames(sce),
 is.mito <- which(chr.loc=="MT")
 ```
 
-Compute qc metrics.
+We can use the `scuttle` package to compute a set of quality-control metrics, specifying that we want to use the mitochondrial genes as a special set of features.
 
 ```{r}
 library(scuttle)
@@ -102,10 +129,23 @@ colData(sce) <- cbind(colData(sce), df)
 colData(sce)
 ```
 
+Now that we have computed the metrics, we have to decide on thresholds to define high- and low-quality samples. We could check how many cells are above/below a certain fixed threshold. For instance,
+
+```{r}
+table(df$sum < 10000)
+table(df$subsets_Mito_percent > 10)
+```
+
+or we could look at the distribution of such metrics and use a data adaptive threshold.
+
 ```{r}
 summary(df$detected)
 summary(df$subsets_Mito_percent)
+```
 
+This can be achieved with the `perCellQCFilters` function. By default, we consider a value to be an outlier if it is more than 3 median absolute deviations (MADs) from the median in the "problematic" direction. This is loosely motivated by the fact that such a filter will retain 99% of non-outlier values that follow a normal distribution.
+
+```{r}
 reasons <- perCellQCFilters(df, sub.fields="subsets_Mito_percent")
 colSums(as.matrix(reasons))
 summary(reasons$discard)
@@ -114,7 +154,10 @@ summary(reasons$discard)
 sce$discard <- reasons$discard
 ```
 
-Checking diagnostic plots.
+## Diagnostic plots
+
+It is always a good idea to check the distribution of the QC metrics and to visualize the cells that were removed, to identify possible problems with the procedure.
+In particular, we expect to have few outliers and with a marked difference from "regular" cells (e.g., a bimodal distribution or a long tail). Moreover, if there are too many discarded cells, further exploration might be needed.
 
 ```{r}
 library(scater)
@@ -122,27 +165,17 @@ library(scater)
 plotColData(sce, y = "sum", colour_by = "discard") + ggtitle("Total count")
 plotColData(sce, y = "detected", colour_by = "discard") + ggtitle("Detected features")
 plotColData(sce, y = "subsets_Mito_percent", colour_by = "discard") + ggtitle("Mito percent")
+```
 
+While the univariate distribution of QC metrics can give some insight on the quality of the sample, often looking at the bivariate distribution of QC metrics is useful, e.g., to confirm that there are no cells with both large total counts and large mitochondrial counts, to ensure that we are not inadvertently removing high-quality cells that happen to be highly metabolically active.
+
+```{r}
 plotColData(sce, x="sum", y="subsets_Mito_percent", colour_by="discard")
 ```
 
-Diagnosing cell type loss (consider removing).
+It could also be a good idea to perform a differential expression analysis between retained and discarded cells to check wether we are removing an unusual cell population rather than low-quality libraries (see [Section 1.5 of OSCA advanced](http://bioconductor.org/books/3.17/OSCA.advanced/quality-control-redux.html#qc-discard-cell-types)).
 
-```{r}
-library(edgeR)
-
-## Diagnosing cell type loss
-lost <- calculateAverage(sce[,reasons$discard])
-kept <- calculateAverage(sce[,!reasons$discard])
-
-logged <- edgeR::cpm(cbind(lost, kept), log=TRUE, prior.count=2)
-logFC <- logged[,1] - logged[,2]
-abundance <- rowMeans(logged)
-plot(abundance, logFC, xlab="Average count", ylab="Log-FC (lost/kept)", pch=16)
-points(abundance[is.mito], logFC[is.mito], col="dodgerblue", pch=16)
-```
-
-Remove low-quality cells.
+Once we are happy with the results, we can discard the low-quality cells by subsetting the original object.
 
 ```{r}
 sce <- sce[,!sce$discard]
@@ -151,9 +184,14 @@ sce
 
 # Normalization
 
-Sections 2.1, 2.2, 2.3, 2.5, of OSCA basics.
+Systematic differences in sequencing coverage between libraries are often observed in single-cell RNA sequencing data. They typically arise from technical differences in cDNA capture or PCR amplification efficiency across cells, attributable to the difficulty of achieving consistent library preparation with minimal starting material [@vallejos2017normalizing]. Normalization aims to remove these differences such that they do not interfere with comparisons of the expression profiles between cells. The hope is that the observed heterogeneity or differential expression within the cell population are driven by biology and not technical biases.
 
-Library size factors.
+We will mostly focus our attention on scaling normalization, which is the simplest and most commonly used class of normalization strategies. This involves dividing all counts for each cell by a cell-specific scaling factor, often called a _size factor_.
+The assumption here is that any cell-specific bias (e.g., in capture or amplification efficiency) affects all genes equally via scaling of the expected mean count for that cell. The size factor for each cell represents the estimate of the relative bias in that cell, so division of its counts by its size factor should remove that bias. The resulting “normalized expression values” can then be used for downstream analyses such as clustering and dimensionality reduction.
+
+The simplest and most natural strategy would be to normalize by the total sum of counts across all genes for each cell. This is often called the _library size normalization_.
+
+The _library size factor_ for each cell is directly proportional to its library size where the proportionality constant is defined such that the mean size factor across all cells is equal to 1. This ensures that the normalized expression values are on the same scale as the original counts.
 
 ```{r}
 lib.sf <- librarySizeFactors(sce)
@@ -161,7 +199,17 @@ summary(lib.sf)
 hist(log10(lib.sf), xlab="Log10[Size factor]", col='grey80', breaks = 30)
 ```
 
-Normalization by deconvolution.
+
+## Normalization by deconvolution
+
+Library size normalization is not optimal, as it assumes that the total sum of UMI counts differ between cells only for technical and not biological reason. This can be a problem if a highly-expressed subset of genes is differentially expressed between cells or cell types.
+
+Several robust normalization methods have been proposed for bulk RNA-seq. However, these methods may underperform in single-cell data due to the dominance of low and zero counts. 
+To overcome this, one solution is to _pool_ counts from many cells to increase the size of the counts for accurate size factor estimation [@l2016pooling]. Pool-based size factors are then _deconvolved_ into cell-based factors for normalization of each cell's expression profile.
+
+We use a pre-clustering step: cells in each cluster are normalized separately and the size factors are rescaled to be comparable across clusters. This avoids the assumption that most genes are non-DE across the entire population -- only a non-DE majority is required between pairs of clusters, which is a weaker assumption for highly heterogeneous populations.
+
+Note that while we focus on normalization by deconvolution here, many other methods have been proposed and lead to similar performance (see @borella2022psinorm for a comparative review).
 
 ```{r}
 library(scran)
@@ -180,7 +228,7 @@ plot(lib.sf, deconv.sf, xlab="Library size factor",
 abline(a=0, b=1, col="red")
 ```
 
-Scaling and log-transforming.
+Once we have computed the size factors, we compute the normalized expression values for each cell by dividing the count for each gene with the appropriate size factor for that cell. Since we are typically going to work with log-transformed counts, the function `logNormCounts` also log-transforms the normalized values, creating a new assay called `logcounts`.
 
 ```{r}
 sizeFactors(sce) <- deconv.sf
@@ -190,9 +238,15 @@ sce
 
 # Feature Selection
 
-Sections 3.1, 3.2, 3.5 of OSCA basics.
+The typical next steps in the analysis of single-cell data are dimensionality reduction and clustering, which involve measuring the similarity between cells.
 
-## 3.2 Quantifying per-gene variation
+The choice of genes to use in this calculation has a major impact on the results. We want to select genes that contain useful information about the biology of the system while removing genes that contain only random noise. This aims to preserve interesting biological structure without the variance that obscures that structure, and to reduce the size of the data to improve computational efficiency of later steps.
+
+## Quantifying per-gene variation
+
+The simplest approach to feature selection is to select the most variable genes based on their log-normalized expression across the population.
+
+Calculation of the per-gene variance is simple but feature selection requires modelling of the mean-variance relationship. The log-transformation is not a variance stabilizing transformation in most cases, which means that the total variance of a gene is driven more by its abundance than its underlying biological heterogeneity. To account for this, the `modelGeneVar` function fits a trend to the variance with respect to abundance across all genes.
 
 ```{r}
 dec.sce <- modelGeneVar(sce)
@@ -203,7 +257,11 @@ plot(fit.sce$mean, fit.sce$var, xlab = "Mean of log-expression",
 curve(fit.sce$trend(x), col = "dodgerblue", add = TRUE, lwd = 2)
 ```
 
-## 3.5 Selecting highly variable genes
+The blue line represents the uninteresting "technical" variance for any given gene abundance. The genes with a lot of additional variance exhibit interesting "biological" variation.
+
+## Selecting highly variable genes
+
+The next step is to select the subset of HVGs to use in downstream analyses. A larger set will assure that we do not remove important genes, at the cost of potentially increasing noise. Typically, we restrict ourselves to the top $n$ genes, here we chose $n=1000$, but this choice should be guided by prior biological knowledge; for instance, we may expect that only about 10% of genes to be differentially expressed across our cell populations and hence select 10% of genes as higly variable (e.g., by setting `prop=0.1`).
 
 ```{r}
 hvg.sce.var <- getTopHVGs(dec.sce, n=1000)
@@ -213,26 +271,42 @@ head(hvg.sce.var)
 
 # Dimensionality Reduction
 
-All sections of Chapter 4 of OSCA basics.
+Many scRNA-seq analysis procedures involve comparing cells based on their expression values across multiple genes. For example, clustering aims to identify cells with similar transcriptomic profiles by computing Euclidean distances across genes. In these applications, each individual gene represents a dimension of the data, hence we can think of the data as "living" in a ten-thousand-dimensional space.
+
+As the name suggests, dimensionality reduction aims to reduce the number of dimensions, while preserving as much as possible of the original information. This obviously reduces the computational work (e.g., it is easier to compute distance in lower-dimensional spaces), and more importantly leads to less noisy and more interpretable results (cf. the _curse of dimensionality_).
 
 ## Principal Component Analysis (PCA)
+
+Principal component analysis (PCA) is a dimensionality reduction technique that provides a parsimonious summarization of the data by replacing the original variables (genes) by fewer linear combinations of these variables, that are orthogonal and have successively maximal variance. Such linear combinations seek to "separate out" the observations (cells), while loosing as little information as possible.
+
+Without getting into the technical details, one nice feature of PCA is that the principal components (PCs) are ordered by how much variance of the original data they "explain". Furthermore, by focusing on the top $k$ PC we are focusing on the most important directions of variability, which hopefully correspond to biological rather than technical variance. (It is however good practice to check this by e.g. looking at correlation between technical QC metrics and PCs).
+
+One simple way to maximize our chance of capturing biological variation is by computing the PCs starting from the highly variable genes identified before.
 
 ```{r}
 sce <- runPCA(sce, subset_row=hvg.sce.var)
 sce
 ```
 
-```{r}
-plotPCA(sce, colour_by="sum")
+By default, `runPCA` computes the first 50 principal components. We can check how much original variability they explain.
 
+```{r}
 percent.var <- attr(reducedDim(sce), "percentVar")
 plot(percent.var, log="y", xlab="PC", ylab="Variance explained (%)")
+```
 
-plotReducedDim(sce, dimred="PCA")
+And we can of course visualize the first 2-3 components, perhaps color-coding each point by an interesting feature, in this case the total number of UMIs per cell.
+
+```{r}
+plotPCA(sce, colour_by="sum")
 plotReducedDim(sce, dimred="PCA", ncomponents=3)
 ```
 
-## t-stochastic neighbor embedding (t-SNE)
+## Non-linear methods
+
+While PCA is a simple and effective way to visualize (and interpret!) scRNA-seq data, non-linear methods such as t-SNE (_t-stochastic neighbor embedding_) and UMAP (_uniform manifold approximation and projection_) have gained much popularity in the literature.
+
+These methods attempt to find a low-dimensional representation of the data that preserves the distances between each point and its neighbors in the high-dimensional space.
 
 ```{r}
 set.seed(100)
@@ -240,18 +314,50 @@ sce <- runTSNE(sce, dimred="PCA")
 plotTSNE(sce)
 ```
 
-## Uniform manifold approximation and projection (UMAP) (very long to run)
 ```{r}
 set.seed(111)
 sce <- runUMAP(sce, dimred="PCA")
 plotUMAP(sce)
 ```
 
+It is easy to over-interpret t-SNE and UMAP plots. We note that the relative sizes and positions of the visual clusters may be misleading, as they tend to inflate dense clusters and compress sparse ones, such that we cannot use the size as a measure of subpopulation heterogeneity. 
+
+In addition, these methods are not guaranteed to preserve the global structure of the data (e.g., the relative locations of non-neighboring clusters), such that we cannot use their positions to determine relationships between distant clusters.
+
+Note that the `sce` object now includes all the computed dimensionality reduced representations of the data for ease of reusing and replotting without the need for recomputing.
+
+```{r}
+sce
+```
+
+Despite their shortcomings, t-SNE and UMAP may be useful visualization techniques.
+When using them, it is important to consider that they are stochastic methods that involve a random component (each run will lead to different plots) and that there are key parameters to be set that change the results substantially (e.g., the "perplexity" parameter of t-SNE).
+
 # Doublet identification
 
 Sections 8.1, 8.3 of OSCA advanced.
 
-## Computing doublet desities (very long to run)
+_Doublets_ are artifactual libraries generated from two cells. They typically arise due to errors in cell sorting or capture. Specifically, in droplet-based protocols, it may happen that two cells are captured in the same droplet. 
+
+Doublets are obviously undesirable when the aim is to characterize populations at the single-cell level. In particular, doublets can be mistaken for intermediate populations or transitory states that do not actually exist. Thus, it is desirable to identify and remove doublet libraries so that they do not compromise interpretation of the results.
+
+It is not easy to computationally identify doublets as they can be hard to distinguish from transient states and/or cell populations with high RNA content. When possible, it is good to rely on experimental strategies to minimize doublets, e.g., by using genetic variation (e.g., pooling multiple donors in one run) or antibody tagging (e.g., CITE-seq).
+
+There are several computational methods to identify doublets; we describe only one here based on in-silico simulation of doublets.
+
+## Computing doublet desities
+
+At a high level, the algorithm can be defined by the following steps:
+
+1. Simulate thousands of doublets by adding together two randomly chosen single-cell profiles.
+2. For each original cell, compute the density of simulated doublets in the surrounding neighborhood.
+3. For each original cell, compute the density of other observed cells in the neighborhood.
+4. Return the ratio between the two densities as a "doublet score" for each cell.
+
+Intuitively, if a "cell" is surrounded only by simulated doublets is very likely to be a doublet itself.
+
+This approach is implemented below, where we visualize the scores in a t-SNE plot.
+
 ```{r}
 library(scDblFinder)
 set.seed(100)
@@ -263,7 +369,11 @@ summary(dbl.dens)
 sce$DoubletScore <- dbl.dens
 
 plotTSNE(sce, colour_by="DoubletScore")
+```
 
+We can explicitly convert this into doublet calls by identifying large outliers for the score within each sample. Here we use the "griffiths" method to do so.
+
+```{r}
 dbl.calls <- doubletThresholding(data.frame(score=dbl.dens),
                                  method="griffiths", returnType="call")
 summary(dbl.calls)
@@ -272,4 +382,32 @@ plotColData(sce, y="DoubletScore", colour_by="doublet")
 plotTSNE(sce, colour_by="doublet")
 ```
 
+One way to determine whether a cell is in a real transient state or it is a doublet is to check the number of detected genes and total UMI counts.
 
+```{r}
+plotColData(sce, "detected", "sum", colour_by = "DoubletScore")
+plotColData(sce, "detected", "sum", colour_by = "doublet")
+```
+
+In this case, we only have a few doublets at the periphery of some clusters. It could be fine to keep the doublets in the analysis, but it may be safer to discard them to avoid biases in downstream analysis (e.g., differential expression).
+
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+# Further Reading
+
+* OSCA book, Basics, [Chapters 1-4](https://bioconductor.org/books/release/OSCA.basic)
+* OSCA book, Advanced, [Chapters 7-8](https://bioconductor.org/books/release/OSCA.advanced/)
+
+# Exercises
+
+1. Normalization: Here we used the deconvolution method implemented in `scran` based on a previous clustering step. Use the `calculateSumFactors` to compute the size factors without considering a preliminary clustering. Compare the resulting size factors via a scatter plot. How do the results change? What are the risks of not including clustering information?
+
+2. An alternative to PCA for dimensionality reduction is the [NewWave method](https://bioconductor.org/packages/release/bioc/html/NewWave.html). Apply the NewWave method to the SingleCellExperiment object and visually compare the first two dimensions with the first two principal components. What are the major differences in terms of results?
+
+Hint: First subset the object to include only highly variable genes (`sce2 <- sce[hvg.sce.var,]`) and then apply the `NewWave` function to the new object setting `K=10` to obtain the first 10 dimensions.
+
+3. PBMC Data: The package `DropletTestFiles` includes the raw output from Cell Ranger of the peripheral blood mononuclear cell (PBMC) dataset from 10X Genomics, publicly available from the 10X Genomics website. Repeat the analysis of this vignette using those data.

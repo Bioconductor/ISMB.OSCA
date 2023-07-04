@@ -1,6 +1,13 @@
 name: Check, build, and push image
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'DESCRIPTION'
+      - '**.yml'
+    branches:
+      - devel
+  pull_request:
 
 env:
   cache-version: v1
@@ -15,11 +22,12 @@ jobs:
       CRAN: https://packagemanager.posit.co/cran/__linux__/jammy/latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Query dependencies and update old packages
         run: |
-          BiocManager::install(ask=FALSE)
+          BiocManager::install("reticulate")
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
         shell: Rscript {0}
 
@@ -31,21 +39,25 @@ jobs:
           key: ${{ env.cache-version }}-${{ runner.os }}-r-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ env.cache-version }}-${{ runner.os }}-r-
 
-      # This lets us augment with additional dependencies
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        env:
-          RHUB_PLATFORM: linux-x86_64-ubuntu-gcc
-        run: |
-          Rscript -e "remotes::install_github('r-hub/sysreqs')"
-          sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
-          sudo -s eval "$sysreqs"
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
 
-      - name: Install dependencies
+      - name: Setup r-reticulate venv
+        shell: Rscript {0}
+        run: |
+          python_packages <- 
+            c("numpy")
+          
+          library(reticulate)
+          sessionInfo()
+
+      - name: Install R dependencies
         run: |
           BiocManager::repositories()
           remotes::install_deps(dependencies = TRUE, repos = BiocManager::repositories())
-          BiocManager::install("remotes", ask = FALSE, update = TRUE)
+          BiocManager::install(ask = FALSE, update = TRUE)
         shell: Rscript {0}
 
       - name: Check
@@ -54,18 +66,20 @@ jobs:
         run: rcmdcheck::rcmdcheck(args = c("--no-manual"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
 
-
       - name: Build pkgdown
+        if: github.event_name != 'pull_request'
         run: |
            PATH=$PATH:$HOME/bin/ Rscript -e 'pkgdown::build_site()'
 
       # deploy needs rsync? Seems so.
-      - name: Install deploy dependencies
+      - name: Install apt dependencies
+        if: github.event_name != 'pull_request'
         run: |
           apt-get update
           apt-get -y install rsync
 
       - name: Deploy 🚀
+        if: success() && github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

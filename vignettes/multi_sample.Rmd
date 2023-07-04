@@ -11,6 +11,7 @@ editor_options:
   chunk_output_type: console
 ---
 
+
 # Setup and data exploration
 
 As said, we will use the the data from the Tal1 chimera experiment:
@@ -25,6 +26,14 @@ As said, we will use the the data from the Tal1 chimera experiment:
 Note that this is a paired design in which for each biological replicate (pool 3, 4, and 5), we have both host and injected cells.
 
 We start by loading the data and doing a quick exploratory analysis, essentially applying the normalization and visualization techniques that we have seen in the previous lectures to all samples.
+
+```{r chunk-opts, include=FALSE}
+rm(list = ls())
+gc()
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+library(BiocStyle)
+```
+
 
 ```{r setup, message = FALSE}
 library(MouseGastrulationData)
@@ -353,3 +362,9 @@ topTags(res.lfc)
 sessionInfo()
 ```
 
+
+# Further Reading
+
+* OSCA book, Multi-sample analysis, [Chapters 1, 4, and 6](https://bioconductor.org/books/release/OSCA.multisample)
+
+# Exercises
