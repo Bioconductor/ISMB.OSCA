@@ -333,7 +333,7 @@ keep <- filterByExpr(y.ab, group=y.ab$samples$tomato)
 y.ab <- y.ab[keep,]
 design <- model.matrix(~factor(pool) + factor(tomato), y.ab$samples)
 y.ab <- estimateDisp(y.ab, design, trend="none")
-# fit.ab <- glmQLFit(y.ab, design, robust=TRUE, abundance.trend=FALSE)
+fit.ab <- glmQLFit(y.ab, design, robust=TRUE, abundance.trend=FALSE)
 ```
 
 ## Background on compositional effect
