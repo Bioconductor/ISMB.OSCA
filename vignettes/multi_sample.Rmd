@@ -339,8 +339,7 @@ fit.ab <- glmQLFit(y.ab, design, robust=TRUE, abundance.trend=FALSE)
 ## Background on compositional effect
 
 As mentioned before, in DA we don't normalize our data with `calcNormFactors` 
-function, because this approach considers that most of the input features do not
-vary between conditions.
+function, because this approach considers that most of the input features do not vary between conditions.
 Which cannot be applied to this analysis because we have a small number of cell
 populations that all can change due to the treatment.
 Leaving us to normalize only for library depth, which in pseudo-bulk data means 
@@ -417,6 +416,6 @@ sessionInfo()
 
 * Test differential expressed genes with just 2 replicates per condition and look into the changes in the results and possible emerging issues.
 
-
+* Test differential expressed genes computed with `muscat` package and check for differences in the results.
 
 
