@@ -319,7 +319,7 @@ To see the full list of curated columns in the metadata, see the Details section
 in the `?get_metadata` documentation page.
 
 4. Now that we are a little familiar with navigating the metadata, let's obtain
-a `SingleCellExperiment` of 10X scRNA-seq counts of `lung` `macrophages` for
+a `SingleCellExperiment` of 10X scRNA-seq counts of `cd8 tem` `lung` cells for
 females older than `80` with `COVID-19`. Note: Use the harmonized columns, where
 possible.
 
@@ -337,7 +337,7 @@ metadata |>
         stringr::str_like(assay, "%10x%") &
         disease == "COVID-19" &  
         tissue_harmonised == "lung" & 
-        cell_type_harmonised == "macrophage"
+        cell_type_harmonised == "cd8 tem"
     ) |>
     get_single_cell_experiment()
 ```
