@@ -449,7 +449,7 @@ reads the data from the HDF5 file. Compare memory usage of holding the entire
 matrix in memory as opposed to holding the data out of memory.  
 
 Hint: see the `HDF5Array` function for reading from HDF5 and the `writeHDF5Array`
-function for writing to HDF5 from the `r BiocPkg("HDF5Array")` package.
+function for writing to HDF5 from the `r Biocpkg("HDF5Array")` package.
 
 2. Parallelization: Perform a PCA analysis of the  wild-type chimera mouse gastrulation
 dataset using a multicore backend for parallel computation. Compare the runtime
