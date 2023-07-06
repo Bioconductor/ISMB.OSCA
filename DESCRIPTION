@@ -31,8 +31,17 @@ Imports:
     batchelor,
     scater,
     scran,
+    scuttle,
+    DropletUtils,
+    EnsDb.Mmusculus.v79,
+    batchelor,
+    igraph,
+    gridExtra,
+    pheatmap,
     scDblFinder,
-    zellkonverter
+    zellkonverter,
+    ggplot2,
+    edgeR
 Suggests: 
     BiocStyle,
     dplyr,
