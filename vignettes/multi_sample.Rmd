@@ -291,7 +291,6 @@ for each cell type, thanks to the `pseudoBulkDGE` function in the `scran` packag
 library(scran)
 summed.filt <- summed[,summed$ncells >= 10]
 
-library(scran)
 de.results <- pseudoBulkDGE(summed.filt, 
     label=summed.filt$celltype.mapped,
     design=~factor(pool) + tomato,

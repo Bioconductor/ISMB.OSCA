@@ -37,9 +37,11 @@ Imports:
     batchelor,
     igraph,
     gridExtra,
-    pheatmap
+    pheatmap,
     scDblFinder,
-    zellkonverter
+    zellkonverter,
+    ggplot2,
+    edgeR
 Suggests: 
     BiocStyle,
     dplyr,
