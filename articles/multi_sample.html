@@ -98,20 +98,599 @@
     
     
 <div class="section level2">
-<h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
+<h2 id="setup-and-data-exploration">Setup and data exploration<a class="anchor" aria-label="anchor" href="#setup-and-data-exploration"></a>
 </h2>
+<p>As said, we will use the the data from the Tal1 chimera
+experiment:</p>
+<ul>
+<li>Sample 5: E8.5 injected cells (tomato positive), pool 3</li>
+<li>Sample 6: E8.5 host cells (tomato negative), pool 3</li>
+<li>Sample 7: E8.5 injected cells (tomato positive), pool 4</li>
+<li>Sample 8: E8.5 host cells (tomato negative), pool 4</li>
+<li>Sample 9: E8.5 injected cells (tomato positive), pool 5</li>
+<li>Sample 10: E8.5 host cells (tomato negative), pool 5</li>
+</ul>
+<p>Note that this is a paired design in which for each biological
+replicate (pool 3, 4, and 5), we have both host and injected cells.</p>
+<p>We start by loading the data and doing a quick exploratory analysis,
+essentially applying the normalization and visualization techniques that
+we have seen in the previous lectures to all samples.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MarioniLab/MouseGastrulationData" class="external-link">MouseGastrulationData</a></span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">5</span><span class="op">:</span><span class="fl">10</span>, type <span class="op">=</span> <span class="st">"processed"</span><span class="op">)</span></span>
+<span><span class="va">sce</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 29453 20935 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(1): counts</span></span>
+<span><span class="co">## rownames(29453): ENSMUSG00000051951 ENSMUSG00000089699 ...</span></span>
+<span><span class="co">##   ENSMUSG00000095742 tomato-td</span></span>
+<span><span class="co">## rowData names(2): ENSEMBL SYMBOL</span></span>
+<span><span class="co">## colnames(20935): cell_9769 cell_9770 ... cell_30702 cell_30703</span></span>
+<span><span class="co">## colData names(11): cell barcode ... doub.density sizeFactor</span></span>
+<span><span class="co">## reducedDimNames(2): pca.corrected.E7.5 pca.corrected.E8.5</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 20935 rows and 11 columns</span></span>
+<span><span class="co">##                   cell          barcode    sample       stage    tomato</span></span>
+<span><span class="co">##            &lt;character&gt;      &lt;character&gt; &lt;integer&gt; &lt;character&gt; &lt;logical&gt;</span></span>
+<span><span class="co">## cell_9769    cell_9769 AAACCTGAGACTGTAA         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9770    cell_9770 AAACCTGAGATGCCTT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9771    cell_9771 AAACCTGAGCAGCCTC         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9772    cell_9772 AAACCTGCATACTCTT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9773    cell_9773 AAACGGGTCAACACCA         5        E8.5      TRUE</span></span>
+<span><span class="co">## ...                ...              ...       ...         ...       ...</span></span>
+<span><span class="co">## cell_30699  cell_30699 TTTGTCACAGCTCGCA        10        E8.5     FALSE</span></span>
+<span><span class="co">## cell_30700  cell_30700 TTTGTCAGTCTAGTCA        10        E8.5     FALSE</span></span>
+<span><span class="co">## cell_30701  cell_30701 TTTGTCATCATCGGAT        10        E8.5     FALSE</span></span>
+<span><span class="co">## cell_30702  cell_30702 TTTGTCATCATTATCC        10        E8.5     FALSE</span></span>
+<span><span class="co">## cell_30703  cell_30703 TTTGTCATCCCATTTA        10        E8.5     FALSE</span></span>
+<span><span class="co">##                 pool stage.mapped        celltype.mapped closest.cell</span></span>
+<span><span class="co">##            &lt;integer&gt;  &lt;character&gt;            &lt;character&gt;  &lt;character&gt;</span></span>
+<span><span class="co">## cell_9769          3        E8.25             Mesenchyme   cell_24159</span></span>
+<span><span class="co">## cell_9770          3         E8.5            Endothelium   cell_96660</span></span>
+<span><span class="co">## cell_9771          3         E8.5              Allantois  cell_134982</span></span>
+<span><span class="co">## cell_9772          3         E8.5             Erythroid3  cell_133892</span></span>
+<span><span class="co">## cell_9773          3        E8.25             Erythroid1   cell_76296</span></span>
+<span><span class="co">## ...              ...          ...                    ...          ...</span></span>
+<span><span class="co">## cell_30699         5         E8.5             Erythroid3   cell_38810</span></span>
+<span><span class="co">## cell_30700         5         E8.5       Surface ectoderm   cell_38588</span></span>
+<span><span class="co">## cell_30701         5        E8.25 Forebrain/Midbrain/H..   cell_66082</span></span>
+<span><span class="co">## cell_30702         5         E8.5             Erythroid3  cell_138114</span></span>
+<span><span class="co">## cell_30703         5         E8.0                Doublet   cell_92644</span></span>
+<span><span class="co">##            doub.density sizeFactor</span></span>
+<span><span class="co">##               &lt;numeric&gt;  &lt;numeric&gt;</span></span>
+<span><span class="co">## cell_9769    0.02985045    1.41243</span></span>
+<span><span class="co">## cell_9770    0.00172753    1.22757</span></span>
+<span><span class="co">## cell_9771    0.01338013    1.15439</span></span>
+<span><span class="co">## cell_9772    0.00218402    1.28676</span></span>
+<span><span class="co">## cell_9773    0.00211723    1.78719</span></span>
+<span><span class="co">## ...                 ...        ...</span></span>
+<span><span class="co">## cell_30699   0.00146287   0.389311</span></span>
+<span><span class="co">## cell_30700   0.00374155   0.588784</span></span>
+<span><span class="co">## cell_30701   0.05651258   0.624455</span></span>
+<span><span class="co">## cell_30702   0.00108837   0.550807</span></span>
+<span><span class="co">## cell_30703   0.82369305   1.184919</span></span></code></pre>
+<p>To speed up computations, after removing doublets, we randomly select
+500 cells per sample.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Loading required package: scuttle</span></span></code></pre>
+<pre><code><span><span class="co">## Loading required package: ggplot2</span></span></code></pre>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># remove doublets</span></span>
+<span><span class="va">drop</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">$</span><span class="va">celltype.mapped</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stripped"</span>, <span class="st">"Doublet"</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span>,<span class="op">!</span><span class="va">drop</span><span class="op">]</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">29482</span><span class="op">)</span></span>
+<span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="va">sce</span><span class="op">$</span><span class="va">sample</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">500</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span>,<span class="va">idx</span><span class="op">]</span></span></code></pre></div>
+<p>We now normalize the data and visualize them in a tSNE plot.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># normalization</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># identify highly variable genes</span></span>
+<span><span class="va">dec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/modelGeneVar.html" class="external-link">modelGeneVar</a></span><span class="op">(</span><span class="va">sce</span>, block<span class="op">=</span><span class="va">sce</span><span class="op">$</span><span class="va">sample</span><span class="op">)</span></span>
+<span><span class="va">chosen.hvgs</span> <span class="op">&lt;-</span> <span class="va">dec</span><span class="op">$</span><span class="va">bio</span> <span class="op">&gt;</span> <span class="fl">0</span></span>
+<span></span>
+<span><span class="co"># dimensionality reduction</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/runPCA.html" class="external-link">runPCA</a></span><span class="op">(</span><span class="va">sce</span>, subset_row <span class="op">=</span> <span class="va">chosen.hvgs</span>, ntop <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runTSNE.html" class="external-link">runTSNE</a></span><span class="op">(</span><span class="va">sce</span>, dimred <span class="op">=</span> <span class="st">"PCA"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sce</span><span class="op">$</span><span class="va">sample</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">sample</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plot_reddim.html" class="external-link">plotTSNE</a></span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"sample"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="multi_sample_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plot_reddim.html" class="external-link">plotTSNE</a></span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"celltype.mapped"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_colour_discrete.html" class="external-link">scale_color_discrete</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Scale for <span style="color: #00BB00;">colour</span> is already present.</span></span>
+<span><span class="co">## Adding another scale for <span style="color: #00BB00;">colour</span>, which will replace the existing scale.</span></span></code></pre>
+<p><img src="multi_sample_files/figure-html/unnamed-chunk-2-2.png" width="700"></p>
+<p>There are evident sample effects. Depending on the analysis that you
+want to do you may want to remove or retain the sample effect. For
+instance, if the goal is to identify cell types with a clustering
+method, one may want to remove the sample effects with “batch effect”
+correction methods.</p>
+<p>For now, let’s assume that we want to remove this effect.</p>
 </div>
 <div class="section level2">
-<h2 id="data-retrieval">Data retrieval<a class="anchor" aria-label="anchor" href="#data-retrieval"></a>
+<h2 id="correcting-batch-effects">Correcting batch effects<a class="anchor" aria-label="anchor" href="#correcting-batch-effects"></a>
 </h2>
-<p>There is a lot to say here.</p>
+<p>We correct the effect of samples by aid of the
+<code>correctExperiment</code> function in the <code>batchelor</code>
+package and using the <code>sample</code> <code>colData</code> column as
+batch.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## This needs work</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">batchelor</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">10102</span><span class="op">)</span></span>
+<span><span class="va">merged</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/batchelor/man/correctExperiments.html" class="external-link">correctExperiments</a></span><span class="op">(</span><span class="va">sce</span>, </span>
+<span>    batch<span class="op">=</span><span class="va">sce</span><span class="op">$</span><span class="va">sample</span>, </span>
+<span>    subset.row<span class="op">=</span><span class="va">chosen.hvgs</span>,</span>
+<span>    PARAM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/batchelor/man/BatchelorParam.html" class="external-link">FastMnnParam</a></span><span class="op">(</span></span>
+<span>        merge.order<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span>,<span class="fl">5</span><span class="op">)</span>, <span class="co"># WT (3 replicates)</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">4</span>,<span class="fl">6</span><span class="op">)</span>  <span class="co"># td-Tomato (3 replicates)</span></span>
+<span>        <span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">merged</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runTSNE.html" class="external-link">runTSNE</a></span><span class="op">(</span><span class="va">merged</span>, dimred<span class="op">=</span><span class="st">"corrected"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plot_reddim.html" class="external-link">plotTSNE</a></span><span class="op">(</span><span class="va">merged</span>, colour_by<span class="op">=</span><span class="st">"batch"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="multi_sample_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
+<p>Once we removed the sample batch effect, we can proceed with the
+Differential Expression Analysis.</p>
+</div>
+<div class="section level2">
+<h2 id="differential-expression">Differential Expression<a class="anchor" aria-label="anchor" href="#differential-expression"></a>
+</h2>
+<p>Section 4 of OSCA multisample.</p>
+<p>In order to perform a Differential Expression Analysis, we need to
+identify group of cells across samples/conditions (depending on the
+experimental design and the final aim of the experiment).</p>
+<p>As previously saw, we have two ways of grouping cells, cell
+clustering and cell labeling. In our case we will focus on this secon
+aspect to group cells accordingly to the already annotated cell types to
+proceed with the computation of the pseudo-bulk samples.</p>
+<div class="section level3">
+<h3 id="pseudo-bulk-samples">Pseudo-bulk samples<a class="anchor" aria-label="anchor" href="#pseudo-bulk-samples"></a>
+</h3>
+<p>To compute differences between different group of cells, a possible
+way is to compute pseudo-bulk samples, where we mediate the gene signal
+of all the cells for each specific cell type. In this manner, we are
+then able to detect differences between the same cell type across two
+different condition, but also across different cell types in the same
+condition, etcetera.</p>
+<p>To compute pseudo-bulk samples, we use
+<code>aggregateAcrossCells</code> function in the <code>scuttle</code>
+package, which takes as input not only the single cell experiment, but
+also the id to use for the identification of the group of cells. In our
+case, we use as id not just the cell type, but also the sample, because
+we want be able to discern between replicates and conditions during
+further steps.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Using 'label' and 'sample' as our two factors; each column of the output</span></span>
+<span><span class="co"># corresponds to one unique combination of these two factors.</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scuttle</span><span class="op">)</span></span>
+<span><span class="va">summed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/aggregateAcrossCells.html" class="external-link">aggregateAcrossCells</a></span><span class="op">(</span><span class="va">merged</span>, </span>
+<span>    id<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">merged</span><span class="op">)</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"celltype.mapped"</span>, <span class="st">"sample"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">summed</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 12224 161 </span></span>
+<span><span class="co">## metadata(2): merge.info pca.info</span></span>
+<span><span class="co">## assays(1): counts</span></span>
+<span><span class="co">## rownames(12224): ENSMUSG00000025900 ENSMUSG00000025902 ...</span></span>
+<span><span class="co">##   ENSMUSG00000095041 ENSMUSG00000095742</span></span>
+<span><span class="co">## rowData names(3): rotation ENSEMBL SYMBOL</span></span>
+<span><span class="co">## colnames: NULL</span></span>
+<span><span class="co">## colData names(15): batch cell ... sample ncells</span></span>
+<span><span class="co">## reducedDimNames(5): corrected pca.corrected.E7.5 pca.corrected.E8.5 PCA</span></span>
+<span><span class="co">##   TSNE</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
+</div>
+<div class="section level3">
+<h3 id="differential-expression-analysis">Differential Expression Analysis<a class="anchor" aria-label="anchor" href="#differential-expression-analysis"></a>
+</h3>
+<p>The main advantage of using pseudo-bulk samples is the possibility to
+use well-tested methods for differential analysis like
+<code>edgeR</code> and <code>DESeq2</code>, we will focus on the first
+one for this analysis. <code>edgeR</code> uses a Negative Binomial
+Generalized Linear Modal for data with a limited number of replicates,
+like our case.</p>
+<p>Before to begin our analysis, let’s say that we are mostly interested
+in a specific cell type, the “Mesenchymal stem cells” and look into
+differences across different conditions.</p>
+<!-- To proceed with our analysis, we need to create an edgeR object for our data, so -->
+<!-- we first subset our dataset for the specific cell type and then we create the object. -->
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">label</span> <span class="op">&lt;-</span> <span class="st">"Mesenchyme"</span></span>
+<span><span class="va">current</span> <span class="op">&lt;-</span> <span class="va">summed</span><span class="op">[</span>,<span class="va">label</span><span class="op">==</span><span class="va">summed</span><span class="op">$</span><span class="va">celltype.mapped</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Creating up a DGEList object for use in edgeR:</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioinf.wehi.edu.au/edgeR/" class="external-link">edgeR</a></span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Loading required package: limma</span></span></code></pre>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## Attaching package: 'limma'</span></span></code></pre>
+<pre><code><span><span class="co">## The following object is masked from 'package:scater':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     plotMDS</span></span></code></pre>
+<pre><code><span><span class="co">## The following object is masked from 'package:BiocGenerics':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     plotMA</span></span></code></pre>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## Attaching package: 'edgeR'</span></span></code></pre>
+<pre><code><span><span class="co">## The following object is masked from 'package:SingleCellExperiment':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     cpm</span></span></code></pre>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/DGEList.html" class="external-link">DGEList</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">current</span><span class="op">)</span>, samples<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">current</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">y</span></span></code></pre></div>
+<pre><code><span><span class="co">## An object of class "DGEList"</span></span>
+<span><span class="co">## $counts</span></span>
+<span><span class="co">##                    Sample1 Sample2 Sample3 Sample4 Sample5 Sample6</span></span>
+<span><span class="co">## ENSMUSG00000025900       0       0       0       0       0       0</span></span>
+<span><span class="co">## ENSMUSG00000025902       0       0       2       0       0       0</span></span>
+<span><span class="co">## ENSMUSG00000104217       0       0       0       0       0       0</span></span>
+<span><span class="co">## ENSMUSG00000002459       2       0       0       1       0       0</span></span>
+<span><span class="co">## ENSMUSG00000025905       2       0       3       0       0       1</span></span>
+<span><span class="co">## 12219 more rows ...</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $samples</span></span>
+<span><span class="co">##         group lib.size norm.factors batch cell barcode sample stage tomato pool</span></span>
+<span><span class="co">## Sample1     1   952221            1     5 &lt;NA&gt;    &lt;NA&gt;      5  E8.5   TRUE    3</span></span>
+<span><span class="co">## Sample2     1   598884            1     6 &lt;NA&gt;    &lt;NA&gt;      6  E8.5  FALSE    3</span></span>
+<span><span class="co">## Sample3     1   403466            1     7 &lt;NA&gt;    &lt;NA&gt;      7  E8.5   TRUE    4</span></span>
+<span><span class="co">## Sample4     1   174195            1     8 &lt;NA&gt;    &lt;NA&gt;      8  E8.5  FALSE    4</span></span>
+<span><span class="co">## Sample5     1   400242            1     9 &lt;NA&gt;    &lt;NA&gt;      9  E8.5   TRUE    5</span></span>
+<span><span class="co">## Sample6     1   211763            1    10 &lt;NA&gt;    &lt;NA&gt;     10  E8.5  FALSE    5</span></span>
+<span><span class="co">##         stage.mapped celltype.mapped closest.cell doub.density sizeFactor</span></span>
+<span><span class="co">## Sample1         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">## Sample2         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">## Sample3         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">## Sample4         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">## Sample5         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">## Sample6         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">##         celltype.mapped.1 sample.1 ncells</span></span>
+<span><span class="co">## Sample1        Mesenchyme        5     60</span></span>
+<span><span class="co">## Sample2        Mesenchyme        6     31</span></span>
+<span><span class="co">## Sample3        Mesenchyme        7     41</span></span>
+<span><span class="co">## Sample4        Mesenchyme        8     22</span></span>
+<span><span class="co">## Sample5        Mesenchyme        9     46</span></span>
+<span><span class="co">## Sample6        Mesenchyme       10     35</span></span></code></pre>
+<p>A typical step is the discard of low quality samples due to low
+sequenced library size. We discard these samples because they can affect
+further steps like normalization and/or DEGs analysis.</p>
+<p>We can see that in our case we don’t have low quality samples and we
+don’t need to filter out any of them.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">discarded</span> <span class="op">&lt;-</span> <span class="va">current</span><span class="op">$</span><span class="va">ncells</span> <span class="op">&lt;</span> <span class="fl">10</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">y</span><span class="op">[</span>,<span class="op">!</span><span class="va">discarded</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discarded</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    Mode   FALSE </span></span>
+<span><span class="co">## logical       6</span></span></code></pre>
+<p>The same idea is typically applied to the genes, indeed we need to
+discard low expressed genes to improve accuracy for the DEGs
+modeling.</p>
+<p>We can see that in the case of the genes we discard 5688 of them,
+reducing the number of genes to test for further analysis to 9011.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/filterByExpr.html" class="external-link">filterByExpr</a></span><span class="op">(</span><span class="va">y</span>, group<span class="op">=</span><span class="va">current</span><span class="op">$</span><span class="va">tomato</span><span class="op">)</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">y</span><span class="op">[</span><span class="va">keep</span>,<span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">keep</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    Mode   FALSE    TRUE </span></span>
+<span><span class="co">## logical    9332    2892</span></span></code></pre>
+<p>Once we consider the data satisfying, we can proceed to normalize
+them. There are several approaches for normalizing bulk, and so
+pseudo-bulk data, but we stick with the Trimmed Mean of M-values method
+implemented in the <code>edgeR</code> package with the
+<code>calcNormFactors</code> function. Keep in mind that because we are
+going to normalize the pseudo-bulk counts, we don’t need to normalize
+the data in “single cell form”.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/calcNormFactors.html" class="external-link">calcNormFactors</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
+<span><span class="va">y</span><span class="op">$</span><span class="va">samples</span></span></code></pre></div>
+<pre><code><span><span class="co">##         group lib.size norm.factors batch cell barcode sample stage tomato pool</span></span>
+<span><span class="co">## Sample1     1   952221    1.0402723     5 &lt;NA&gt;    &lt;NA&gt;      5  E8.5   TRUE    3</span></span>
+<span><span class="co">## Sample2     1   598884    1.0300931     6 &lt;NA&gt;    &lt;NA&gt;      6  E8.5  FALSE    3</span></span>
+<span><span class="co">## Sample3     1   403466    0.9820112     7 &lt;NA&gt;    &lt;NA&gt;      7  E8.5   TRUE    4</span></span>
+<span><span class="co">## Sample4     1   174195    0.9798656     8 &lt;NA&gt;    &lt;NA&gt;      8  E8.5  FALSE    4</span></span>
+<span><span class="co">## Sample5     1   400242    0.9784025     9 &lt;NA&gt;    &lt;NA&gt;      9  E8.5   TRUE    5</span></span>
+<span><span class="co">## Sample6     1   211763    0.9912336    10 &lt;NA&gt;    &lt;NA&gt;     10  E8.5  FALSE    5</span></span>
+<span><span class="co">##         stage.mapped celltype.mapped closest.cell doub.density sizeFactor</span></span>
+<span><span class="co">## Sample1         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">## Sample2         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">## Sample3         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">## Sample4         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">## Sample5         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">## Sample6         &lt;NA&gt;      Mesenchyme         &lt;NA&gt;           NA         NA</span></span>
+<span><span class="co">##         celltype.mapped.1 sample.1 ncells</span></span>
+<span><span class="co">## Sample1        Mesenchyme        5     60</span></span>
+<span><span class="co">## Sample2        Mesenchyme        6     31</span></span>
+<span><span class="co">## Sample3        Mesenchyme        7     41</span></span>
+<span><span class="co">## Sample4        Mesenchyme        8     22</span></span>
+<span><span class="co">## Sample5        Mesenchyme        9     46</span></span>
+<span><span class="co">## Sample6        Mesenchyme       10     35</span></span></code></pre>
+<p>To investigate the effect of our normalization, we use an MD plot for
+each sample in order to detect possible normalization problems due to
+insufficient cells/reads/UMIs composing a particular pseudo-bulk
+profile.</p>
+<p>In our case, we verify that all these plots are centered in 0 (on
+y-axis) and present a trumpet shape, as expected.</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/limma/man/plotMD.html" class="external-link">plotMD</a></span><span class="op">(</span><span class="va">y</span>, column<span class="op">=</span><span class="va">i</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p><img src="multi_sample_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
+<p>On the other hand, we want to understand if the samples weel-group
+together based on their known factors (like the tomato injection in this
+case).</p>
+<p>To do so, we use the MDS plot, which is very close to a PCA
+representation.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">limma</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/plotMDS.html" class="external-link">plotMDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/cpm.html" class="external-link">cpm</a></span><span class="op">(</span><span class="va">y</span>, log<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>, </span>
+<span>    col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">y</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">tomato</span>, <span class="st">"red"</span>, <span class="st">"blue"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="multi_sample_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+<p>We then construct a matrix factor by including both the pool and the
+tomato as factors. This design indicates which samples belong to which
+pool and condition, so we can use it in the next step of the
+analysis.</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">pool</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">tomato</span><span class="op">)</span>, <span class="va">y</span><span class="op">$</span><span class="va">samples</span><span class="op">)</span></span>
+<span><span class="va">design</span></span></code></pre></div>
+<pre><code><span><span class="co">##         (Intercept) factor(pool)4 factor(pool)5 factor(tomato)TRUE</span></span>
+<span><span class="co">## Sample1           1             0             0                  1</span></span>
+<span><span class="co">## Sample2           1             0             0                  0</span></span>
+<span><span class="co">## Sample3           1             1             0                  1</span></span>
+<span><span class="co">## Sample4           1             1             0                  0</span></span>
+<span><span class="co">## Sample5           1             0             1                  1</span></span>
+<span><span class="co">## Sample6           1             0             1                  0</span></span>
+<span><span class="co">## attr(,"assign")</span></span>
+<span><span class="co">## [1] 0 1 1 2</span></span>
+<span><span class="co">## attr(,"contrasts")</span></span>
+<span><span class="co">## attr(,"contrasts")$`factor(pool)`</span></span>
+<span><span class="co">## [1] "contr.treatment"</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## attr(,"contrasts")$`factor(tomato)`</span></span>
+<span><span class="co">## [1] "contr.treatment"</span></span></code></pre>
+<p>Now we can compute the Negative Binomial (NB) overdispersion
+parameter, to model the mean-variance trend.</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/estimateDisp.html" class="external-link">estimateDisp</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">design</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">y</span><span class="op">$</span><span class="va">trended.dispersion</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">## 0.01640 0.01903 0.03382 0.03204 0.04239 0.04623</span></span></code></pre>
+<p>The BCV plot allows us to investigate the relation between the
+Biological Coefficient of Variation and the Average log CPM for each
+gene. Additionally, the Common and Trend BCV are shown in
+<code>red</code> and <code>blue</code>.</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/plotBCV.html" class="external-link">plotBCV</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span></code></pre></div>
+<p><img src="multi_sample_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
+<p>We then estimate a QL dispersion from the deviance of a GLM for each
+gene. The <code>robust=TRUE</code> parameter avoids distorsion from
+highly variable clusters. This is useful to handle the uncertainty and
+variability of the per-gene variance which is not well estimated by the
+NB dispersions, so the two dispersion types complement each other in the
+final analysis.</p>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/glmQLFTest.html" class="external-link">glmQLFit</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">design</span>, robust<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">var.prior</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">##  0.3906  0.7350  0.8886  0.8363  0.9169  1.1865</span></span></code></pre>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">df.prior</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">##  0.2789 13.7731 13.7731 13.3698 13.7731 13.7731</span></span></code></pre>
+<p>QL dispersion estimates for each gene as a function of abundance. Raw
+estimates (black) are shrunk towards the trend (blue) to yield squeezed
+estimates (red).</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/plotQLDisp.html" class="external-link">plotQLDisp</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
+<p><img src="multi_sample_files/figure-html/unnamed-chunk-15-1.png" width="700"></p>
+<p>We then use the QL-test function to test for Fold-Change (FC)
+differences (due to tomato injection) per each gene at a False Discovery
+Rate (FDR) of 5%. The low amount of DGEs highlights that the tomato
+injection effect has a low influence on the mesenchyme cells.</p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/glmQLFTest.html" class="external-link">glmQLFTest</a></span><span class="op">(</span><span class="va">fit</span>, coef<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">design</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/decideTests.html" class="external-link">decideTests</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##        factor(tomato)TRUE</span></span>
+<span><span class="co">## Down                    4</span></span>
+<span><span class="co">## NotSig               2878</span></span>
+<span><span class="co">## Up                     10</span></span></code></pre>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/topTags.html" class="external-link">topTags</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Coefficient:  factor(tomato)TRUE </span></span>
+<span><span class="co">##                         logFC    logCPM         F       PValue          FDR</span></span>
+<span><span class="co">## ENSMUSG00000096768  2.3553486  8.805445 220.79204 1.082724e-10 3.131237e-07</span></span>
+<span><span class="co">## ENSMUSG00000027520  2.4084381  7.007835  64.99689 5.537775e-07 8.007623e-04</span></span>
+<span><span class="co">## ENSMUSG00000101609  1.6220561  7.444688  49.63427 2.998825e-06 2.890867e-03</span></span>
+<span><span class="co">## ENSMUSG00000010760 -3.8963507 10.113367 190.95679 5.277514e-06 3.815643e-03</span></span>
+<span><span class="co">## ENSMUSG00000035299  1.8932108  7.142674  40.12079 1.253358e-05 7.249422e-03</span></span>
+<span><span class="co">## ENSMUSG00000002265  0.8020709 10.252732  34.94573 2.323033e-05 1.119702e-02</span></span>
+<span><span class="co">## ENSMUSG00000040212 -2.5448004  4.694483  27.21738 8.868906e-05 3.240657e-02</span></span>
+<span><span class="co">## ENSMUSG00000069833  0.9617152  8.581593  26.97303 9.450038e-05 3.240657e-02</span></span>
+<span><span class="co">## ENSMUSG00000036446 -0.7719616  9.456712  26.54355 1.008503e-04 3.240657e-02</span></span>
+<span><span class="co">## ENSMUSG00000006311  2.1719197  5.781086  25.22545 1.304925e-04 3.718002e-02</span></span></code></pre>
+<p>All the previous steps can be easily performed with the following
+function for each cell type, thanks to the <code>pseudoBulkDGE</code>
+function in the <code>scran</code> package.</p>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span>
+<span><span class="va">summed.filt</span> <span class="op">&lt;-</span> <span class="va">summed</span><span class="op">[</span>,<span class="va">summed</span><span class="op">$</span><span class="va">ncells</span> <span class="op">&gt;=</span> <span class="fl">10</span><span class="op">]</span></span>
+<span></span>
+<span><span class="va">de.results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/pseudoBulkDGE.html" class="external-link">pseudoBulkDGE</a></span><span class="op">(</span><span class="va">summed.filt</span>, </span>
+<span>    label<span class="op">=</span><span class="va">summed.filt</span><span class="op">$</span><span class="va">celltype.mapped</span>,</span>
+<span>    design<span class="op">=</span><span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">pool</span><span class="op">)</span> <span class="op">+</span> <span class="va">tomato</span>,</span>
+<span>    coef<span class="op">=</span><span class="st">"tomatoTRUE"</span>,</span>
+<span>    condition<span class="op">=</span><span class="va">summed.filt</span><span class="op">$</span><span class="va">tomato</span> </span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The returned object is a list of <code>DataFrame</code>s each with
+the results for a cell type. Each of these contains also the
+intermediate results in <code>edgeR</code> format to perform any
+intermediate plot or diagnostic.</p>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cur.results</span> <span class="op">&lt;-</span> <span class="va">de.results</span><span class="op">[[</span><span class="st">"Allantois"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">cur.results</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">cur.results</span><span class="op">$</span><span class="va">PValue</span><span class="op">)</span>,<span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 12224 rows and 5 columns</span></span>
+<span><span class="co">##                        logFC    logCPM         F      PValue         FDR</span></span>
+<span><span class="co">##                    &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;   &lt;numeric&gt;   &lt;numeric&gt;</span></span>
+<span><span class="co">## ENSMUSG00000010760 -2.283461  12.36685  257.2189 7.63721e-10 1.83064e-06</span></span>
+<span><span class="co">## ENSMUSG00000086503 -5.844385   6.52504  122.8816 6.34642e-08 7.60619e-05</span></span>
+<span><span class="co">## ENSMUSG00000096768  2.158359   9.33834   99.3260 2.16745e-07 1.73179e-04</span></span>
+<span><span class="co">## ENSMUSG00000029580 -0.812811  12.76710   86.7945 4.65546e-07 2.78978e-04</span></span>
+<span><span class="co">## ENSMUSG00000101609  2.957612   7.77409   40.2402 2.76997e-05 1.10673e-02</span></span>
+<span><span class="co">## ...                      ...       ...       ...         ...         ...</span></span>
+<span><span class="co">## ENSMUSG00000061654        NA        NA        NA          NA          NA</span></span>
+<span><span class="co">## ENSMUSG00000079834        NA        NA        NA          NA          NA</span></span>
+<span><span class="co">## ENSMUSG00000095247        NA        NA        NA          NA          NA</span></span>
+<span><span class="co">## ENSMUSG00000095041        NA        NA        NA          NA          NA</span></span>
+<span><span class="co">## ENSMUSG00000095742        NA        NA        NA          NA          NA</span></span></code></pre>
+</div>
+</div>
+<div class="section level2">
+<h2 id="differential-abundance">Differential Abundance<a class="anchor" aria-label="anchor" href="#differential-abundance"></a>
+</h2>
+<p>With DA we test for differences between clusters across conditions,
+to investigate which clusters change accordingly to the treatment (the
+tomato injection in our case).</p>
+<p>We first setup some code and variables for further analysis, like
+quantifying the number of cells per each cell type and fit a model to
+catch differences between the injected cells and the background.</p>
+<p>The performed steps are very similar to the ones for DEGs analysis,
+but this time we start our analysis on the computed abundances and
+without normalizing the data with TMM.</p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioinf.wehi.edu.au/edgeR/" class="external-link">edgeR</a></span><span class="op">)</span></span>
+<span><span class="va">abundances</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">merged</span><span class="op">$</span><span class="va">celltype.mapped</span>, <span class="va">merged</span><span class="op">$</span><span class="va">sample</span><span class="op">)</span> </span>
+<span><span class="va">abundances</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">unclass</a></span><span class="op">(</span><span class="va">abundances</span><span class="op">)</span> </span>
+<span><span class="co"># Attaching some column metadata.</span></span>
+<span><span class="va">extra.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">merged</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">abundances</span><span class="op">)</span>, <span class="va">merged</span><span class="op">$</span><span class="va">sample</span><span class="op">)</span>,<span class="op">]</span></span>
+<span><span class="va">y.ab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/DGEList.html" class="external-link">DGEList</a></span><span class="op">(</span><span class="va">abundances</span>, samples<span class="op">=</span><span class="va">extra.info</span><span class="op">)</span></span>
+<span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/filterByExpr.html" class="external-link">filterByExpr</a></span><span class="op">(</span><span class="va">y.ab</span>, group<span class="op">=</span><span class="va">y.ab</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">tomato</span><span class="op">)</span></span>
+<span><span class="va">y.ab</span> <span class="op">&lt;-</span> <span class="va">y.ab</span><span class="op">[</span><span class="va">keep</span>,<span class="op">]</span></span>
+<span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">pool</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">tomato</span><span class="op">)</span>, <span class="va">y.ab</span><span class="op">$</span><span class="va">samples</span><span class="op">)</span></span>
+<span><span class="va">y.ab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/estimateDisp.html" class="external-link">estimateDisp</a></span><span class="op">(</span><span class="va">y.ab</span>, <span class="va">design</span>, trend<span class="op">=</span><span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">fit.ab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/glmQLFTest.html" class="external-link">glmQLFit</a></span><span class="op">(</span><span class="va">y.ab</span>, <span class="va">design</span>, robust<span class="op">=</span><span class="cn">TRUE</span>, abundance.trend<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="background-on-compositional-effect">Background on compositional effect<a class="anchor" aria-label="anchor" href="#background-on-compositional-effect"></a>
+</h3>
+<p>As mentioned before, in DA we don’t normalize our data with
+<code>calcNormFactors</code> function, because this approach considers
+that most of the input features do not vary between conditions. Which
+cannot be applied to this analysis because we have a small number of
+cell populations that all can change due to the treatment. Leaving us to
+normalize only for library depth, which in pseudo-bulk data means by the
+total number of cells in each sample (cell type).</p>
+<p>On the other hand, this can lead our data to be susceptible to
+compositional effect, that means that our conclusions can be biased by
+the amount of cells present in each cell type. And this amount of cells
+can be totally unbalanced between cell types.</p>
+<p>For example, a specific cell type can have the 40% of the total
+amount of cells present in the experiment, while another just the 3%.
+The differences in terms of abundance of these cell types are detected
+between the different conditions, but our final interpretation could be
+biased if we don’t consider this aspect.</p>
+<p>We now look at different approaches for handling the compositional
+effect.</p>
+</div>
+<div class="section level3">
+<h3 id="assuming-most-labels-do-not-change">Assuming most labels do not change<a class="anchor" aria-label="anchor" href="#assuming-most-labels-do-not-change"></a>
+</h3>
+<p>We can use a similar approach used during the DEGs analysis, assuming
+that most labels are not changing, in particular if we think about the
+low number of DEGs resulted from the previous analysis.</p>
+<p>To do so, we first normalize the data with
+<code>calcNormFactors</code> and then we fit and estimate a QL-model for
+our abundance data.</p>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">y.ab2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/calcNormFactors.html" class="external-link">calcNormFactors</a></span><span class="op">(</span><span class="va">y.ab</span><span class="op">)</span></span>
+<span><span class="va">y.ab2</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">norm.factors</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 1.0347252 1.2081899 1.0100763 0.8339180 1.0312635 0.9208579</span></span></code></pre>
+<p>We then follow the already saw edgeR analysis steps. Many of the
+positive log-fold changes are shifted towards zero, consistent with the
+removal of composition biases from the presence of extra-embryonic
+ectoderm in only background cells. As it is possible to notice, the
+mesenchyme is no longer significantly DA after injection.</p>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">y.ab2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/estimateDisp.html" class="external-link">estimateDisp</a></span><span class="op">(</span><span class="va">y.ab2</span>, <span class="va">design</span>, trend<span class="op">=</span><span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">fit.ab2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/glmQLFTest.html" class="external-link">glmQLFit</a></span><span class="op">(</span><span class="va">y.ab2</span>, <span class="va">design</span>, robust<span class="op">=</span><span class="cn">TRUE</span>, abundance.trend<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/glmQLFTest.html" class="external-link">glmQLFTest</a></span><span class="op">(</span><span class="va">fit.ab2</span>, coef<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">design</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/topTags.html" class="external-link">topTags</a></span><span class="op">(</span><span class="va">res2</span>, n<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Coefficient:  factor(tomato)TRUE </span></span>
+<span><span class="co">##                                   logFC   logCPM         F     PValue       FDR</span></span>
+<span><span class="co">## Allantois                     1.1450235 15.58397 4.9625408 0.03224195 0.4073020</span></span>
+<span><span class="co">## Pharyngeal mesoderm           0.8921423 15.83772 3.2561184 0.07952883 0.4073020</span></span>
+<span><span class="co">## Cardiomyocytes                0.9641155 14.97847 2.8392729 0.10063709 0.4073020</span></span>
+<span><span class="co">## Neural crest                 -1.0070587 14.78804 2.7445670 0.10627716 0.4073020</span></span>
+<span><span class="co">## Erythroid3                   -0.7133169 17.30238 2.6367921 0.11313946 0.4073020</span></span>
+<span><span class="co">## Mesenchyme                    0.6773289 16.30824 2.1164994 0.15438389 0.4631517</span></span>
+<span><span class="co">## Forebrain/Midbrain/Hindbrain -0.4783315 16.47410 1.0877801 0.30391712 0.7815012</span></span>
+<span><span class="co">## Endothelium                   0.5090692 14.53179 0.6878822 0.41235151 0.8442223</span></span>
+<span><span class="co">## NMP                          -0.4241986 15.12430 0.5868368 0.44863895 0.8442223</span></span>
+<span><span class="co">## Spinal cord                  -0.3310764 15.50451 0.4186412 0.52172035 0.8442223</span></span></code></pre>
+</div>
+<div class="section level3">
+<h3 id="testing-against-a-log-fold-change-threshold">Testing against a log-fold change threshold<a class="anchor" aria-label="anchor" href="#testing-against-a-log-fold-change-threshold"></a>
+</h3>
+<p>This other approach assumes that the composition bias introduces a
+spurious log2-fold change of no more than a quantity for a non-DA label.
+In other words, we interpret this as the maximum log-fold change in the
+total number of cells given by DA in other labels. On the other hand,
+when choosing , we should not consider fold-differences in the totals
+due to differences in capture efficiency or the size of the original
+cell population are not attributable to composition bias. We then
+mitigate the effect of composition biases by testing each label for
+changes in abundance beyond .</p>
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res.lfc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/glmTreat.html" class="external-link">glmTreat</a></span><span class="op">(</span><span class="va">fit.ab</span>, coef<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">design</span><span class="op">)</span>, lfc<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/decideTests.html" class="external-link">decideTests</a></span><span class="op">(</span><span class="va">res.lfc</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##        factor(tomato)TRUE</span></span>
+<span><span class="co">## Down                    0</span></span>
+<span><span class="co">## NotSig                 18</span></span>
+<span><span class="co">## Up                      0</span></span></code></pre>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/edgeR/man/topTags.html" class="external-link">topTags</a></span><span class="op">(</span><span class="va">res.lfc</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Coefficient:  factor(tomato)TRUE </span></span>
+<span><span class="co">##                                   logFC unshrunk.logFC   logCPM    PValue</span></span>
+<span><span class="co">## Allantois                     1.2345618      1.2424898 15.57878 0.1303831</span></span>
+<span><span class="co">## Cardiomyocytes                0.9973014      1.0079319 14.99868 0.2527610</span></span>
+<span><span class="co">## Pharyngeal mesoderm           0.9755714      0.9805693 15.82876 0.2644786</span></span>
+<span><span class="co">## Neural crest                 -0.8783504     -0.8891224 14.76164 0.3247181</span></span>
+<span><span class="co">## Mesenchyme                    0.7420103      0.7445474 16.31769 0.4487462</span></span>
+<span><span class="co">## Erythroid3                   -0.6379409     -0.6390305 17.26111 0.5575492</span></span>
+<span><span class="co">## Endothelium                   0.5201284      0.5276729 14.55915 0.5740270</span></span>
+<span><span class="co">## NMP                          -0.4082472     -0.4117838 15.16374 0.6786762</span></span>
+<span><span class="co">## Forebrain/Midbrain/Hindbrain -0.4215353     -0.4229418 16.49345 0.7207131</span></span>
+<span><span class="co">## Surface ectoderm              0.3274000      0.3286359 16.07669 0.7788403</span></span>
+<span><span class="co">##                                    FDR</span></span>
+<span><span class="co">## Allantois                    0.9771146</span></span>
+<span><span class="co">## Cardiomyocytes               0.9771146</span></span>
+<span><span class="co">## Pharyngeal mesoderm          0.9771146</span></span>
+<span><span class="co">## Neural crest                 0.9771146</span></span>
+<span><span class="co">## Mesenchyme                   0.9771146</span></span>
+<span><span class="co">## Erythroid3                   0.9771146</span></span>
+<span><span class="co">## Endothelium                  0.9771146</span></span>
+<span><span class="co">## NMP                          0.9771146</span></span>
+<span><span class="co">## Forebrain/Midbrain/Hindbrain 0.9771146</span></span>
+<span><span class="co">## Surface ectoderm             0.9771146</span></span></code></pre>
+<p>Addionally, the choice of can be guided by other external
+experimental data, like a previous or a pilot experiment.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.3.0 (2023-04-21)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
@@ -137,49 +716,83 @@
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] scran_1.28.1                scuttle_1.10.1             </span></span>
-<span><span class="co">##  [3] SingleCellExperiment_1.22.0 SummarizedExperiment_1.30.2</span></span>
-<span><span class="co">##  [5] Biobase_2.60.0              GenomicRanges_1.52.0       </span></span>
-<span><span class="co">##  [7] GenomeInfoDb_1.36.1         IRanges_2.34.1             </span></span>
-<span><span class="co">##  [9] S4Vectors_0.38.1            BiocGenerics_0.46.0        </span></span>
-<span><span class="co">## [11] MatrixGenerics_1.12.2       matrixStats_1.0.0          </span></span>
-<span><span class="co">## [13] BiocStyle_2.28.0           </span></span>
+<span><span class="co">##  [1] edgeR_3.42.4                 limma_3.56.2                </span></span>
+<span><span class="co">##  [3] batchelor_1.16.0             scran_1.28.1                </span></span>
+<span><span class="co">##  [5] scater_1.28.0                ggplot2_3.4.2               </span></span>
+<span><span class="co">##  [7] scuttle_1.10.1               MouseGastrulationData_1.14.0</span></span>
+<span><span class="co">##  [9] SpatialExperiment_1.10.0     SingleCellExperiment_1.22.0 </span></span>
+<span><span class="co">## [11] SummarizedExperiment_1.30.2  Biobase_2.60.0              </span></span>
+<span><span class="co">## [13] GenomicRanges_1.52.0         GenomeInfoDb_1.36.1         </span></span>
+<span><span class="co">## [15] IRanges_2.34.1               S4Vectors_0.38.1            </span></span>
+<span><span class="co">## [17] BiocGenerics_0.46.0          MatrixGenerics_1.12.2       </span></span>
+<span><span class="co">## [19] matrixStats_1.0.0            BiocStyle_2.28.0            </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
-<span><span class="co">##  [1] xfun_0.39                 bslib_0.5.0              </span></span>
-<span><span class="co">##  [3] lattice_0.21-8            vctrs_0.6.3              </span></span>
-<span><span class="co">##  [5] tools_4.3.0               bitops_1.0-7             </span></span>
-<span><span class="co">##  [7] parallel_4.3.0            cluster_2.1.4            </span></span>
-<span><span class="co">##  [9] pkgconfig_2.0.3           BiocNeighbors_1.18.0     </span></span>
-<span><span class="co">## [11] Matrix_1.5-4.1            dqrng_0.3.0              </span></span>
-<span><span class="co">## [13] desc_1.4.2                sparseMatrixStats_1.12.2 </span></span>
-<span><span class="co">## [15] lifecycle_1.0.3           GenomeInfoDbData_1.2.10  </span></span>
-<span><span class="co">## [17] compiler_4.3.0            stringr_1.5.0            </span></span>
-<span><span class="co">## [19] textshaping_0.3.6         statmod_1.5.0            </span></span>
-<span><span class="co">## [21] bluster_1.10.0            codetools_0.2-19         </span></span>
-<span><span class="co">## [23] htmltools_0.5.5           sass_0.4.6               </span></span>
-<span><span class="co">## [25] RCurl_1.98-1.12           yaml_2.3.7               </span></span>
-<span><span class="co">## [27] pkgdown_2.0.7             crayon_1.5.2             </span></span>
-<span><span class="co">## [29] jquerylib_0.1.4           BiocParallel_1.34.2      </span></span>
-<span><span class="co">## [31] limma_3.56.2              DelayedArray_0.26.6      </span></span>
-<span><span class="co">## [33] cachem_1.0.8              metapod_1.8.0            </span></span>
-<span><span class="co">## [35] locfit_1.5-9.8            rsvd_1.0.5               </span></span>
-<span><span class="co">## [37] digest_0.6.32             stringi_1.7.12           </span></span>
-<span><span class="co">## [39] BiocSingular_1.16.0       purrr_1.0.1              </span></span>
-<span><span class="co">## [41] rprojroot_2.0.3           fastmap_1.1.1            </span></span>
-<span><span class="co">## [43] grid_4.3.0                cli_3.6.1                </span></span>
-<span><span class="co">## [45] magrittr_2.0.3            S4Arrays_1.0.4           </span></span>
-<span><span class="co">## [47] edgeR_3.42.4              DelayedMatrixStats_1.22.1</span></span>
-<span><span class="co">## [49] rmarkdown_2.23            XVector_0.40.0           </span></span>
-<span><span class="co">## [51] igraph_1.5.0              ragg_1.2.5               </span></span>
-<span><span class="co">## [53] ScaledMatrix_1.8.1        beachmat_2.16.0          </span></span>
-<span><span class="co">## [55] memoise_2.0.1             evaluate_0.21            </span></span>
-<span><span class="co">## [57] knitr_1.43                irlba_2.3.5.1            </span></span>
-<span><span class="co">## [59] rlang_1.1.1               Rcpp_1.0.10              </span></span>
-<span><span class="co">## [61] glue_1.6.2                BiocManager_1.30.21      </span></span>
-<span><span class="co">## [63] jsonlite_1.8.7            R6_2.5.1                 </span></span>
-<span><span class="co">## [65] systemfonts_1.0.4         fs_1.6.2                 </span></span>
-<span><span class="co">## [67] zlibbioc_1.46.0</span></span></code></pre>
+<span><span class="co">##   [1] jsonlite_1.8.7                magrittr_2.0.3               </span></span>
+<span><span class="co">##   [3] ggbeeswarm_0.7.2              magick_2.7.4                 </span></span>
+<span><span class="co">##   [5] farver_2.1.1                  rmarkdown_2.23               </span></span>
+<span><span class="co">##   [7] fs_1.6.2                      zlibbioc_1.46.0              </span></span>
+<span><span class="co">##   [9] ragg_1.2.5                    vctrs_0.6.3                  </span></span>
+<span><span class="co">##  [11] memoise_2.0.1                 DelayedMatrixStats_1.22.1    </span></span>
+<span><span class="co">##  [13] RCurl_1.98-1.12               htmltools_0.5.5              </span></span>
+<span><span class="co">##  [15] S4Arrays_1.0.4                AnnotationHub_3.8.0          </span></span>
+<span><span class="co">##  [17] curl_5.0.1                    BiocNeighbors_1.18.0         </span></span>
+<span><span class="co">##  [19] Rhdf5lib_1.22.0               rhdf5_2.44.0                 </span></span>
+<span><span class="co">##  [21] sass_0.4.6                    bslib_0.5.0                  </span></span>
+<span><span class="co">##  [23] desc_1.4.2                    cachem_1.0.8                 </span></span>
+<span><span class="co">##  [25] ResidualMatrix_1.10.0         igraph_1.5.0                 </span></span>
+<span><span class="co">##  [27] mime_0.12                     lifecycle_1.0.3              </span></span>
+<span><span class="co">##  [29] pkgconfig_2.0.3               rsvd_1.0.5                   </span></span>
+<span><span class="co">##  [31] Matrix_1.5-4.1                R6_2.5.1                     </span></span>
+<span><span class="co">##  [33] fastmap_1.1.1                 GenomeInfoDbData_1.2.10      </span></span>
+<span><span class="co">##  [35] shiny_1.7.4                   digest_0.6.32                </span></span>
+<span><span class="co">##  [37] colorspace_2.1-0              AnnotationDbi_1.62.2         </span></span>
+<span><span class="co">##  [39] rprojroot_2.0.3               dqrng_0.3.0                  </span></span>
+<span><span class="co">##  [41] irlba_2.3.5.1                 ExperimentHub_2.8.0          </span></span>
+<span><span class="co">##  [43] textshaping_0.3.6             RSQLite_2.3.1                </span></span>
+<span><span class="co">##  [45] beachmat_2.16.0               labeling_0.4.2               </span></span>
+<span><span class="co">##  [47] filelock_1.0.2                fansi_1.0.4                  </span></span>
+<span><span class="co">##  [49] httr_1.4.6                    compiler_4.3.0               </span></span>
+<span><span class="co">##  [51] bit64_4.0.5                   withr_2.5.0                  </span></span>
+<span><span class="co">##  [53] BiocParallel_1.34.2           viridis_0.6.3                </span></span>
+<span><span class="co">##  [55] DBI_1.1.3                     highr_0.10                   </span></span>
+<span><span class="co">##  [57] HDF5Array_1.28.1              R.utils_2.12.2               </span></span>
+<span><span class="co">##  [59] rappdirs_0.3.3                DelayedArray_0.26.6          </span></span>
+<span><span class="co">##  [61] bluster_1.10.0                rjson_0.2.21                 </span></span>
+<span><span class="co">##  [63] tools_4.3.0                   vipor_0.4.5                  </span></span>
+<span><span class="co">##  [65] beeswarm_0.4.0                interactiveDisplayBase_1.38.0</span></span>
+<span><span class="co">##  [67] httpuv_1.6.11                 R.oo_1.25.0                  </span></span>
+<span><span class="co">##  [69] glue_1.6.2                    rhdf5filters_1.12.1          </span></span>
+<span><span class="co">##  [71] promises_1.2.0.1              grid_4.3.0                   </span></span>
+<span><span class="co">##  [73] Rtsne_0.16                    cluster_2.1.4                </span></span>
+<span><span class="co">##  [75] generics_0.1.3                gtable_0.3.3                 </span></span>
+<span><span class="co">##  [77] R.methodsS3_1.8.2             metapod_1.8.0                </span></span>
+<span><span class="co">##  [79] BiocSingular_1.16.0           ScaledMatrix_1.8.1           </span></span>
+<span><span class="co">##  [81] utf8_1.2.3                    XVector_0.40.0               </span></span>
+<span><span class="co">##  [83] ggrepel_0.9.3                 BiocVersion_3.17.1           </span></span>
+<span><span class="co">##  [85] pillar_1.9.0                  stringr_1.5.0                </span></span>
+<span><span class="co">##  [87] BumpyMatrix_1.8.0             later_1.3.1                  </span></span>
+<span><span class="co">##  [89] splines_4.3.0                 dplyr_1.1.2                  </span></span>
+<span><span class="co">##  [91] BiocFileCache_2.8.0           lattice_0.21-8               </span></span>
+<span><span class="co">##  [93] bit_4.0.5                     tidyselect_1.2.0             </span></span>
+<span><span class="co">##  [95] locfit_1.5-9.8                Biostrings_2.68.1            </span></span>
+<span><span class="co">##  [97] knitr_1.43                    gridExtra_2.3                </span></span>
+<span><span class="co">##  [99] xfun_0.39                     statmod_1.5.0                </span></span>
+<span><span class="co">## [101] DropletUtils_1.20.0           stringi_1.7.12               </span></span>
+<span><span class="co">## [103] yaml_2.3.7                    evaluate_0.21                </span></span>
+<span><span class="co">## [105] codetools_0.2-19              tibble_3.2.1                 </span></span>
+<span><span class="co">## [107] BiocManager_1.30.21           cli_3.6.1                    </span></span>
+<span><span class="co">## [109] xtable_1.8-4                  systemfonts_1.0.4            </span></span>
+<span><span class="co">## [111] munsell_0.5.0                 jquerylib_0.1.4              </span></span>
+<span><span class="co">## [113] Rcpp_1.0.10                   dbplyr_2.3.2                 </span></span>
+<span><span class="co">## [115] png_0.1-8                     parallel_4.3.0               </span></span>
+<span><span class="co">## [117] ellipsis_0.3.2                pkgdown_2.0.7                </span></span>
+<span><span class="co">## [119] blob_1.2.4                    sparseMatrixStats_1.12.2     </span></span>
+<span><span class="co">## [121] bitops_1.0-7                  viridisLite_0.4.2            </span></span>
+<span><span class="co">## [123] scales_1.2.1                  purrr_1.0.1                  </span></span>
+<span><span class="co">## [125] crayon_1.5.2                  rlang_1.1.1                  </span></span>
+<span><span class="co">## [127] formatR_1.14                  cowplot_1.1.1                </span></span>
+<span><span class="co">## [129] KEGGREST_1.40.0</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>
@@ -193,6 +806,14 @@
 <div class="section level2">
 <h2 id="exercises">Exercises<a class="anchor" aria-label="anchor" href="#exercises"></a>
 </h2>
+<ul>
+<li><p>Test differential expressed genes with just 2 replicates per
+condition and look into the changes in the results and possible emerging
+issues.</p></li>
+<li><p>Test differential expressed genes computed with
+<code>muscat</code> package and check for differences in the
+results.</p></li>
+</ul>
 </div>
   </div>
 

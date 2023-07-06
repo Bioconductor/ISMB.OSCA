@@ -415,20 +415,21 @@ approximation can be largely ignored.</p>
 <span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span>exact <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html" class="external-link">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, approx <span class="op">=</span> <span class="va">clusters</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      approx</span></span>
 <span><span class="co">## exact   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15</span></span>
-<span><span class="co">##    1   88   0   0   0   1   0   0   0   2   0   0   0   0   0   0</span></span>
+<span><span class="co">##    1   88   0   0   0   3   0   0   0   2   0   0   0   0   0   0</span></span>
 <span><span class="co">##    2    0 143   0   0   0   0   0   0   0   0   0   0   0   0   1</span></span>
 <span><span class="co">##    3    0   0  75   0   0   0   0   0   0   0   0   0   0   0   0</span></span>
-<span><span class="co">##    4    0   0   0 342   0   0   0   0   0   0   0   0   0   0  55</span></span>
-<span><span class="co">##    5    0   0   0   0 393   0   0   0   0   1   0   3   0   0   0</span></span>
-<span><span class="co">##    6    0   0   0   0   0 203  52   0   0   0   1   0   2   0   0</span></span>
-<span><span class="co">##    7    0   0   0   0   0   6 193   0   0   1   0   0   0   0   0</span></span>
-<span><span class="co">##    8    0   0   0   0   0   0   0  95   0   0   0   0   0   0   0</span></span>
+<span><span class="co">##    4    0   0   0 341   0   0   0   0   0   0   0   0   0   0   0</span></span>
+<span><span class="co">##    5    0   0   0   0 390   0   0   6   0   1   0  11   0   0   0</span></span>
+<span><span class="co">##    6    0   0   0   0   0 210  51   0   0   0   0   0   0   0   0</span></span>
+<span><span class="co">##    7    0   0   0   0   0   0 194   0   0   1   0   0   0   0   0</span></span>
+<span><span class="co">##    8    0   0   0   0   1   0   0  88   0   0   0   0   0   0   0</span></span>
 <span><span class="co">##    9    1   0   0   0   1   0   0   0 106   0   0   0   0   0   0</span></span>
-<span><span class="co">##    10   0   0   0   0   0   0   0   0   0 113   0   1   0   0   0</span></span>
-<span><span class="co">##    11   0   0   0   0   0   0   0   0   0   0 153   0   0   0   0</span></span>
-<span><span class="co">##    12   0   0   0   0   6   0   0   0   0   0   0 209   0   0   0</span></span>
-<span><span class="co">##    13   0   0   0   0   0   0   0   0   0   0   0   0 144   0   0</span></span>
-<span><span class="co">##    14   0   0   0   0   0   0   0   0   0   0   0   0   0  20   0</span></span></code></pre>
+<span><span class="co">##    10   0   0   0   0   0   0   0   0   0 113   0   0   0   0   0</span></span>
+<span><span class="co">##    11   0   0   0   0   0   0   0   0   0   5 142   0   6   0   0</span></span>
+<span><span class="co">##    12   0   1   0   0   1   0   0   0   0   0   0 207   0   0   0</span></span>
+<span><span class="co">##    13   0   0   0   0   0   0   0   0   0   0   0   0 146   0   0</span></span>
+<span><span class="co">##    14   0   0   0   0   0   0   0   0   0   0   0   0   0  20   0</span></span>
+<span><span class="co">##    15   0   0   0   0   0   0   0   0   0   0   0   0   0   0  56</span></span></code></pre>
 <p>Note that Annoy writes the NN index to disk prior to performing the
 search. Thus, it may not actually be faster than the default exact
 algorithm for small datasets, depending on whether the overhead of disk
@@ -547,7 +548,7 @@ PBMC dataset:</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.satijalab.org/seurat" class="external-link">SeuratData</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://satijalab.org/seurat/reference/InstallData.html" class="external-link">InstallData</a></span><span class="op">(</span><span class="st">"pbmc3k"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Installing package into '/tmp/RtmpTF3fJQ/temp_libpath1dfe58b4f4de'</span></span>
+<pre><code><span><span class="co">## Installing package into '/tmp/RtmpITav4S/temp_libpath1d757c914b6a'</span></span>
 <span><span class="co">## (as 'lib' is unspecified)</span></span></code></pre>
 <p>We then load the dataset as an <code>SeuratObject</code> and convert
 it to a <code>SingleCellExperiment</code>.</p>

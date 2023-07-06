@@ -108,27 +108,222 @@ SingleCellExperiment class</h1>
 <div class="section level2">
 <h2 id="the-singlecellexperiment-class">The <code>SingleCellExperiment</code> class<a class="anchor" aria-label="anchor" href="#the-singlecellexperiment-class"></a>
 </h2>
+<p>One of the main strengths of the Bioconductor project lies in the use
+of a common data infrastructure that powers interoperability across
+packages.</p>
+<p>Users should be able to analyze their data using functions from
+different Bioconductor packages without the need to convert between
+formats. To this end, the <code>SingleCellExperiment</code> class (from
+the <em>SingleCellExperiment</em> package) serves as the common currency
+for data exchange across 70+ single-cell-related Bioconductor
+packages.</p>
+<p>This class implements a data structure that stores all aspects of our
+single-cell data - gene-by-cell expression data, per-cell metadata and
+per-gene annotation - and manipulate them in a synchronized manner.</p>
+<p><img src="http://bioconductor.org/books/3.17/OSCA.intro/images/SingleCellExperiment.png"><!-- --></p>
 <p>Let’s start with an example dataset.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sce_processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>samples<span class="op">=</span><span class="fl">5</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="va">sce_processed</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MouseGastrulationData/man/WTChimeraData.html" class="external-link">WTChimeraData</a></span><span class="op">(</span>sample<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">sce</span></span></code></pre></div>
 <pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
-<span><span class="co">## dim: 29453 20935 </span></span>
+<span><span class="co">## dim: 29453 2411 </span></span>
 <span><span class="co">## metadata(0):</span></span>
 <span><span class="co">## assays(1): counts</span></span>
 <span><span class="co">## rownames(29453): ENSMUSG00000051951 ENSMUSG00000089699 ...</span></span>
 <span><span class="co">##   ENSMUSG00000095742 tomato-td</span></span>
 <span><span class="co">## rowData names(2): ENSEMBL SYMBOL</span></span>
-<span><span class="co">## colnames(20935): cell_9769 cell_9770 ... cell_30702 cell_30703</span></span>
+<span><span class="co">## colnames(2411): cell_9769 cell_9770 ... cell_12178 cell_12179</span></span>
 <span><span class="co">## colData names(11): cell barcode ... doub.density sizeFactor</span></span>
 <span><span class="co">## reducedDimNames(2): pca.corrected.E7.5 pca.corrected.E8.5</span></span>
 <span><span class="co">## mainExpName: NULL</span></span>
 <span><span class="co">## altExpNames(0):</span></span></code></pre>
+<p>We can think of this (and other) class as a <em>container</em>, that
+contains several different pieces of data in so-called
+<em>slots</em>.</p>
+<p>The <em>getter</em> methods are used to extract information from the
+slots and the <em>setter</em> methods are used to add information into
+the slots. These are the only ways to interact with the objects (rather
+than directly accessing the slots).</p>
+<p>Depending on the object, slots can contain different types of data
+(e.g., numeric matrices, lists, etc.). We will here review the main
+slots of the SingleCellExperiment class as well as their getter/setter
+methods.</p>
+<div class="section level3">
+<h3 id="the-assays">The <code>assays</code><a class="anchor" aria-label="anchor" href="#the-assays"></a>
+</h3>
+<p>This is arguably the most fundamental part of the object that
+contains the count matrix, and potentially other matrices with
+transformed data. We can access the <em>list</em> of matrices with the
+<code>assays</code> function and individual matrices with the
+<code>assay</code> function. If one of these matrices is called
+“counts”, we can use the special <code>counts</code> getter (and the
+analogous <code>logcounts</code>).</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] TRUE</span></span></code></pre>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">## 3 x 3 sparse Matrix of class "dgTMatrix"</span></span>
+<span><span class="co">##                    cell_9769 cell_9770 cell_9771</span></span>
+<span><span class="co">## ENSMUSG00000051951         .         .         .</span></span>
+<span><span class="co">## ENSMUSG00000089699         .         .         .</span></span>
+<span><span class="co">## ENSMUSG00000102343         .         .         .</span></span></code></pre>
+<p>You will notice that in this case we have a sparse matrix of class
+“dgTMatrix” inside the object. More generally, any “matrix-like” object
+can be used, e.g., dense matrices or HDF5-backed matrices (see “Working
+with large data”).</p>
+</div>
+<div class="section level3">
+<h3 id="the-coldata-and-rowdata">The <code>colData</code> and <code>rowData</code><a class="anchor" aria-label="anchor" href="#the-coldata-and-rowdata"></a>
+</h3>
+<p>Conceptually, these are two data frames that annotate the columns and
+the rows of your assay, respectively.</p>
+<p>One can interact with them as usual, e.g., by extracting columns or
+adding additional variables as columns.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 2411 rows and 11 columns</span></span>
+<span><span class="co">##                   cell          barcode    sample       stage    tomato</span></span>
+<span><span class="co">##            &lt;character&gt;      &lt;character&gt; &lt;integer&gt; &lt;character&gt; &lt;logical&gt;</span></span>
+<span><span class="co">## cell_9769    cell_9769 AAACCTGAGACTGTAA         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9770    cell_9770 AAACCTGAGATGCCTT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9771    cell_9771 AAACCTGAGCAGCCTC         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9772    cell_9772 AAACCTGCATACTCTT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9773    cell_9773 AAACGGGTCAACACCA         5        E8.5      TRUE</span></span>
+<span><span class="co">## ...                ...              ...       ...         ...       ...</span></span>
+<span><span class="co">## cell_12175  cell_12175 TTTGGTTAGTCCGTAT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_12176  cell_12176 TTTGGTTAGTGTTGAA         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_12177  cell_12177 TTTGGTTGTTAAAGAC         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_12178  cell_12178 TTTGGTTTCAGTCAGT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_12179  cell_12179 TTTGGTTTCGCCATAA         5        E8.5      TRUE</span></span>
+<span><span class="co">##                 pool stage.mapped        celltype.mapped closest.cell</span></span>
+<span><span class="co">##            &lt;integer&gt;  &lt;character&gt;            &lt;character&gt;  &lt;character&gt;</span></span>
+<span><span class="co">## cell_9769          3        E8.25             Mesenchyme   cell_24159</span></span>
+<span><span class="co">## cell_9770          3         E8.5            Endothelium   cell_96660</span></span>
+<span><span class="co">## cell_9771          3         E8.5              Allantois  cell_134982</span></span>
+<span><span class="co">## cell_9772          3         E8.5             Erythroid3  cell_133892</span></span>
+<span><span class="co">## cell_9773          3        E8.25             Erythroid1   cell_76296</span></span>
+<span><span class="co">## ...              ...          ...                    ...          ...</span></span>
+<span><span class="co">## cell_12175         3         E8.5             Erythroid3  cell_138060</span></span>
+<span><span class="co">## cell_12176         3         E8.5 Forebrain/Midbrain/H..   cell_72709</span></span>
+<span><span class="co">## cell_12177         3        E8.25       Surface ectoderm  cell_100275</span></span>
+<span><span class="co">## cell_12178         3        E8.25             Erythroid2   cell_70906</span></span>
+<span><span class="co">## cell_12179         3         E8.5            Spinal cord  cell_102334</span></span>
+<span><span class="co">##            doub.density sizeFactor</span></span>
+<span><span class="co">##               &lt;numeric&gt;  &lt;numeric&gt;</span></span>
+<span><span class="co">## cell_9769    0.02985045    1.41243</span></span>
+<span><span class="co">## cell_9770    0.00172753    1.22757</span></span>
+<span><span class="co">## cell_9771    0.01338013    1.15439</span></span>
+<span><span class="co">## cell_9772    0.00218402    1.28676</span></span>
+<span><span class="co">## cell_9773    0.00211723    1.78719</span></span>
+<span><span class="co">## ...                 ...        ...</span></span>
+<span><span class="co">## cell_12175   0.00129403   1.219506</span></span>
+<span><span class="co">## cell_12176   0.01833074   1.095753</span></span>
+<span><span class="co">## cell_12177   0.03104037   0.910728</span></span>
+<span><span class="co">## cell_12178   0.00169483   2.061701</span></span>
+<span><span class="co">## cell_12179   0.03767894   1.798687</span></span></code></pre>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 29453 rows and 2 columns</span></span>
+<span><span class="co">##                               ENSEMBL         SYMBOL</span></span>
+<span><span class="co">##                           &lt;character&gt;    &lt;character&gt;</span></span>
+<span><span class="co">## ENSMUSG00000051951 ENSMUSG00000051951           Xkr4</span></span>
+<span><span class="co">## ENSMUSG00000089699 ENSMUSG00000089699         Gm1992</span></span>
+<span><span class="co">## ENSMUSG00000102343 ENSMUSG00000102343        Gm37381</span></span>
+<span><span class="co">## ENSMUSG00000025900 ENSMUSG00000025900            Rp1</span></span>
+<span><span class="co">## ENSMUSG00000025902 ENSMUSG00000025902          Sox17</span></span>
+<span><span class="co">## ...                               ...            ...</span></span>
+<span><span class="co">## ENSMUSG00000095041 ENSMUSG00000095041     AC149090.1</span></span>
+<span><span class="co">## ENSMUSG00000063897 ENSMUSG00000063897          DHRSX</span></span>
+<span><span class="co">## ENSMUSG00000096730 ENSMUSG00000096730       Vmn2r122</span></span>
+<span><span class="co">## ENSMUSG00000095742 ENSMUSG00000095742 CAAA01147332.1</span></span>
+<span><span class="co">## tomato-td                   tomato-td      tomato-td</span></span></code></pre>
+<p>Note the <code>$</code> short cut.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">sum</span>, <span class="va">sce</span><span class="op">$</span><span class="va">sum</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] TRUE</span></span></code></pre>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">my_sum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 2411 rows and 12 columns</span></span>
+<span><span class="co">##                   cell          barcode    sample       stage    tomato</span></span>
+<span><span class="co">##            &lt;character&gt;      &lt;character&gt; &lt;integer&gt; &lt;character&gt; &lt;logical&gt;</span></span>
+<span><span class="co">## cell_9769    cell_9769 AAACCTGAGACTGTAA         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9770    cell_9770 AAACCTGAGATGCCTT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9771    cell_9771 AAACCTGAGCAGCCTC         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9772    cell_9772 AAACCTGCATACTCTT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_9773    cell_9773 AAACGGGTCAACACCA         5        E8.5      TRUE</span></span>
+<span><span class="co">## ...                ...              ...       ...         ...       ...</span></span>
+<span><span class="co">## cell_12175  cell_12175 TTTGGTTAGTCCGTAT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_12176  cell_12176 TTTGGTTAGTGTTGAA         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_12177  cell_12177 TTTGGTTGTTAAAGAC         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_12178  cell_12178 TTTGGTTTCAGTCAGT         5        E8.5      TRUE</span></span>
+<span><span class="co">## cell_12179  cell_12179 TTTGGTTTCGCCATAA         5        E8.5      TRUE</span></span>
+<span><span class="co">##                 pool stage.mapped        celltype.mapped closest.cell</span></span>
+<span><span class="co">##            &lt;integer&gt;  &lt;character&gt;            &lt;character&gt;  &lt;character&gt;</span></span>
+<span><span class="co">## cell_9769          3        E8.25             Mesenchyme   cell_24159</span></span>
+<span><span class="co">## cell_9770          3         E8.5            Endothelium   cell_96660</span></span>
+<span><span class="co">## cell_9771          3         E8.5              Allantois  cell_134982</span></span>
+<span><span class="co">## cell_9772          3         E8.5             Erythroid3  cell_133892</span></span>
+<span><span class="co">## cell_9773          3        E8.25             Erythroid1   cell_76296</span></span>
+<span><span class="co">## ...              ...          ...                    ...          ...</span></span>
+<span><span class="co">## cell_12175         3         E8.5             Erythroid3  cell_138060</span></span>
+<span><span class="co">## cell_12176         3         E8.5 Forebrain/Midbrain/H..   cell_72709</span></span>
+<span><span class="co">## cell_12177         3        E8.25       Surface ectoderm  cell_100275</span></span>
+<span><span class="co">## cell_12178         3        E8.25             Erythroid2   cell_70906</span></span>
+<span><span class="co">## cell_12179         3         E8.5            Spinal cord  cell_102334</span></span>
+<span><span class="co">##            doub.density sizeFactor    my_sum</span></span>
+<span><span class="co">##               &lt;numeric&gt;  &lt;numeric&gt; &lt;numeric&gt;</span></span>
+<span><span class="co">## cell_9769    0.02985045    1.41243     27577</span></span>
+<span><span class="co">## cell_9770    0.00172753    1.22757     29309</span></span>
+<span><span class="co">## cell_9771    0.01338013    1.15439     28795</span></span>
+<span><span class="co">## cell_9772    0.00218402    1.28676     34794</span></span>
+<span><span class="co">## cell_9773    0.00211723    1.78719     38300</span></span>
+<span><span class="co">## ...                 ...        ...       ...</span></span>
+<span><span class="co">## cell_12175   0.00129403   1.219506     26680</span></span>
+<span><span class="co">## cell_12176   0.01833074   1.095753     19013</span></span>
+<span><span class="co">## cell_12177   0.03104037   0.910728     24627</span></span>
+<span><span class="co">## cell_12178   0.00169483   2.061701     46162</span></span>
+<span><span class="co">## cell_12179   0.03767894   1.798687     38398</span></span></code></pre>
+</div>
+<div class="section level3">
+<h3 id="the-reduceddims">The <code>reducedDims</code><a class="anchor" aria-label="anchor" href="#the-reduceddims"></a>
+</h3>
+<p>Everything that we have described so far (except for the
+<code>counts</code> getter) is part of the
+<code>SummarizedExperiment</code> class that SingleCellExperiment
+extends.</p>
+<p>One of the peculiarity of SingleCellExperiment is its ability to
+store reduced dimension matrices within the object. These may include
+PCA, t-SNE, UMAP, etc.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDims</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## List of length 2</span></span>
+<span><span class="co">## names(2): pca.corrected.E7.5 pca.corrected.E8.5</span></span></code></pre>
+<p>As for the other slots, we have the usual setter/getter, but it is
+somewhat rare to interact directly with these functions.</p>
+<p>It is more common for other functions to <em>store</em> this
+information in the object, e.g., the <code>runPCA</code> function from
+the <code>scater</code> package.</p>
+<p>Here, we use <code>scater</code>’s <code>plotReducedDim</code>
+function as an example of how to extract this information
+<em>indirectly</em> from the objects. Note that one could obtain the
+same results (somewhat less efficiently) by extracting the corresponding
+<code>reducedDim</code> matrix and <code>ggplot</code>.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Loading required package: scuttle</span></span></code></pre>
+<pre><code><span><span class="co">## Loading required package: ggplot2</span></span></code></pre>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html" class="external-link">plotReducedDim</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"pca.corrected.E8.5"</span>, colour_by <span class="op">=</span> <span class="st">"celltype.mapped"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 131 rows containing missing values (`geom_point()`).</span></span></code></pre>
+<p><img src="intro_bioc_sce_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.3.0 (2023-04-21)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
@@ -154,66 +349,77 @@ SingleCellExperiment class</h1>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] MouseGastrulationData_1.14.0 SpatialExperiment_1.10.0    </span></span>
-<span><span class="co">##  [3] SingleCellExperiment_1.22.0  SummarizedExperiment_1.30.2 </span></span>
-<span><span class="co">##  [5] Biobase_2.60.0               GenomicRanges_1.52.0        </span></span>
-<span><span class="co">##  [7] GenomeInfoDb_1.36.1          IRanges_2.34.1              </span></span>
-<span><span class="co">##  [9] S4Vectors_0.38.1             BiocGenerics_0.46.0         </span></span>
-<span><span class="co">## [11] MatrixGenerics_1.12.2        matrixStats_1.0.0           </span></span>
+<span><span class="co">##  [1] scater_1.28.0                ggplot2_3.4.2               </span></span>
+<span><span class="co">##  [3] scuttle_1.10.1               MouseGastrulationData_1.14.0</span></span>
+<span><span class="co">##  [5] SpatialExperiment_1.10.0     SingleCellExperiment_1.22.0 </span></span>
+<span><span class="co">##  [7] SummarizedExperiment_1.30.2  Biobase_2.60.0              </span></span>
+<span><span class="co">##  [9] GenomicRanges_1.52.0         GenomeInfoDb_1.36.1         </span></span>
+<span><span class="co">## [11] IRanges_2.34.1               S4Vectors_0.38.1            </span></span>
+<span><span class="co">## [13] BiocGenerics_0.46.0          MatrixGenerics_1.12.2       </span></span>
+<span><span class="co">## [15] matrixStats_1.0.0           </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
-<span><span class="co">##   [1] DBI_1.1.3                     bitops_1.0-7                 </span></span>
-<span><span class="co">##   [3] rlang_1.1.1                   magrittr_2.0.3               </span></span>
-<span><span class="co">##   [5] compiler_4.3.0                RSQLite_2.3.1                </span></span>
-<span><span class="co">##   [7] DelayedMatrixStats_1.22.1     png_0.1-8                    </span></span>
-<span><span class="co">##   [9] systemfonts_1.0.4             vctrs_0.6.3                  </span></span>
-<span><span class="co">##  [11] stringr_1.5.0                 pkgconfig_2.0.3              </span></span>
-<span><span class="co">##  [13] crayon_1.5.2                  fastmap_1.1.1                </span></span>
-<span><span class="co">##  [15] ellipsis_0.3.2                dbplyr_2.3.2                 </span></span>
-<span><span class="co">##  [17] magick_2.7.4                  XVector_0.40.0               </span></span>
-<span><span class="co">##  [19] scuttle_1.10.1                utf8_1.2.3                   </span></span>
-<span><span class="co">##  [21] promises_1.2.0.1              rmarkdown_2.23               </span></span>
-<span><span class="co">##  [23] ragg_1.2.5                    purrr_1.0.1                  </span></span>
-<span><span class="co">##  [25] bit_4.0.5                     xfun_0.39                    </span></span>
-<span><span class="co">##  [27] zlibbioc_1.46.0               cachem_1.0.8                 </span></span>
-<span><span class="co">##  [29] beachmat_2.16.0               jsonlite_1.8.7               </span></span>
-<span><span class="co">##  [31] blob_1.2.4                    later_1.3.1                  </span></span>
-<span><span class="co">##  [33] rhdf5filters_1.12.1           DelayedArray_0.26.6          </span></span>
-<span><span class="co">##  [35] Rhdf5lib_1.22.0               BiocParallel_1.34.2          </span></span>
-<span><span class="co">##  [37] interactiveDisplayBase_1.38.0 parallel_4.3.0               </span></span>
-<span><span class="co">##  [39] R6_2.5.1                      bslib_0.5.0                  </span></span>
-<span><span class="co">##  [41] stringi_1.7.12                limma_3.56.2                 </span></span>
-<span><span class="co">##  [43] jquerylib_0.1.4               Rcpp_1.0.10                  </span></span>
-<span><span class="co">##  [45] knitr_1.43                    R.utils_2.12.2               </span></span>
-<span><span class="co">##  [47] httpuv_1.6.11                 Matrix_1.5-4.1               </span></span>
-<span><span class="co">##  [49] tidyselect_1.2.0              yaml_2.3.7                   </span></span>
-<span><span class="co">##  [51] codetools_0.2-19              curl_5.0.1                   </span></span>
-<span><span class="co">##  [53] lattice_0.21-8                tibble_3.2.1                 </span></span>
-<span><span class="co">##  [55] withr_2.5.0                   KEGGREST_1.40.0              </span></span>
-<span><span class="co">##  [57] shiny_1.7.4                   BumpyMatrix_1.8.0            </span></span>
-<span><span class="co">##  [59] evaluate_0.21                 desc_1.4.2                   </span></span>
-<span><span class="co">##  [61] BiocFileCache_2.8.0           Biostrings_2.68.1            </span></span>
-<span><span class="co">##  [63] ExperimentHub_2.8.0           pillar_1.9.0                 </span></span>
-<span><span class="co">##  [65] BiocManager_1.30.21           filelock_1.0.2               </span></span>
-<span><span class="co">##  [67] generics_0.1.3                rprojroot_2.0.3              </span></span>
-<span><span class="co">##  [69] RCurl_1.98-1.12               BiocVersion_3.17.1           </span></span>
-<span><span class="co">##  [71] sparseMatrixStats_1.12.2      xtable_1.8-4                 </span></span>
-<span><span class="co">##  [73] glue_1.6.2                    tools_4.3.0                  </span></span>
-<span><span class="co">##  [75] AnnotationHub_3.8.0           locfit_1.5-9.8               </span></span>
-<span><span class="co">##  [77] fs_1.6.2                      rhdf5_2.44.0                 </span></span>
-<span><span class="co">##  [79] grid_4.3.0                    AnnotationDbi_1.62.2         </span></span>
-<span><span class="co">##  [81] DropletUtils_1.20.0           edgeR_3.42.4                 </span></span>
-<span><span class="co">##  [83] GenomeInfoDbData_1.2.10       HDF5Array_1.28.1             </span></span>
-<span><span class="co">##  [85] cli_3.6.1                     rappdirs_0.3.3               </span></span>
-<span><span class="co">##  [87] textshaping_0.3.6             fansi_1.0.4                  </span></span>
-<span><span class="co">##  [89] S4Arrays_1.0.4                dplyr_1.1.2                  </span></span>
-<span><span class="co">##  [91] R.methodsS3_1.8.2             sass_0.4.6                   </span></span>
-<span><span class="co">##  [93] digest_0.6.32                 dqrng_0.3.0                  </span></span>
-<span><span class="co">##  [95] rjson_0.2.21                  memoise_2.0.1                </span></span>
-<span><span class="co">##  [97] htmltools_0.5.5               pkgdown_2.0.7                </span></span>
-<span><span class="co">##  [99] R.oo_1.25.0                   lifecycle_1.0.3              </span></span>
-<span><span class="co">## [101] httr_1.4.6                    mime_0.12                    </span></span>
-<span><span class="co">## [103] bit64_4.0.5</span></span></code></pre>
+<span><span class="co">##   [1] jsonlite_1.8.7                magrittr_2.0.3               </span></span>
+<span><span class="co">##   [3] ggbeeswarm_0.7.2              magick_2.7.4                 </span></span>
+<span><span class="co">##   [5] farver_2.1.1                  rmarkdown_2.23               </span></span>
+<span><span class="co">##   [7] fs_1.6.2                      zlibbioc_1.46.0              </span></span>
+<span><span class="co">##   [9] ragg_1.2.5                    vctrs_0.6.3                  </span></span>
+<span><span class="co">##  [11] memoise_2.0.1                 DelayedMatrixStats_1.22.1    </span></span>
+<span><span class="co">##  [13] RCurl_1.98-1.12               htmltools_0.5.5              </span></span>
+<span><span class="co">##  [15] S4Arrays_1.0.4                AnnotationHub_3.8.0          </span></span>
+<span><span class="co">##  [17] curl_5.0.1                    BiocNeighbors_1.18.0         </span></span>
+<span><span class="co">##  [19] Rhdf5lib_1.22.0               rhdf5_2.44.0                 </span></span>
+<span><span class="co">##  [21] sass_0.4.6                    bslib_0.5.0                  </span></span>
+<span><span class="co">##  [23] desc_1.4.2                    cachem_1.0.8                 </span></span>
+<span><span class="co">##  [25] mime_0.12                     lifecycle_1.0.3              </span></span>
+<span><span class="co">##  [27] pkgconfig_2.0.3               rsvd_1.0.5                   </span></span>
+<span><span class="co">##  [29] Matrix_1.5-4.1                R6_2.5.1                     </span></span>
+<span><span class="co">##  [31] fastmap_1.1.1                 GenomeInfoDbData_1.2.10      </span></span>
+<span><span class="co">##  [33] shiny_1.7.4                   digest_0.6.32                </span></span>
+<span><span class="co">##  [35] colorspace_2.1-0              AnnotationDbi_1.62.2         </span></span>
+<span><span class="co">##  [37] rprojroot_2.0.3               dqrng_0.3.0                  </span></span>
+<span><span class="co">##  [39] irlba_2.3.5.1                 ExperimentHub_2.8.0          </span></span>
+<span><span class="co">##  [41] textshaping_0.3.6             RSQLite_2.3.1                </span></span>
+<span><span class="co">##  [43] beachmat_2.16.0               labeling_0.4.2               </span></span>
+<span><span class="co">##  [45] filelock_1.0.2                fansi_1.0.4                  </span></span>
+<span><span class="co">##  [47] httr_1.4.6                    compiler_4.3.0               </span></span>
+<span><span class="co">##  [49] bit64_4.0.5                   withr_2.5.0                  </span></span>
+<span><span class="co">##  [51] BiocParallel_1.34.2           viridis_0.6.3                </span></span>
+<span><span class="co">##  [53] DBI_1.1.3                     highr_0.10                   </span></span>
+<span><span class="co">##  [55] HDF5Array_1.28.1              R.utils_2.12.2               </span></span>
+<span><span class="co">##  [57] rappdirs_0.3.3                DelayedArray_0.26.6          </span></span>
+<span><span class="co">##  [59] rjson_0.2.21                  tools_4.3.0                  </span></span>
+<span><span class="co">##  [61] vipor_0.4.5                   beeswarm_0.4.0               </span></span>
+<span><span class="co">##  [63] interactiveDisplayBase_1.38.0 httpuv_1.6.11                </span></span>
+<span><span class="co">##  [65] R.oo_1.25.0                   glue_1.6.2                   </span></span>
+<span><span class="co">##  [67] rhdf5filters_1.12.1           promises_1.2.0.1             </span></span>
+<span><span class="co">##  [69] grid_4.3.0                    generics_0.1.3               </span></span>
+<span><span class="co">##  [71] gtable_0.3.3                  R.methodsS3_1.8.2            </span></span>
+<span><span class="co">##  [73] BiocSingular_1.16.0           ScaledMatrix_1.8.1           </span></span>
+<span><span class="co">##  [75] utf8_1.2.3                    XVector_0.40.0               </span></span>
+<span><span class="co">##  [77] ggrepel_0.9.3                 BiocVersion_3.17.1           </span></span>
+<span><span class="co">##  [79] pillar_1.9.0                  stringr_1.5.0                </span></span>
+<span><span class="co">##  [81] limma_3.56.2                  BumpyMatrix_1.8.0            </span></span>
+<span><span class="co">##  [83] later_1.3.1                   dplyr_1.1.2                  </span></span>
+<span><span class="co">##  [85] BiocFileCache_2.8.0           lattice_0.21-8               </span></span>
+<span><span class="co">##  [87] bit_4.0.5                     tidyselect_1.2.0             </span></span>
+<span><span class="co">##  [89] locfit_1.5-9.8                Biostrings_2.68.1            </span></span>
+<span><span class="co">##  [91] knitr_1.43                    gridExtra_2.3                </span></span>
+<span><span class="co">##  [93] edgeR_3.42.4                  xfun_0.39                    </span></span>
+<span><span class="co">##  [95] DropletUtils_1.20.0           stringi_1.7.12               </span></span>
+<span><span class="co">##  [97] yaml_2.3.7                    evaluate_0.21                </span></span>
+<span><span class="co">##  [99] codetools_0.2-19              tibble_3.2.1                 </span></span>
+<span><span class="co">## [101] BiocManager_1.30.21           cli_3.6.1                    </span></span>
+<span><span class="co">## [103] xtable_1.8-4                  systemfonts_1.0.4            </span></span>
+<span><span class="co">## [105] munsell_0.5.0                 jquerylib_0.1.4              </span></span>
+<span><span class="co">## [107] Rcpp_1.0.10                   dbplyr_2.3.2                 </span></span>
+<span><span class="co">## [109] png_0.1-8                     parallel_4.3.0               </span></span>
+<span><span class="co">## [111] ellipsis_0.3.2                pkgdown_2.0.7                </span></span>
+<span><span class="co">## [113] blob_1.2.4                    sparseMatrixStats_1.12.2     </span></span>
+<span><span class="co">## [115] bitops_1.0-7                  viridisLite_0.4.2            </span></span>
+<span><span class="co">## [117] scales_1.2.1                  purrr_1.0.1                  </span></span>
+<span><span class="co">## [119] crayon_1.5.2                  rlang_1.1.1                  </span></span>
+<span><span class="co">## [121] cowplot_1.1.1                 KEGGREST_1.40.0</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="further-reading">Further Reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>
@@ -226,6 +432,21 @@ SingleCellExperiment class</h1>
 <div class="section level2">
 <h2 id="exercises">Exercises<a class="anchor" aria-label="anchor" href="#exercises"></a>
 </h2>
+<ol style="list-style-type: decimal">
+<li>Create a <code>SingleCellExperiment</code> object: Try and create a
+SingleCellExperiment object “from scratch”. Start from a matrix (either
+randomly generated or with some fake data in it) and add one or more
+columns as colData.</li>
+</ol>
+<p>Hint: the <code>SingleCellExperiment</code> function can be used to
+create a new SingleCellExperiment object.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Combining two objects: The <code>MouseGastrulationData</code>
+package contains several datasets. Download sample 6 of the chimera
+experiment by running <code>sce6 &lt;- WTChimeraData(sample=6)</code>.
+Use the <code>cbind</code> function to combine the new data with the
+<code>sce</code> object created before.</li>
+</ol>
 </div>
   </div>
 
