@@ -42,7 +42,7 @@ sce
 colData(sce)
 ```
 
-We now normalize the data and visualize them in a tSNE plot.
+To speed up computations, after removing doublets, we randomly select 500 cells per sample.
 
 ```{r}
 library(scater)
@@ -53,6 +53,14 @@ library(scran)
 drop <- sce$celltype.mapped %in% c("stripped", "Doublet")
 sce <- sce[,!drop]
 
+set.seed(29482)
+idx <- unlist(tapply(colnames(sce), sce$sample, function(x) sample(x, 500)))
+sce <- sce[,idx]
+```
+
+We now normalize the data and visualize them in a tSNE plot.
+
+```{r}
 # normalization
 sce <- logNormCounts(sce)
 
@@ -226,8 +234,7 @@ on their known factors (like the tomato injection in this case).
 To do so, we use the MDS plot, which is very close to a PCA representation.
     
 ```{r}
-par(mfrow=c(1,1))
-plotMDS(cpm(y, log=TRUE), 
+limma::plotMDS(cpm(y, log=TRUE), 
     col=ifelse(y$samples$tomato, "red", "blue"))
 ```
 
