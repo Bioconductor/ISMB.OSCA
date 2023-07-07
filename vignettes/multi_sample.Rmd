@@ -14,7 +14,7 @@ editor_options:
 
 # Setup and data exploration
 
-As said, we will use the the data from the Tal1 chimera experiment:
+As said, we will use the the wild-type data from the Tal1 chimera experiment:
 
 - Sample 5: E8.5 injected cells (tomato positive), pool 3
 - Sample 6: E8.5 host cells (tomato negative), pool 3
@@ -79,7 +79,7 @@ plotTSNE(sce, colour_by = "celltype.mapped") +
     theme(legend.position = "bottom")
 ```
 
-There are evident sample effects. Depending on the analysis that you want to do you may want to remove or retain the sample effect. For instance, if the goal is to identify cell types with a clustering method, one may want to remove the sample effects with "batch effect" correction methods.
+There are evident sample effects. Depending on the analysis that you want to perform you may want to remove or retain the sample effect. For instance, if the goal is to identify cell types with a clustering method, one may want to remove the sample effects with "batch effect" correction methods.
 
 For now, let's assume that we want to remove this effect.
 
@@ -116,28 +116,26 @@ Expression Analysis.
 
 # Differential Expression
 
-Section 4 of OSCA multisample.
-
 In order to perform a Differential Expression Analysis, we need to identify 
-group of cells across samples/conditions (depending on the experimental 
+groups of cells across samples/conditions (depending on the experimental 
 design and the final aim of the experiment). 
 
-As previously saw, we have two ways of grouping cells, cell clustering and cell
+As previously seen, we have two ways of grouping cells, cell clustering and cell
 labeling.
-In our case we will focus on this secon aspect to group cells accordingly to the 
+In our case we will focus on this second aspect to group cells according to the 
 already annotated cell types to proceed with the computation of the 
 pseudo-bulk samples.
 
 ## Pseudo-bulk samples
 
-To compute differences between different group of cells, a possible way is to 
+To compute differences between groups of cells, a possible way is to 
 compute pseudo-bulk samples, where we mediate the gene signal of all the cells
 for each specific cell type.
 In this manner, we are then able to detect differences between the same cell type 
-across two different condition, but also across different cell types in the same condition, etcetera.
+across two different conditions.
 
-To compute pseudo-bulk samples, we use `aggregateAcrossCells` function in the 
-`scuttle` package, which takes as input not only the single cell experiment, 
+To compute pseudo-bulk samples, we use the `aggregateAcrossCells` function in the 
+`scuttle` package, which takes as input not only a SingleCellExperiment, 
 but also the id to use for the identification of the group of cells.
 In our case, we use as id not just the cell type, but also the sample, because
 we want be able to discern between replicates and conditions during further steps.
@@ -156,16 +154,11 @@ summed
 
 The main advantage of using pseudo-bulk samples is the possibility to use 
 well-tested methods for differential analysis like `edgeR` and `DESeq2`, we will
-focus on the first one for this analysis.
+focus on the former for this analysis.
 `edgeR` uses a Negative Binomial Generalized Linear Modal for data with a limited 
 number of replicates, like our case.
 
-Before to begin our analysis, let's say that we are mostly interested in a specific
-cell type, the "Mesenchymal stem cells" and look into differences across different
-conditions.
-
-<!-- To proceed with our analysis, we need to create an edgeR object for our data, so -->
-<!-- we first subset our dataset for the specific cell type and then we create the object. -->
+First, let's start with a specific cell type, for instance the "Mesenchymal stem cells", and look into differences between this cell type across conditions.
 
 ```{r}
 label <- "Mesenchyme"
@@ -177,7 +170,7 @@ y <- DGEList(counts(current), samples=colData(current))
 y
 ```
 
-A typical step is the discard of low quality samples due to low sequenced library 
+A typical step is to discard low quality samples due to low sequenced library 
 size. We discard these samples because they can affect further steps like normalization
 and/or DEGs analysis.
 
