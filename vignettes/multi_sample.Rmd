@@ -54,7 +54,11 @@ drop <- sce$celltype.mapped %in% c("stripped", "Doublet")
 sce <- sce[,!drop]
 
 set.seed(29482)
-idx <- unlist(tapply(colnames(sce), sce$sample, function(x) sample(x, 500)))
+idx <- unlist(tapply(colnames(sce), sce$sample, function(x) {
+    perc <- round(0.70 * length(x))
+    sample(x, perc)
+}))
+
 sce <- sce[,idx]
 ```
 
@@ -91,7 +95,6 @@ in the `batchelor` package and using the `sample` `colData` column as batch.
 
 ```{r}
 
-## This needs work
 library(batchelor)
 set.seed(10102)
 merged <- correctExperiments(sce, 
