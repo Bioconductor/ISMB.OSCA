@@ -7,6 +7,7 @@ vignette: >
 output:
   html_document:
     mathjax: null   
+bibliography: references.bib
 ---
 
 
@@ -19,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 library(BiocStyle)
 ```
 
-As mentioned in the introduction, in this tutorial we will use the data from the Tal1 chimera experiment. These data are available through the [MouseGastrulationData](https://bioconductor.org/packages/release/data/experiment/html/MouseGastrulationData.html) Bioconductor package, which contains several datasets.
+As mentioned in the introduction, in this tutorial we will use the wild-type data from the Tal1 chimera experiment. These data are available through the [MouseGastrulationData](https://bioconductor.org/packages/release/data/experiment/html/MouseGastrulationData.html) Bioconductor package, which contains several datasets.
 
 In particular, the package contains the following samples that we will use for the tutorial:
 
@@ -335,8 +336,6 @@ When using them, it is important to consider that they are stochastic methods th
 
 # Doublet identification
 
-Sections 8.1, 8.3 of OSCA advanced.
-
 _Doublets_ are artifactual libraries generated from two cells. They typically arise due to errors in cell sorting or capture. Specifically, in droplet-based protocols, it may happen that two cells are captured in the same droplet. 
 
 Doublets are obviously undesirable when the aim is to characterize populations at the single-cell level. In particular, doublets can be mistaken for intermediate populations or transitory states that do not actually exist. Thus, it is desirable to identify and remove doublet libraries so that they do not compromise interpretation of the results.
@@ -411,3 +410,5 @@ sessionInfo()
 Hint: First subset the object to include only highly variable genes (`sce2 <- sce[hvg.sce.var,]`) and then apply the `NewWave` function to the new object setting `K=10` to obtain the first 10 dimensions.
 
 3. PBMC Data: The package `DropletTestFiles` includes the raw output from Cell Ranger of the peripheral blood mononuclear cell (PBMC) dataset from 10X Genomics, publicly available from the 10X Genomics website. Repeat the analysis of this vignette using those data.
+
+# References
