@@ -30,7 +30,7 @@ We start by loading the data and doing a quick exploratory analysis, essentially
 ```{r chunk-opts, include=FALSE}
 rm(list = ls())
 gc()
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, message=FALSE, warning=FALSE)
 library(BiocStyle)
 ```
 
