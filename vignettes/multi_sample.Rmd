@@ -42,7 +42,7 @@ sce
 colData(sce)
 ```
 
-To speed up computations, after removing doublets, we randomly select 500 cells per sample.
+To speed up computations, after removing doublets, we randomly select 50% cells per sample.
 
 ```{r}
 library(scater)
@@ -55,7 +55,7 @@ sce <- sce[,!drop]
 
 set.seed(29482)
 idx <- unlist(tapply(colnames(sce), sce$sample, function(x) {
-    perc <- round(0.70 * length(x))
+    perc <- round(0.50 * length(x))
     sample(x, perc)
 }))
 
