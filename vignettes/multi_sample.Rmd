@@ -158,8 +158,7 @@ summed
 The main advantage of using pseudo-bulk samples is the possibility to use 
 well-tested methods for differential analysis like `edgeR` and `DESeq2`, we will
 focus on the former for this analysis.
-`edgeR` uses a Negative Binomial Generalized Linear Modal for data with a limited 
-number of replicates, like our case.
+`edgeR` uses a Negative Binomial Generalized Linear Model.
 
 First, let's start with a specific cell type, for instance the "Mesenchymal stem cells", and look into differences between this cell type across conditions.
 
@@ -189,19 +188,15 @@ summary(discarded)
 The same idea is typically applied to the genes, indeed we need to discard low 
 expressed genes to improve accuracy for the DEGs modeling.
 
-We can see that in the case of the genes we discard 5688 of them, reducing the 
-number of genes to test for further analysis to 9011.
-
 ```{r}
 keep <- filterByExpr(y, group=current$tomato)
 y <- y[keep,]
 summary(keep)
 ```
 
-Once we consider the data satisfying, we can proceed to normalize them.
-There are several approaches for normalizing bulk, and so pseudo-bulk data, but
-we stick with the Trimmed Mean of M-values method implemented in the `edgeR` 
-package with the `calcNormFactors` function.
+We can now proceed to normalize the data
+There are several approaches for normalizing bulk, and hence pseudo-bulk data. Here, we use the Trimmed Mean of M-values method, implemented in the `edgeR` 
+package within the `calcNormFactors` function.
 Keep in mind that because we are going to normalize the pseudo-bulk counts,
 we don't need to normalize the data in "single cell form".
 
@@ -210,7 +205,7 @@ y <- calcNormFactors(y)
 y$samples
 ```
 
-To investigate the effect of our normalization, we use an MD plot for each sample
+To investigate the effect of our normalization, we use a Mean-Difference (MD) plot for each sample
 in order to detect possible normalization problems due to insufficient cells/reads/UMIs composing a particular pseudo-bulk profile.
 
 In our case, we verify that all these plots are centered in 0 (on y-axis) and present
@@ -224,7 +219,7 @@ for (i in seq_len(ncol(y))) {
 }
 ```
 
-On the other hand, we want to understand if the samples weel-group together based
+Furthermore, we want to check if the samples cluster together based
 on their known factors (like the tomato injection in this case).
 
 To do so, we use the MDS plot, which is very close to a PCA representation.
@@ -234,7 +229,7 @@ limma::plotMDS(cpm(y, log=TRUE),
     col=ifelse(y$samples$tomato, "red", "blue"))
 ```
 
-We then construct a matrix factor by including both the pool and the tomato as factors.
+We then construct a design matrix by including both the pool and the tomato as factors.
 This design indicates which samples belong to which pool and condition, so we can
 use it in the next step of the analysis.
 
@@ -243,7 +238,7 @@ design <- model.matrix(~factor(pool) + factor(tomato), y$samples)
 design
 ```
 
-Now we can compute the Negative Binomial (NB) overdispersion parameter, to model
+Now we can estimate the Negative Binomial (NB) overdispersion parameter, to model
 the mean-variance trend.
 
 ```{r}
@@ -260,9 +255,9 @@ plotBCV(y)
 ```
 
 
-We then estimate a QL dispersion from the deviance of a GLM for each gene.
-The `robust=TRUE` parameter avoids distorsion from highly variable clusters.
-This is useful to handle the uncertainty and variability of the per-gene variance which is not well estimated by the NB dispersions, so the two dispersion types complement each other in the final analysis.
+We then fit a Quasi-Likelihood (QL) negative binomial generalized linear model for each gene. 
+The `robust=TRUE` parameter avoids distorsions from highly variable clusters.
+The QL method includes an additional dispersion parameter, useful to handle the uncertainty and variability of the per-gene variance, which is not well estimated by the NB dispersions, so the two dispersion types complement each other in the final analysis.
 
 ```{r}
 fit <- glmQLFit(y, design, robust=TRUE)
@@ -276,8 +271,7 @@ QL dispersion estimates for each gene as a function of abundance. Raw estimates 
 plotQLDisp(fit)
 ```
 
-We then use the QL-test function to test for Fold-Change (FC) differences 
-(due to tomato injection) per each gene at a False Discovery Rate (FDR) of 5%.
+We then use an empirical Bayes quasi-likelihood F-test to test for differential expression (due to tomato injection) per each gene at a False Discovery Rate (FDR) of 5%.
 The low amount of DGEs highlights that the tomato injection effect has a low 
 influence on the mesenchyme cells.
 
@@ -331,8 +325,7 @@ abundances <- unclass(abundances)
 # Attaching some column metadata.
 extra.info <- colData(merged)[match(colnames(abundances), merged$sample),]
 y.ab <- DGEList(abundances, samples=extra.info)
-keep <- filterByExpr(y.ab, group=y.ab$samples$tomato)
-y.ab <- y.ab[keep,]
+
 design <- model.matrix(~factor(pool) + factor(tomato), y.ab$samples)
 y.ab <- estimateDisp(y.ab, design, trend="none")
 fit.ab <- glmQLFit(y.ab, design, robust=TRUE, abundance.trend=FALSE)
@@ -342,7 +335,7 @@ fit.ab <- glmQLFit(y.ab, design, robust=TRUE, abundance.trend=FALSE)
 
 As mentioned before, in DA we don't normalize our data with `calcNormFactors` 
 function, because this approach considers that most of the input features do not vary between conditions.
-Which cannot be applied to this analysis because we have a small number of cell
+This cannot be applied to this analysis because we have a small number of cell
 populations that all can change due to the treatment.
 Leaving us to normalize only for library depth, which in pseudo-bulk data means 
 by the total number of cells in each sample (cell type).
@@ -352,7 +345,7 @@ effect, that means that our conclusions can be biased by the amount of cells
 present in each cell type. And this amount of cells can be totally unbalanced 
 between cell types.
 
-For example, a specific cell type can have the 40% of the total amount of cells
+For example, a specific cell type can be 40% of the total amount of cells
 present in the experiment, while another just the 3%. 
 The differences in terms of abundance of these cell types are detected between 
 the different conditions, but our final interpretation could be biased if we don't
@@ -374,15 +367,13 @@ y.ab2 <- calcNormFactors(y.ab)
 y.ab2$samples$norm.factors
 ```
 
-We then follow the already saw edgeR analysis steps. 
-Many of the positive log-fold changes are shifted towards zero, 
-consistent with the removal of composition biases from the presence of extra-embryonic ectoderm in only background cells. 
-As it is possible to notice, the mesenchyme is no longer significantly DA after injection.
+We then follow the already seen edgeR analysis steps. 
 
 ```{r}
 y.ab2 <- estimateDisp(y.ab2, design, trend="none")
 fit.ab2 <- glmQLFit(y.ab2, design, robust=TRUE, abundance.trend=FALSE)
 res2 <- glmQLFTest(fit.ab2, coef=ncol(design))
+summary(decideTests(res2))
 topTags(res2, n=10)
 ```
 
@@ -400,8 +391,6 @@ topTags(res.lfc)
 ```
 
 Addionally, the choice of \tau can be guided by other external experimental data, like a previous or a pilot experiment.
-
-
 
 # Session Info
 
