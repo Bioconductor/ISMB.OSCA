@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ISMB.OSCA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.13</span>
       </span>
     </div>
 
@@ -329,7 +329,7 @@ variance calculations on a Unix system:</p>
 <span><span class="co">## ENSMUSG00000025900 0.000794995 0.000863633 0.000811027  5.26059e-05 3.68975e-01</span></span>
 <span><span class="co">## ENSMUSG00000025902 0.170777718 0.388633677 0.170893240  2.17740e-01 2.48097e-11</span></span>
 <span><span class="co">## ...                        ...         ...         ...          ...         ...</span></span>
-<span><span class="co">## ENSMUSG00000095041  0.35571083  0.34572194   0.3364126  0.009309343    0.443249</span></span>
+<span><span class="co">## ENSMUSG00000095041  0.35571083  0.34572194   0.3364126  0.009309342    0.443249</span></span>
 <span><span class="co">## ENSMUSG00000063897  0.49007956  0.41924282   0.4407846 -0.021541821    0.599512</span></span>
 <span><span class="co">## ENSMUSG00000096730  0.00000000  0.00000000   0.0000000  0.000000000         NaN</span></span>
 <span><span class="co">## ENSMUSG00000095742  0.00177158  0.00211619   0.0018073  0.000308881    0.189009</span></span>
@@ -415,21 +415,20 @@ approximation can be largely ignored.</p>
 <span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span>exact <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/colLabels.html" class="external-link">colLabels</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, approx <span class="op">=</span> <span class="va">clusters</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      approx</span></span>
 <span><span class="co">## exact   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15</span></span>
-<span><span class="co">##    1   88   0   0   0   3   0   0   0   2   0   0   0   0   0   0</span></span>
+<span><span class="co">##    1   91   0   0   0   0   0   0   0   0   0   0   0   0   0   0</span></span>
 <span><span class="co">##    2    0 143   0   0   0   0   0   0   0   0   0   0   0   0   1</span></span>
-<span><span class="co">##    3    0   0  75   0   0   0   0   0   0   0   0   0   0   0   0</span></span>
-<span><span class="co">##    4    0   0   0 341   0   0   0   0   0   0   0   0   0   0   0</span></span>
-<span><span class="co">##    5    0   0   0   0 390   0   0   6   0   1   0  11   0   0   0</span></span>
-<span><span class="co">##    6    0   0   0   0   0 210  51   0   0   0   0   0   0   0   0</span></span>
-<span><span class="co">##    7    0   0   0   0   0   0 194   0   0   1   0   0   0   0   0</span></span>
-<span><span class="co">##    8    0   0   0   0   1   0   0  88   0   0   0   0   0   0   0</span></span>
+<span><span class="co">##    3    0   0  77   0   0   0   0   0   0   0   0   0   0   0   0</span></span>
+<span><span class="co">##    4    0   0   0 341   0   0   0   0   0   0   0   0   0   0  56</span></span>
+<span><span class="co">##    5    4   0   0   0 390   0   0   0   0   0   0   2   0   0   0</span></span>
+<span><span class="co">##    6    0   0   0   0   0 200   1   0   0   0   1   0   2   0   0</span></span>
+<span><span class="co">##    7    0   0   0   0   0   9 244   0   0   1   0   0   0   0   0</span></span>
+<span><span class="co">##    8    0   0   0   0   0   0   0  95   0   0   0   0   0   0   0</span></span>
 <span><span class="co">##    9    1   0   0   0   1   0   0   0 106   0   0   0   0   0   0</span></span>
-<span><span class="co">##    10   0   0   0   0   0   0   0   0   0 113   0   0   0   0   0</span></span>
-<span><span class="co">##    11   0   0   0   0   0   0   0   0   0   5 142   0   6   0   0</span></span>
-<span><span class="co">##    12   0   1   0   0   1   0   0   0   0   0   0 207   0   0   0</span></span>
-<span><span class="co">##    13   0   0   0   0   0   0   0   0   0   0   0   0 146   0   0</span></span>
-<span><span class="co">##    14   0   0   0   0   0   0   0   0   0   0   0   0   0  20   0</span></span>
-<span><span class="co">##    15   0   0   0   0   0   0   0   0   0   0   0   0   0   0  56</span></span></code></pre>
+<span><span class="co">##    10   0   0   0   0   0   0   0   0   0 108   0   0   0   0   0</span></span>
+<span><span class="co">##    11   0   0   0   0   0   0   0   0   0   0 153   0   0   0   0</span></span>
+<span><span class="co">##    12   0   0   0   0   3   0   0   0   0   5   0 212   0   0   0</span></span>
+<span><span class="co">##    13   0   0   0   0   0   0   0   0   0   0   0   0 144   0   0</span></span>
+<span><span class="co">##    14   0   0   0   0   0   0   0   0   0   0   0   0   0  20   0</span></span></code></pre>
 <p>Note that Annoy writes the NN index to disk prior to performing the
 search. Thus, it may not actually be faster than the default exact
 algorithm for small datasets, depending on whether the overhead of disk
@@ -548,7 +547,7 @@ PBMC dataset:</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.satijalab.org/seurat" class="external-link">SeuratData</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://satijalab.org/seurat/reference/InstallData.html" class="external-link">InstallData</a></span><span class="op">(</span><span class="st">"pbmc3k"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Installing package into '/tmp/RtmpITav4S/temp_libpath1d757c914b6a'</span></span>
+<pre><code><span><span class="co">## Installing package into '/tmp/RtmpbWs7Zn/temp_libpath1d835677011f'</span></span>
 <span><span class="co">## (as 'lib' is unspecified)</span></span></code></pre>
 <p>We then load the dataset as an <code>SeuratObject</code> and convert
 it to a <code>SingleCellExperiment</code>.</p>

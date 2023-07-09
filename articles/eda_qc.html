@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ISMB.OSCA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.13</span>
       </span>
     </div>
 
@@ -102,8 +102,8 @@ control</h1>
 <h2 id="setup-and-experimental-design">Setup and experimental design<a class="anchor" aria-label="anchor" href="#setup-and-experimental-design"></a>
 </h2>
 <p>As mentioned in the introduction, in this tutorial we will use the
-data from the Tal1 chimera experiment. These data are available through
-the <a href="https://bioconductor.org/packages/release/data/experiment/html/MouseGastrulationData.html" class="external-link">MouseGastrulationData</a>
+wild-type data from the Tal1 chimera experiment. These data are
+available through the <a href="https://bioconductor.org/packages/release/data/experiment/html/MouseGastrulationData.html" class="external-link">MouseGastrulationData</a>
 Bioconductor package, which contains several datasets.</p>
 <p>In particular, the package contains the following samples that we
 will use for the tutorial:</p>
@@ -172,11 +172,11 @@ content.</p>
 <h3 id="testing-for-empty-droplets">Testing for empty droplets<a class="anchor" aria-label="anchor" href="#testing-for-empty-droplets"></a>
 </h3>
 <p>A better approach is to test whether the expression profile for each
-cell barcode is significantly different from the ambient RNA pool <span class="citation">[@lun2019emptydrops]</span>. Any significant deviation
-indicates that the barcode corresponds to a cell-containing droplet.
-This allows us to discriminate between well-sequenced empty droplets and
-droplets derived from cells with little RNA, both of which would have
-similar total counts.</p>
+cell barcode is significantly different from the ambient RNA pool <span class="citation">(Aaron TL Lun et al. 2019)</span>. Any significant
+deviation indicates that the barcode corresponds to a cell-containing
+droplet. This allows us to discriminate between well-sequenced empty
+droplets and droplets derived from cells with little RNA, both of which
+would have similar total counts.</p>
 <p>We call cells at a false discovery rate (FDR) of 0.1%, meaning that
 no more than 0.1% of our called barcodes should be empty droplets on
 average.</p>
@@ -233,8 +233,8 @@ metrics and, if needed, remove low-quality samples.</p>
 <h3 id="choice-of-quality-control-metrics">Choice of quality-control metrics<a class="anchor" aria-label="anchor" href="#choice-of-quality-control-metrics"></a>
 </h3>
 <p>There are many possibile ways to define a set of quality-control
-metrics, see for instance <span class="citation">@cole2019performance</span>. Here, we keep it simple
-and consider only:</p>
+metrics, see for instance <span class="citation">Cole et al.
+(2019)</span>. Here, we keep it simple and consider only:</p>
 <ul>
 <li>the <em>library size</em>, defined as the total sum of counts across
 all relevant features for each cell;</li>
@@ -415,8 +415,8 @@ cells by subsetting the original object.</p>
 often observed in single-cell RNA sequencing data. They typically arise
 from technical differences in cDNA capture or PCR amplification
 efficiency across cells, attributable to the difficulty of achieving
-consistent library preparation with minimal starting material <span class="citation">[@vallejos2017normalizing]</span>. Normalization aims
-to remove these differences such that they do not interfere with
+consistent library preparation with minimal starting material <span class="citation">(Vallejos et al. 2017)</span>. Normalization aims to
+remove these differences such that they do not interfere with
 comparisons of the expression profiles between cells. The hope is that
 the observed heterogeneity or differential expression within the cell
 population are driven by biology and not technical biases.</p>
@@ -458,9 +458,10 @@ genes is differentially expressed between cells or cell types.</p>
 RNA-seq. However, these methods may underperform in single-cell data due
 to the dominance of low and zero counts. To overcome this, one solution
 is to <em>pool</em> counts from many cells to increase the size of the
-counts for accurate size factor estimation <span class="citation">[@l2016pooling]</span>. Pool-based size factors are
-then <em>deconvolved</em> into cell-based factors for normalization of
-each cell’s expression profile.</p>
+counts for accurate size factor estimation <span class="citation">(Aaron
+T. Lun, Bach, and Marioni 2016)</span>. Pool-based size factors are then
+<em>deconvolved</em> into cell-based factors for normalization of each
+cell’s expression profile.</p>
 <p>We use a pre-clustering step: cells in each cluster are normalized
 separately and the size factors are rescaled to be comparable across
 clusters. This avoids the assumption that most genes are non-DE across
@@ -469,7 +470,7 @@ of clusters, which is a weaker assumption for highly heterogeneous
 populations.</p>
 <p>Note that while we focus on normalization by deconvolution here, many
 other methods have been proposed and lead to similar performance (see
-<span class="citation">@borella2022psinorm</span> for a comparative
+<span class="citation">Borella et al. (2022)</span> for a comparative
 review).</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scran</span><span class="op">)</span></span>
@@ -698,7 +699,6 @@ parameter of t-SNE).</p>
 <div class="section level2">
 <h2 id="doublet-identification">Doublet identification<a class="anchor" aria-label="anchor" href="#doublet-identification"></a>
 </h2>
-<p>Sections 8.1, 8.3 of OSCA advanced.</p>
 <p><em>Doublets</em> are artifactual libraries generated from two cells.
 They typically arise due to errors in cell sorting or capture.
 Specifically, in droplet-based protocols, it may happen that two cells
@@ -936,6 +936,40 @@ raw output from Cell Ranger of the peripheral blood mononuclear cell
 Genomics website. Repeat the analysis of this vignette using those
 data.</li>
 </ol>
+</div>
+<div class="section level2">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-borella2022psinorm" class="csl-entry">
+Borella, Matteo, Graziano Martello, Davide Risso, and Chiara Romualdi.
+2022. <span>“PsiNorm: A Scalable Normalization for Single-Cell RNA-Seq
+Data.”</span> <em>Bioinformatics</em> 38 (1): 164–72.
+</div>
+<div id="ref-cole2019performance" class="csl-entry">
+Cole, Michael B, Davide Risso, Allon Wagner, David DeTomaso, John Ngai,
+Elizabeth Purdom, Sandrine Dudoit, and Nir Yosef. 2019.
+<span>“Performance Assessment and Selection of Normalization Procedures
+for Single-Cell RNA-Seq.”</span> <em>Cell Systems</em> 8 (4): 315–28.
+</div>
+<div id="ref-l2016pooling" class="csl-entry">
+Lun, Aaron T, Karsten Bach, and John C Marioni. 2016. <span>“Pooling
+Across Cells to Normalize Single-Cell RNA Sequencing Data with Many Zero
+Counts.”</span> <em>Genome Biology</em> 17 (1): 1–14.
+</div>
+<div id="ref-lun2019emptydrops" class="csl-entry">
+Lun, Aaron TL, Samantha Riesenfeld, Tallulah Andrews, Tomas Gomes, John
+C Marioni, et al. 2019. <span>“EmptyDrops: Distinguishing Cells from
+Empty Droplets in Droplet-Based Single-Cell RNA Sequencing Data.”</span>
+<em>Genome Biology</em> 20 (1): 1–9.
+</div>
+<div id="ref-vallejos2017normalizing" class="csl-entry">
+Vallejos, Catalina A, Davide Risso, Antonio Scialdone, Sandrine Dudoit,
+and John C Marioni. 2017. <span>“Normalizing Single-Cell RNA Sequencing
+Data: Challenges and Opportunities.”</span> <em>Nature Methods</em> 14
+(6): 565–71.
+</div>
+</div>
 </div>
   </div>
 

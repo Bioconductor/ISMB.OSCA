@@ -8,7 +8,7 @@ articles:
   intro_bioc_sce: intro_bioc_sce.html
   large_data: large_data.html
   multi_sample: multi_sample.html
-last_built: 2023-07-06T17:13Z
+last_built: 2023-07-09T23:09Z
 urls:
   reference: https://bioconductor.github.io/ISMB.OSCA/reference
   article: https://bioconductor.github.io/ISMB.OSCA/articles
