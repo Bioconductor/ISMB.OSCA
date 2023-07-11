@@ -52,7 +52,8 @@ Suggests:
 Remotes:
     lgeistlinger/SeuratData,
     stemangiola/CuratedAtlasQueryR
-URL: https://bioconductor.github.io/ISMB.OSCA/
+URL: https://bioconductor.github.io/ISMB.OSCA/,
+  ghcr.io/bioconductor/ismb.osca
 BugReports: https://github.com/Bioconductor/ISMB.OSCA/issues/new/choose
 VignetteBuilder: knitr
 DockerImage: ghcr.io/bioconductor/ismb.osca:latest
