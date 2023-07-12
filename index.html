@@ -91,6 +91,7 @@
 <div class="section level1">
 <div class="page-header"><h1 id="ismb-2023-orchestrating-large-scale-single-cell-analysis-with-bioconductor">ISMB 2023: Orchestrating Large-Scale Single-Cell Analysis with Bioconductor<a class="anchor" aria-label="anchor" href="#ismb-2023-orchestrating-large-scale-single-cell-analysis-with-bioconductor"></a>
 </h1></div>
+<p><a href="https://bioconductor.github.io/ISMB.OSCA/">Tutorial homepage</a></p>
 <div class="section level2">
 <h2 id="speakers">Speakers<a class="anchor" aria-label="anchor" href="#speakers"></a>
 </h2>
@@ -185,6 +186,29 @@
 </tr>
 </tbody>
 </table>
+</div>
+<div class="section level2">
+<h2 id="docker-container">Docker container<a class="anchor" aria-label="anchor" href="#docker-container"></a>
+</h2>
+<p>To run this tutorial in a <a href="ghcr.io/bioconductor/ismb.osca:latest">Docker container</a>, pull the Docker image via</p>
+<pre><code>docker pull ghcr.io/bioconductor/ismb.osca:latest</code></pre>
+<p>and then run the image via</p>
+<pre><code>docker run -e PASSWORD=bioc -p 8787:8787 ghcr.io/bioconductor/ismb.osca</code></pre>
+<p>Once running, navigate to <a href="http://localhost:8787/" class="external-link uri">http://localhost:8787/</a> in your browser and login with username <code>rstudio</code> and password <code>bioc</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="local-installation">Local installation<a class="anchor" aria-label="anchor" href="#local-installation"></a>
+</h2>
+<p>This tutorial can be installed like an ordinary R package via:</p>
+<pre><code><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://bioconductor.github.io/BiocManager/" class="external-link">"BiocManager"</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://remotes.r-lib.org" class="external-link">"remotes"</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"Bioconductor/ISMB.OSCA"</span>,</span>
+<span>                     dependencies <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                     build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
 </div>
 </div>
   </div>
