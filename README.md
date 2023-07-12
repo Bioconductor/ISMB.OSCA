@@ -1,5 +1,7 @@
 # ISMB 2023: Orchestrating Large-Scale Single-Cell Analysis with Bioconductor
 
+[Tutorial homepage](https://bioconductor.github.io/ISMB.OSCA/)
+
 ## Speakers
 
 * Dario Righelli, University of Padova, Italy
@@ -60,3 +62,37 @@ In particular, participants will learn:
 | Case study: from data import to DE and DA                       | 16:15-17:00  |
 | Case study: discussion                                          | 17:00-18:00  |
 
+## Docker container
+
+To run this tutorial in a
+[Docker container](ghcr.io/bioconductor/ismb.osca:latest),
+pull the Docker image via
+
+```
+docker pull ghcr.io/bioconductor/ismb.osca:latest
+``` 
+
+and then run the image via
+
+```
+docker run -e PASSWORD=bioc -p 8787:8787 ghcr.io/bioconductor/ismb.osca
+```
+
+Once running, navigate to http://localhost:8787/ in your browser and login with
+username `rstudio` and password `bioc`.
+
+## Local installation
+
+This tutorial can be installed like an ordinary R package via:
+
+```
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+if (!require("remotes", quietly = TRUE))
+    install.packages("remotes")
+
+BiocManager::install("Bioconductor/ISMB.OSCA",
+                     dependencies = TRUE,
+                     build_vignettes = TRUE)
+```
