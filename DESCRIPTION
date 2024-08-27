@@ -6,7 +6,7 @@ Authors@R:
     person("Ludwig", "Geistlinger", role = c("aut", "cre"),
            email = "ludwig_geistlinger@hms.harvard.edu"),
     person("Marcel", "Ramos", role = "ctb",
-           email = "marcel.ramos@roswellpark.org"),
+           email = "marcel.ramos@sph.cuny.edu"),
     person("Dario", "Righelli", role = "ctb", email = "drighelli@gmail.com")) 
 Description: This tutorial aims to provide a solid foundation in using
     Bioconductor tools for single-cell RNA-seq analysis by walking through
